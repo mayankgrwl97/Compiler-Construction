@@ -8,7 +8,7 @@ declare m:real;
 [r,m] := use mod1 with parameters v, w;
 print(r);
 print(m);
-end
+end ** asdf
 <<module mod1>>
 takes input [a:integer, b:integer];
 returns [x:integer, abc:real];

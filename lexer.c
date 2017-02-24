@@ -13,10 +13,10 @@ char* getStream(FILE* fp)
 	return testCaseFile;
 }
 
-void removeComments(char* testCaseFile, char* cleanFile)
+void removeComments(char* testCaseFile, char** cleanFile)
 {
 	size_t inputsize = strlen(testCaseFile);
-	cleanFile = malloc(inputsize * (sizeof(char)));
+	*cleanFile = malloc(inputsize * (sizeof(char)));
 	int i = 0;
 	int pt = 0;
 	while(i < inputsize)
@@ -29,11 +29,9 @@ void removeComments(char* testCaseFile, char* cleanFile)
 			i += 2;
 		}
 		else
-			cleanFile[pt++] = testCaseFile[i++];
+			(*cleanFile)[pt++] = testCaseFile[i++];
 	}
-	cleanFile[i] = '\0';
-	printf("%d\t%d\n", strlen(cleanFile), inputsize);
-	printf("%s\n", cleanFile);
+	(*cleanFile)[i] = '\0';
 	return;
 }
 
@@ -43,10 +41,9 @@ int main()
 {
 	FILE* inputfile = fopen("test.txt","rb");
 	char* testCaseFile = getStream(inputfile);
-	printf("%s\n", testCaseFile);
 	fclose(inputfile);
 	char* cleanFile;
-	removeComments(testCaseFile, cleanFile);
-
+	removeComments(testCaseFile, &cleanFile);
+	printf("%s", cleanFile);
 	return 0;
 }
