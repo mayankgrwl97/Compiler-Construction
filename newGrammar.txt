@@ -26,7 +26,6 @@
 <moduleReuseStmt> --> <optional> USE MODULE ID WITH PARAMETERS <idList> SEMICOL
 <optional> --> SQBO <idList> SQBC ASSIGNOP | eps
 <idList> --> <idList> COMMA ID | ID
-<expression> --> <arithmeticExpr> | <booleanExpr>
 <expression> --> <arithmeticOrBooleanExpr> | MINUS BO <arithmeticExpr> BC
 <arithmeticOrBooleanExpr> --> <AnyTerm> <N7>
 <N7> --> <logicalOp> <AnyTerm> <N7> | eps
