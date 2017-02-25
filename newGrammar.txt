@@ -6,7 +6,7 @@
 <module> --> DEF MODULE ID ENDDEF TAKES INPUT SQBO <input_plist> SQBC SEMICOL <ret> <moduleDef>
 <ret> --> RETURNS SQBO <output_plist> SQBC SEMICOL | eps
 <input_plist> --> ID COLON <dataType> <N1>
-<N1> -- > COMMA ID COLON <dataType> <N1> | eps
+<N1> --> COMMA ID COLON <dataType> <N1> | eps
 <output_plist> --> ID COLON <type> <N2>
 <N2> --> COMMA ID COLON <type> <N2> | eps
 <dataType> --> INTEGER | REAL | BOOLEAN | ARRAY SQBO <range> SQBC OF <type>
@@ -25,13 +25,13 @@
 <index> --> NUM | ID
 <moduleReuseStmt> --> <optional> USE MODULE ID WITH PARAMETERS <idList> SEMICOL
 <optional> --> SQBO <idList> SQBC ASSIGNOP | eps
-<idList> --> <idList> COMMA ID | ID
+<idList> --> ID <N3>
+<N3> --> COMMA ID <N3> | eps
 <expression> --> <arithmeticOrBooleanExpr> | MINUS BO <arithmeticExpr> BC
-<arithmeticOrBooleanExpr> --> <AnyTerm> <N7>
+<arithmeticOrBooleanExpr> --> <AnyTerm> <N7> | BO <arithmeticOrBooleanExpr> BC
 <N7> --> <logicalOp> <AnyTerm> <N7> | eps
 <AnyTerm> --> <arithmeticExpr> <N8>
 <N8> --> <relationalOp> <arithmeticExpr> <N8> | eps
-<arithmeticOrBooleanExpr> --> BO <arithmeticOrBooleanExpr> BC
 <arithmeticExpr> --> <term> <N4>
 <N4> --> <op1> <term> <N4> | eps
 <term> --> <factor> <N5>
@@ -47,6 +47,5 @@
 <N9> --> CASE <value> COLON <statements> BREAK SEMICOL <N9> | eps
 <value> --> NUM | TRUE | FALSE
 <default> --> DEFAULT COLON <statements> BREAK SEMICOL | eps
-<iterativeStmt> --> FOR BO ID IN <range> BC START <statements> END |
-WHILE BO <booleanExpr> BC START <statements> END
+<iterativeStmt> --> FOR BO ID IN <range> BC START <statements> END | WHILE BO <booleanExpr> BC START <statements> END
 <range> --> NUM RANGEOP NUM
