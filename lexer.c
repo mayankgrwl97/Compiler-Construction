@@ -114,6 +114,7 @@ char* getNextToken(char* cleanFile)
 					return "GT";
 				}
 			}
+			i++;
 			return "GT";
 		}
 		else if(cleanFile[i] == '=' && i+1<l && cleanFile[i+1] == '=')
@@ -203,17 +204,17 @@ char* getNextToken(char* cleanFile)
 							i++;
 							while(i<l && isdigit(cleanFile[i]))
 								i++;
-							i++;
+							// i++;
 							return "RNUM";
 						}
 					}
-					i++;
+					// i++;
 					return "RNUM";
 				}
 			}
 			else
 			{
-				i++;
+				// i++;
 				return "NUM";
 			}
 		}
@@ -225,7 +226,6 @@ char* getNextToken(char* cleanFile)
 			return "ID";
 		}
 	}
-
 	return "ERROR";
 }
 
@@ -237,5 +237,12 @@ int main()
 	char* cleanFile;
 	removeComments(testCaseFile, &cleanFile);
 	printf("%s", cleanFile);
+	printf("\n--*--*--*--\n");
+	while(1){
+		char* ret = getNextToken(cleanFile);
+		if(strcmp(ret, "ERROR") == 0)
+			return 0;
+		printf("%s\n", ret);
+	}
 	return 0;
 }
