@@ -3,246 +3,446 @@
 #include <string.h>
 #include <ctype.h>
 
-char* getStream(FILE* fp)
+char* getStream(FILE** fp)
 {
 	char* testCaseFile;
-	fseek(fp,0,SEEK_END);
-	size_t inputsize = ftell(fp);
-	rewind(fp);
+	size_t inputsize = 100;
 	testCaseFile = (char*)malloc(inputsize * (sizeof(char)));
-	fread(testCaseFile, sizeof(char), inputsize, fp);
+	fread(testCaseFile, sizeof(char), inputsize, *fp);
 	return testCaseFile;
 }
 
-void removeComments(char* testCaseFile, char** cleanFile)
+void removeComments(FILE* fp)
 {
-	size_t inputsize = strlen(testCaseFile);
-	*cleanFile = (char*)malloc(inputsize * (sizeof(char)));
-	int i = 0;
-	int pt = 0;
-	while(i < inputsize)
-	{
-		if(testCaseFile[i] == '*' && i+1<inputsize && testCaseFile[i+1] == '*')
-		{
-			i = i+2;
-			while(i+1<inputsize && (testCaseFile[i] != '*' || testCaseFile[i+1] != '*'))
-				i++;
-			i += 2;
-		}
-		else
-			(*cleanFile)[pt++] = testCaseFile[i++];
-	}
-	(*cleanFile)[i] = '\0';
-	return;
-}
+	FILE* cleanFile = fopen("cleanFile.txt", "w+");//change to append
+	char* testCaseFile = getStream(&fp);
+	if(testCaseFile[0] == '\0')
+		return ;
 
-char* getNextToken(char* cleanFile)
-{
-	static int i=0;
-	int l = strlen(cleanFile);
-	while(i<l)
+	int i=0;
+	int flag = 0;
+
+	while(1)
 	{
-		if(cleanFile[i] == ' ' || cleanFile[i] == '\t' || cleanFile[i] == '\n')
+		if(testCaseFile[i] == '\0')
 		{
-			i++;
-			continue;
+			testCaseFile = getStream(&fp);
+			if(testCaseFile[0] == '\0')
+				break;
+			i = 0;
 		}
-		else if(cleanFile[i] == '+')
+
+		if(testCaseFile[i] == '*')//one star found
 		{
-			i++;
-			return "PLUS";
-		}
-		else if(cleanFile[i] == '-')
-		{
-			i++;
-			return "MINUS";
-		}
-		else if(cleanFile[i] == '*')
-		{
-			i++;
-			return "MUL";
-		}
-		else if(cleanFile[i] == '/')
-		{
-			i++;
-			return "DIV";
-		}
-		else if(cleanFile[i] == '<')
-		{
-			if(i+1<l)
+			if(testCaseFile[i+1] == '\0')
 			{
-				if(cleanFile[i+1] == '<')
-				{
-					i++;
-					i++;
-					return "DEF";
-				}
-				else if(cleanFile[i+1] == '=')
-				{
-					i++;
-					i++;
-					return "LE";
-				}
-				else
-				{
-					i++;
-					return "LT";
-				}
+				testCaseFile = getStream(&fp);//check for errors
+				if(testCaseFile[0] == '\0')
+					return;
+				i = -1;
 			}
-			i++;
-			return "LT";
-		}
-		else if(cleanFile[i] == '>')
-		{
-			if(i+1<l)
+
+			if(testCaseFile[i+1] == '*')
 			{
-				if(cleanFile[i+1] == '>')
-				{
-					i++;
-					i++;
-					return "ENDDEF";
-				}
-				else if(cleanFile[i+1] == '=')
-				{
-					i++;
-					i++;
-					return "GE";
-				}
-				else
-				{
-					i++;
-					return "GT";
-				}
-			}
-			i++;
-			return "GT";
-		}
-		else if(cleanFile[i] == '=' && i+1<l && cleanFile[i+1] == '=')
-		{
-			i++;
-			i++;
-			return "EQ";
-		}
-		else if(cleanFile[i] == '!' && i+1<l && cleanFile[i+1] == '=')
-		{
-			i++;
-			i++;
-			return "NE";
-		}
-		else if(cleanFile[i] == ':')
-		{
-			if(i+1 < l && cleanFile[i+1] == '=')
-			{
-				i++;
-				i++;
-				return "ASSIGNOP";
-			}
-			i++;
-			return "COLON";
-		}
-		else if(cleanFile[i] == '.' && i+1<l && cleanFile[i+1] == '.')
-		{
-			i++;
-			i++;
-			return "RANGEOP";
-		}
-		else if(cleanFile[i] == ';')
-		{
-			i++;
-			return "SEMICOL";
-		}
-		else if(cleanFile[i] == ',')
-		{
-			i++;
-			return "COMMA";
-		}
-		else if(cleanFile[i] == '(')
-		{
-			i++;
-			return "BO";
-		}
-		else if(cleanFile[i] == ')')
-		{
-			i++;
-			return "BC";
-		}
-		else if(cleanFile[i] == '[')
-		{
-			i++;
-			return "SQBO";
-		}
-		else if(cleanFile[i] == ']')
-		{
-			i++;
-			return "SQBC";
-		}
-		else if(isdigit(cleanFile[i]))
-		{
-			i++;
-			while(i<l && isdigit(cleanFile[i]))
-				i++;
-			if(i<l && cleanFile[i] == '.')
-			{
-				if(i+1<l && cleanFile[i+1] == '.')
-				{
-					i -= 2;
-					i++;
-					return "NUM";
-				}
-				else if(i+1<l && isdigit(cleanFile[i+1]))
-				{
-					i++;
-					while(i<l && isdigit(cleanFile[i]))
-						i++;
-					if(i<l && (cleanFile[i] == 'e' || cleanFile[i] == 'E'))
-					{
-						i++;
-						if(i<l && (cleanFile[i] == '+' || cleanFile[i] == '-'))
-							i++;
-						if(i<l && isdigit(cleanFile[i]))
-						{
-							i++;
-							while(i<l && isdigit(cleanFile[i]))
-								i++;
-							// i++;
-							return "RNUM";
-						}
-					}
-					// i++;
-					return "RNUM";
-				}
+				i+=2;
+				flag=1-flag;
 			}
 			else
 			{
-				// i++;
-				return "NUM";
+				if(flag == 0)
+					fputc('*', cleanFile);
+				i++;
 			}
 		}
-		else if(isalpha(cleanFile[i]))
+		else
 		{
+			if(flag == 0)
+				fputc(testCaseFile[i], cleanFile);
 			i++;
-			while(i<l && (isalpha(cleanFile[i]) || isdigit(cleanFile[i]) || cleanFile[i] == '_'))
-				i++;
-			return "ID";
 		}
 	}
-	return "ERROR";
+	fclose(cleanFile);
+	return ;
+}
+
+typedef struct tokeninfo tokeninfo;
+
+struct tokeninfo
+{
+	char* tokenname;
+	int linenumber;
+	char* value;
+};
+
+tokeninfo* makeToken(char* tokenname, int linenumber)
+{
+	tokeninfo* temp = (tokeninfo*)malloc(sizeof(tokeninfo));
+	temp->tokenname = tokenname;
+	temp->linenumber = linenumber;
+	temp->value = NULL;
+	return temp;
+}
+
+char* buff;
+
+tokeninfo* getNextToken(FILE* cleanFile)
+{
+	static int i = 0;
+	static int linenumber = 1;
+	if(buff == NULL)
+		buff = getStream(&cleanFile);
+
+label:
+
+	if(buff[i] == '\0')
+	{
+		buff = getStream(&cleanFile);
+		i = 0;
+		if(buff[0] == '\0')
+			return makeToken(NULL,linenumber);
+	}
+
+	switch(buff[i])
+	{
+		case ' ':
+		case '\t':
+			i++;
+			goto label;
+		case '\n':
+			linenumber++;
+			i++;
+			goto label;
+		case '+':
+			i++;
+			return makeToken("PLUS", linenumber);
+		case '-':
+			i++;
+			return makeToken("MINUS", linenumber);
+		case '*':
+			i++;
+			return makeToken("MUL", linenumber);
+		case '/':
+			i++;
+			return makeToken("DIV", linenumber);
+		case ';':
+			i++;
+			return makeToken("SEMICOL", linenumber);
+		case ',':
+			i++;
+			return makeToken("COMMA", linenumber);
+		case '(':
+			i++;
+			return makeToken("BO", linenumber);
+		case ')':
+			i++;
+			return makeToken("BC", linenumber);
+		case '[':
+			i++;
+			return makeToken("SQBO", linenumber);
+		case ']':
+			i++;
+			return makeToken("SQBC", linenumber);
+		case '<':
+			if(buff[i+1] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				if(buff[0] == '\0')
+					return makeToken(NULL, linenumber);
+				i = -1;
+			}
+			switch(buff[i+1])
+			{
+				case '<':
+					i+=2;
+					return makeToken("DEF", linenumber);
+				case '=':
+					i+=2;
+					return makeToken("LE", linenumber);
+				default:
+					i++;
+					return makeToken("LT", linenumber);
+			}
+		case '>':
+			if(buff[i+1] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				if(buff[0] == '\0')
+					return makeToken(NULL, linenumber);
+				i = -1;
+			}
+			switch(buff[i+1])
+			{
+				case '>':
+					i+=2;
+					return makeToken("ENDDEF", linenumber);
+				case '=':
+					i+=2;
+					return makeToken("GE", linenumber);
+				default:
+					i++;
+					return makeToken("GT", linenumber);
+			}
+		case '=':
+			if(buff[i+1] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				if(buff[0] == '\0')
+					return makeToken(NULL, linenumber);
+				i = -1;
+			}
+			switch(buff[i+1])
+			{
+				case '=':
+					i+=2;
+					return makeToken("EQ", linenumber);
+			}
+		case '!':
+			if(buff[i+1] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				if(buff[0] == '\0')
+					return makeToken(NULL, linenumber);
+				i = -1;
+			}
+			switch(buff[i+1])
+			{
+				case '=':
+					i+=2;
+					return makeToken("NE", linenumber);
+			}
+		case ':':
+			if(buff[i+1] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				if(buff[0] == '\0')
+					return makeToken(NULL, linenumber);
+				i = -1;
+			}
+			switch(buff[i+1])
+			{
+				case '=':
+					i+=2;
+					return makeToken("ASSIGNOP", linenumber);
+				default:
+					i++;
+					return makeToken("COLON", linenumber);
+			}
+		case '.':
+			if(buff[i+1] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				if(buff[0] == '\0')
+					return makeToken(NULL, linenumber);
+				i = -1;
+			}
+			switch(buff[i+1])
+			{
+				case '.':
+					i+=2;
+					return makeToken("RANGEOP", linenumber);
+			}
+		default:
+			if(isdigit(buff[i])) //check
+			{
+				// i++;
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+						return makeToken("NUM", linenumber);
+					i = -1;
+				}
+				while(isdigit(buff[i+1]))
+				{
+					i++;
+					if(buff[i+1] == '\0')
+					{
+						buff = getStream(&cleanFile);
+						if(buff[0] == '\0')
+							return makeToken("NUM", linenumber);
+						i = -1;
+					}
+				}
+				if(buff[i+1] == '.')
+				{
+					i++;
+					if(buff[i+1] == '\0')
+					{
+						buff = getStream(&cleanFile);
+						if(buff[0] == '\0')
+							return makeToken(NULL, linenumber);
+						i = -1;
+					}
+					if(buff[i+1] == '.')
+					{
+						// currently on the first .
+						i--;
+						return makeToken("NUM", linenumber);
+					}
+					else if(isdigit(buff[i+1]))
+					{
+						i++;
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+								return makeToken("RNUM", linenumber);
+							i = -1;
+						}
+						while(isdigit(buff[i+1]))
+						{
+							i++;
+							if(buff[i+1] == '\0')
+							{
+								buff = getStream(&cleanFile);
+								if(buff[0] == '\0')
+									return makeToken("RNUM", linenumber);
+								i = -1;
+							}
+						}
+						if(buff[i+1] == 'e' || buff[i+1] == 'E')
+						{
+							i++;
+							if(buff[i+1] == '\0')
+							{
+								buff = getStream(&cleanFile);
+								if(buff[0] == '\0')
+									return makeToken(NULL, linenumber);
+								i = -1;
+							}
+							if(buff[i+1] == '+' || buff[i+1] == '-')
+							{
+								i++;
+								if(buff[i+1] == '\0')
+								{
+									buff = getStream(&cleanFile);
+									if(buff[0] == '\0')
+										return makeToken(NULL, linenumber);
+									i = -1;
+								}
+								if(isdigit(buff[i+1]))
+								{
+									i++;
+									if(buff[i+1] == '\0')
+									{
+										buff = getStream(&cleanFile);
+										if(buff[0] == '\0')
+											return makeToken("RNUM", linenumber);
+										i = -1;
+									}
+									while(isdigit(buff[i+1]))
+									{
+										i++;
+										if(buff[i+1] == '\0')
+										{
+											buff = getStream(&cleanFile);
+											if(buff[0] == '\0')
+												return makeToken("RNUM", linenumber);
+											i = -1;
+										}
+									}
+									i++;
+									return makeToken("RNUM", linenumber);
+								}
+								else
+								{
+									return makeToken(NULL, linenumber);
+								}
+							}
+							else if(isdigit(buff[i+1]))
+							{
+								i++;
+								if(buff[i+1] == '\0')
+								{
+									buff = getStream(&cleanFile);
+									if(buff[0] == '\0')
+										return makeToken("RNUM", linenumber);
+									i = -1;
+								}
+								while(isdigit(buff[i+1]))
+								{
+									i++;
+									if(buff[i+1] == '\0')
+									{
+										buff = getStream(&cleanFile);
+										if(buff[0] == '\0')
+											return makeToken("RNUM", linenumber);
+										i = -1;
+									}
+								}
+								i++;
+								return makeToken("RNUM", linenumber);
+							}
+							else
+							{
+								return makeToken(NULL, linenumber);
+							}
+						}
+						else
+						{
+							i++;
+							return makeToken("RNUM", linenumber);
+						}
+					}
+					else
+					{
+						return makeToken(NULL, linenumber);
+					}			
+				}
+				else
+				{
+					i++;
+					return makeToken("NUM", linenumber);
+				}
+			}
+			else if(isalpha(buff[i]))
+			{
+				// i++;
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+						return makeToken("ID", linenumber);
+					i = -1;
+				}
+				while(buff[i+1] == '_' || isdigit(buff[i+1]) || isalpha(buff[i+1]) )
+				{
+					i++;
+					if(buff[i] == '\0')
+					{
+						buff = getStream(&cleanFile);
+						if(buff[0] == '\0')
+							return makeToken("ID", linenumber);
+						i = -1;
+					}
+				}
+				i++;
+				return makeToken("ID", linenumber);
+			}
+			else
+			{
+				return makeToken(NULL, linenumber);
+			}
+	}
+
+	return makeToken(NULL, linenumber);
 }
 
 int main()
 {
 	FILE* inputfile = fopen("test.txt","rb");
-	char* testCaseFile = getStream(inputfile);
+	removeComments(inputfile);
 	fclose(inputfile);
-	char* cleanFile;
-	removeComments(testCaseFile, &cleanFile);
-	printf("%s", cleanFile);
-	printf("\n--*--*--*--\n");
+	FILE* cleanFile = fopen("cleanFile.txt", "rb");
+	// getNextToken(cleanFile);
+	// getNextToken(cleanFile);
+	// getNextToken(cleanFile);
 	while(1){
-		char* ret = getNextToken(cleanFile);
-		if(strcmp(ret, "ERROR") == 0)
+		tokeninfo* ret = getNextToken(cleanFile);
+		if(ret->tokenname == NULL)
 			return 0;
-		printf("%s\n", ret);
+		printf("%s %d\n", ret->tokenname, ret->linenumber);
 	}
+	fclose(cleanFile);
 	return 0;
 }
