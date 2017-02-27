@@ -239,21 +239,150 @@ label:
 					return makeToken("RANGEOP", linenumber);
 			}
 		default:
-			if(isdigit(cleanFile[i])) //check
+			if(isdigit(buff[i])) //check
 			{
 				i++;
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
 					if(buff[0] == '\0')
-						return makeToken(NULL, linenumber);
+						return makeToken("NUM", linenumber);
 					i = -1;
 				}
-
+				while(buff[i+1] != '\0' && isdigit(buff[i+1]))
+					i++;
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+						return makeToken("NUM", linenumber);
+					i = -1;
+				}
+				if(buff[i+1] == '.')
+				{
+					i++;
+					if(buff[i+1] == '\0')
+					{
+						buff = getStream(&cleanFile);
+						if(buff[0] == '\0')
+							return makeToken(NULL, linenumber);
+						i = -1;
+					}
+					if(buff[i+1] == '.')
+					{
+						// currently on the first .
+						i--;
+						return makeToken("NUM", linenumber);
+					}
+					else if(isdigit(buff[i+1]))
+					{
+						i++;
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+								return makeToken("RNUM", linenumber);
+							i = -1;
+						}
+						while(buff[i+1] != '\0' && isdigit(buff[i+1]))
+							i++;
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+								return makeToken("RNUM", linenumber);
+							i = -1;
+						}
+						if(buff[i+1] == 'e' || buff[i+1] == 'E')
+						{
+							i++;
+							if(buff[i+1] == '\0')
+							{
+								buff = getStream(&cleanFile);
+								if(buff[0] == '\0')
+									return makeToken(NULL, linenumber);
+								i = -1;
+							}
+							if(buff[i+1] == '+' || buff[i+1] == '-')
+							{
+								i++;
+								if(buff[i+1] == '\0')
+								{
+									buff = getStream(&cleanFile);
+									if(buff[0] == '\0')
+										return makeToken(NULL, linenumber);
+									i = -1;
+								}
+								if(isdigit(buff[i+1]))
+								{
+									i++;
+									if(buff[i+1] == '\0')
+									{
+										buff = getStream(&cleanFile);
+										if(buff[0] == '\0')
+											return makeToken("RNUM", linenumber);
+										i = -1;
+									}
+									while(buff[i+1] != '\0' && isdigit(buff[i+1]))
+										i++;
+									return makeToken("RNUM", linenumber);
+								}
+							}
+							else if(isdigit(buff[i+1]))
+							{
+								i++;
+								if(buff[i+1] == '\0')
+								{
+									buff = getStream(&cleanFile);
+									if(buff[0] == '\0')
+										return makeToken("RNUM", linenumber);
+									i = -1;
+								}
+								while(buff[i+1] != '\0' && isdigit(buff[i+1]))
+									i++;
+								return makeToken("RNUM", linenumber);
+							}
+							else
+							{
+								return makeToken(NULL, linenumber);
+							}
+						}
+						else
+						{
+							return makeToken("RNUM", linenumber);
+						}
+					}
+					else
+					{
+						return makeToken(NULL, linenumber);
+					}			
+				}
+				else
+				{
+					return makeToken("NUM", linenumber);
+				}
+			}
+			else if(isalpha(buff[i]))
+			{
+				i++;
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+						return makeToken("ID", linenumber);
+					i = -1;
+				}
+				while(buff[i] != '\0' && (buff[i+1] == '_' || isdigit(buff[i+1]) || isalpha(buff[i+1]) ) )
+					i++;
+				return makeToken("ID", linenumber);
+			}
+			else
+			{
+				return makeToken(NULL, linenumber);
 			}
 	}
 
-	return makeToken();
+	return makeToken(NULL, linenumber);
 }
 
 int main()
@@ -262,10 +391,15 @@ int main()
 	removeComments(inputfile);
 	fclose(inputfile);
 	FILE* cleanFile = fopen("cleanFile.txt", "rb");
-
-	getNextToken(cleanFile);
-	getNextToken(cleanFile);
-	getNextToken(cleanFile);
+	// getNextToken(cleanFile);
+	// getNextToken(cleanFile);
+	// getNextToken(cleanFile);
+	while(1){
+		tokeninfo* ret = getNextToken(cleanFile);
+		if(ret == NULL)
+			return 0;
+		printf("%s %d\n", ret->tokenname, ret->linenumber);
+	}
 	fclose(cleanFile);
 	return 0;
 }
