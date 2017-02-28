@@ -8,6 +8,7 @@ struct ntort
 	int val;
 	char* str;
 	ntort* next;
+	ntort* down;
 };
 
 ntort* makentortnode(int nt, int val, char* str);

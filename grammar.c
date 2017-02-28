@@ -4,14 +4,11 @@
 #include <string.h>
 #include "ntort.h"
 #include "hashtable.h"
+#include "grammar.h"
 
-typedef struct node node;
-struct node
-{
-	node* next;
-	ntort* firstntort;
-	ntort* lastntort;
-};
+node* grammar[60];
+node* toppointers[60];
+char buff[500];
 
 node* makenode()
 {
@@ -21,11 +18,6 @@ node* makenode()
 	temp->lastntort = NULL;
 	return temp;
 }
-
-node* grammar[60];
-node* toppointers[60];
-
-char buff[500];
 
 void populateGrammar(hashtable* table)
 {
@@ -40,7 +32,6 @@ void populateGrammar(hashtable* table)
 
 		fscanf(fp, "%s", buff); //scanning -->
 		fscanf(fp, "%s", buff);
-		// printf("%s\n", buff);
 
 		grammar[ind] = makenode();
 		node* curr = grammar[ind];
@@ -107,12 +98,4 @@ void printGrammar(hashtable* table)
 		printf("\n");
 	}
 	return ;
-}
-
-int main()
-{
-	hashtable* table = makehashtable();
-	populateGrammar(table);
-	printGrammar(table);
-	return 0;
 }
