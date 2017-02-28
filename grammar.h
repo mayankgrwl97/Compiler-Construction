@@ -13,10 +13,11 @@ struct node
 };
 
 extern node* grammar[60];
-extern node* toppointers[60];
+extern node toppointers[60];
 
 node* makenode();
 void populateGrammar(hashtable* table);
 void printGrammar(hashtable* table);
+void printTopDownGrammar(hashtable* table);
 
 #endif

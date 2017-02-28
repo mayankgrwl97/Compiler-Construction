@@ -161,8 +161,6 @@ void populateFirstSets()
 	{
 		if(grammar[i] == NULL)
 			break;
-
-		
 	}
 	return;
 }
@@ -172,21 +170,22 @@ int main()
 	hashtable* table = makehashtable();
 	populateGrammar(table);
 	// printGrammar(table);
-	FILE* fp = fopen("nonterminals.txt", "r");
-	for(int i = 0;i < 51; i++){
-		// if(grammar[present(i)] == NULL)
-		// 	return 0;
-		char buff[100];
-		fscanf(fp, "%s",buff);
-		printf("%s --> ", buff);
-		calculateFirst(present(table, buff));
-		ntort* temp = firstSets[present(table, buff)];
-		while(temp != NULL){
-			printf("%s ",temp->str);
-			temp = temp->next;
-		}
-		printf("\n");
-	}
+	printTopDownGrammar(table);
+	// FILE* fp = fopen("nonterminals.txt", "r");
+	// for(int i = 0;i < 51; i++){
+	// 	// if(grammar[present(i)] == NULL)
+	// 	// 	return 0;
+	// 	char buff[100];
+	// 	fscanf(fp, "%s",buff);
+	// 	printf("%s --> ", buff);
+	// 	calculateFirst(present(table, buff));
+	// 	ntort* temp = firstSets[present(table, buff)];
+	// 	while(temp != NULL){
+	// 		printf("%s ",temp->str);
+	// 		temp = temp->next;
+	// 	}
+	// 	printf("\n");
+	// }
 
 	// char buff[100];
 	// fscanf(fp, "%s",buff);
