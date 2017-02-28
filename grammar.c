@@ -40,6 +40,8 @@ void populateGrammar(hashtable* table)
 		{
 			if(buff[0] == '|')
 			{
+				// insert $
+				curr->lastntort->next = makentortnode(buff[0]=='<' ? 1 : 0, 1000, "$");
 				curr->next = makenode();
 				curr = curr->next;
 			}
@@ -62,6 +64,8 @@ void populateGrammar(hashtable* table)
 			}
 			fscanf(fp, "%s", buff);
 		}
+		// insert $
+		curr->lastntort->next = makentortnode(buff[0]=='<' ? 1 : 0, 1000, "$");
 	}
 	// printhashtable(table);
 	fclose(fp);
