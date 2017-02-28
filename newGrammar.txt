@@ -35,7 +35,7 @@
 <arithmeticExpr> --> <term> <N4> $
 <N4> --> <op1> <term> <N4> | eps $
 <term> --> <factor> <N5> $
-<N5> --> <op2> <factor> <N5>| eps $
+<N5> --> <op2> <factor> <N5> | eps $
 <factor> --> <var> $
 <op1> --> PLUS | MINUS $
 <op2> --> MUL | DIV $
