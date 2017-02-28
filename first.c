@@ -155,56 +155,72 @@ int calculateFirst(int ind)
 	return 0;
 }
 
-void populateFirstSets()
+void populateFirstSets(hashtable* table)
 {
-	for(int i=1; i<60; i++)
-	{
-		if(grammar[i] == NULL)
-			break;
+	// for(int i=1; i<60; i++)
+	// {
+	// 	if(grammar[i] == NULL)
+	// 		break;
+	// }
+	FILE* fp = fopen("nonterminals.txt", "r");
+	for(int i = 0;i < 51; i++){
+		// if(grammar[present(i)] == NULL)
+		// 	return 0;
+		char buff[100];
+		fscanf(fp, "%s",buff);
+		// printf("%s --> ", buff);
+		calculateFirst(present(table, buff));
+		// ntort* temp = firstSets[present(table, buff)];
+		// while(temp != NULL){
+		// 	printf("%s ",temp->str);
+		// 	temp = temp->next;
+		// }
+		// printf("\n");
 	}
+	fclose(fp);
 	return;
 }
 
-int main()
-{
-	hashtable* table = makehashtable();
-	populateGrammar(table);
-	// printGrammar(table);
-	printTopDownGrammar(table);
-	// FILE* fp = fopen("nonterminals.txt", "r");
-	// for(int i = 0;i < 51; i++){
-	// 	// if(grammar[present(i)] == NULL)
-	// 	// 	return 0;
-	// 	char buff[100];
-	// 	fscanf(fp, "%s",buff);
-	// 	printf("%s --> ", buff);
-	// 	calculateFirst(present(table, buff));
-	// 	ntort* temp = firstSets[present(table, buff)];
-	// 	while(temp != NULL){
-	// 		printf("%s ",temp->str);
-	// 		temp = temp->next;
-	// 	}
-	// 	printf("\n");
-	// }
+// int main()
+// {
+// 	hashtable* table = makehashtable();
+// 	populateGrammar(table);
+// 	// printGrammar(table);
+// 	// printTopDownGrammar(table);
+// 	FILE* fp = fopen("nonterminals.txt", "r");
+// 	for(int i = 0;i < 51; i++){
+// 		// if(grammar[present(i)] == NULL)
+// 		// 	return 0;
+// 		char buff[100];
+// 		fscanf(fp, "%s",buff);
+// 		printf("%s --> ", buff);
+// 		calculateFirst(present(table, buff));
+// 		ntort* temp = firstSets[present(table, buff)];
+// 		while(temp != NULL){
+// 			printf("%s ",temp->str);
+// 			temp = temp->next;
+// 		}
+// 		printf("\n");
+// 	}
 
-	// char buff[100];
-	// fscanf(fp, "%s",buff);
-	// printf("%s --> ", buff);
-	// calculateFirst(present(table, "<moduleReuseStmt>"));
-	// ntort* temp = firstSets[present(table, "<moduleReuseStmt>")];
-	// while(temp != NULL){
-	// 	printf("%s ",temp->str);
-	// 	temp = temp->next;
-	// }
-	// printf("\n");
+// 	// char buff[100];
+// 	// fscanf(fp, "%s",buff);
+// 	// printf("%s --> ", buff);
+// 	// calculateFirst(present(table, "<moduleReuseStmt>"));
+// 	// ntort* temp = firstSets[present(table, "<moduleReuseStmt>")];
+// 	// while(temp != NULL){
+// 	// 	printf("%s ",temp->str);
+// 	// 	temp = temp->next;
+// 	// }
+// 	// printf("\n");
 
-	// calculateFirst(1);
-	// // node* gra = grammar[1];
-	// // 	printf("%s\n", gra->firstntort->str);
-	// ntort* temp = firstSets[1];
-	// while(temp != NULL){
-	// 	printf("%s ",temp->str);
-	// 	temp = temp->next;
-	// }
-	return 0;
-}
+// 	// calculateFirst(1);
+// 	// // node* gra = grammar[1];
+// 	// // 	printf("%s\n", gra->firstntort->str);
+// 	// ntort* temp = firstSets[1];
+// 	// while(temp != NULL){
+// 	// 	printf("%s ",temp->str);
+// 	// 	temp = temp->next;
+// 	// }
+// 	return 0;
+// }

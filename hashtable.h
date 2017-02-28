@@ -8,6 +8,8 @@ typedef struct hashtable hashtable;
 struct hashtable
 {
 	ntort* buckets[hashtablesize];
+	int ntval;
+	int val;
 };
 
 int hash(char* str);
