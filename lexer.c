@@ -7,7 +7,7 @@ char* getStream(FILE** fp)
 {
 	char* testCaseFile;
 	size_t inputsize = 100;
-	testCaseFile = (char*)malloc(inputsize * (sizeof(char)));
+	testCaseFile = (char*)calloc(sizeof(char), inputsize * (sizeof(char)));
 	fread(testCaseFile, sizeof(char), inputsize, *fp);
 	return testCaseFile;
 }
@@ -84,11 +84,13 @@ tokeninfo* makeToken(char* tokenname, int linenumber)
 }
 
 char* buff;
+int i = 0;
+int linenumber = 1;
 
 tokeninfo* getNextToken(FILE* cleanFile)
 {
-	static int i = 0;
-	static int linenumber = 1;
+	// static int i = 0;
+	// static int linenumber = 1;
 	if(buff == NULL)
 		buff = getStream(&cleanFile);
 
@@ -102,16 +104,44 @@ label:
 			return makeToken(NULL,linenumber);
 	}
 
+	while(1)
 	switch(buff[i])
 	{
 		case ' ':
 		case '\t':
 			i++;
-			goto label;
+			if(buff[i] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				i = 0;
+				if(buff[0] == '\0')
+					return makeToken(NULL,linenumber);
+			}
+			continue;
+			// goto label;
 		case '\n':
 			linenumber++;
 			i++;
-			goto label;
+			if(buff[i] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				i = 0;
+				if(buff[0] == '\0')
+					return makeToken(NULL,linenumber);
+			}
+			continue;
+			// goto label;
+		case '\r':
+			i++;
+			if(buff[i] == '\0')
+			{
+				buff = getStream(&cleanFile);
+				i = 0;
+				if(buff[0] == '\0')
+					return makeToken(NULL,linenumber);
+			}
+			continue;
+			// goto label;
 		case '+':
 			i++;
 			return makeToken("PLUS", linenumber);
@@ -430,13 +460,10 @@ label:
 
 int main()
 {
-	FILE* inputfile = fopen("test.txt","rb");
+	FILE* inputfile = fopen("testcase4.txt","rb");
 	removeComments(inputfile);
 	fclose(inputfile);
 	FILE* cleanFile = fopen("cleanFile.txt", "rb");
-	// getNextToken(cleanFile);
-	// getNextToken(cleanFile);
-	// getNextToken(cleanFile);
 	while(1){
 		tokeninfo* ret = getNextToken(cleanFile);
 		if(ret->tokenname == NULL)
