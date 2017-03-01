@@ -92,7 +92,7 @@ void printParseTable(hashtable* table)
 	char term[60][20];
 	FILE* fp = fopen("nonterminals.txt", "r");
 	FILE* fp2 = fopen("terminals.txt","r");
-	for(int i=0; i<54; i++)
+	for(int i=0; i<57; i++)
 		fscanf(fp2, "%s", term[i]);
 	fclose(fp2);
 
@@ -102,7 +102,7 @@ void printParseTable(hashtable* table)
 		fscanf(fp, "%s", buff);
 		printf("%s \n", buff);
 		int ind = present(table, buff);
-		for(int j=0; j<54; j++)
+		for(int j=0; j<57; j++)
 		{
 			int terminalind = present(table, term[j]);
 			// printf("%d ", terminalind);
