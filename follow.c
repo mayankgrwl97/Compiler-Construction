@@ -6,9 +6,7 @@
 #include "hashtable.h"
 #include "grammar.h"
 #include "first.h"
-
-ntort* followSets[60];
-int done2[60];
+#include "follow.h"
 
 void calculateFollow(int ind)
 {
@@ -104,49 +102,50 @@ void calculateFollow(int ind)
 	return;
 }
 
-// void calculateFollowSets(hashtable* table)
-// {
-// 	FILE* fp = fopen("nonterminals.txt", "rb");
-// 	char buff[100];
-// 	fscanf(fp, "%s", buff);
-// 	int ind = present(table, buff);
-// 	followSets[ind] = makentortnode(0, 200, "$");
-// 	done2[ind] = 1;
-// 	for(int i = 1;i < 51; i++)
-// 	{
-// 		fscanf(fp, "%s", buff);
-// 		ind = present(table,buff);
-// 		calculateFollow(ind);
-// 	}
-// 	return;
-// }
-
-
-int main()
+void populateFollowSets(hashtable* table)
 {
-	hashtable* table = makehashtable();
-	populateGrammar(table);
-	populateFirstSets(table);
-
 	FILE* fp = fopen("nonterminals.txt", "rb");
 	char buff[100];
 	fscanf(fp, "%s", buff);
-	int ind = present(table,buff);
+	int ind = present(table, buff);
 	followSets[ind] = makentortnode(0, 200, "$");
 	done2[ind] = 1;
-
 	for(int i = 1;i < 51; i++)
 	{
 		fscanf(fp, "%s", buff);
-		ind = present(table, buff);
+		ind = present(table,buff);
 		calculateFollow(ind);
-		printf("%s --> ", buff);
-		ntort* temp = followSets[ind];
-		while(temp != NULL){
-			printf(" %s ", temp->str);
-			temp = temp->next;
-		}
-		printf("\n");
 	}
-	return 0;
+	fclose(fp);
+	return;
 }
+
+
+// int main()
+// {
+// 	hashtable* table = makehashtable();
+// 	populateGrammar(table);
+// 	populateFirstSets(table);
+
+// 	FILE* fp = fopen("nonterminals.txt", "rb");
+// 	char buff[100];
+// 	fscanf(fp, "%s", buff);
+// 	int ind = present(table,buff);
+// 	followSets[ind] = makentortnode(0, 200, "$");
+// 	done2[ind] = 1;
+
+// 	for(int i = 1;i < 51; i++)
+// 	{
+// 		fscanf(fp, "%s", buff);
+// 		ind = present(table, buff);
+// 		calculateFollow(ind);
+// 		printf("%s --> ", buff);
+// 		ntort* temp = followSets[ind];
+// 		while(temp != NULL){
+// 			printf(" %s ", temp->str);
+// 			temp = temp->next;
+// 		}
+// 		printf("\n");
+// 	}
+// 	return 0;
+// }

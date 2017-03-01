@@ -762,21 +762,21 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 	return makeToken("EOF", "EOF", linenumber);
 }
 
-int main(int argc, char const *argv[])
-{
-	FILE* inputfile = fopen("testcase4.txt","rb");
-	removeComments(inputfile);
-	fclose(inputfile);
-	FILE* cleanFile = fopen("cleanFile.txt", "rb");
-	symboltable* table = makesymboltable();
-	addKeywords(table);
-	// printsymboltable(table);
-	while(1){
-		tokeninfo* ret = getNextToken(cleanFile, table);
-		if(strcmp(ret->tokenname,"EOF") == 0)
-			return 0;
-		printf("%s  %s  %d\n", ret->tokenname, ret->lexeme, ret->linenumber);
-	}
-	fclose(cleanFile);
-	return 0;
-}
+// int main(int argc, char const *argv[])
+// {
+// 	FILE* inputfile = fopen("testcase4.txt","rb");
+// 	removeComments(inputfile);
+// 	fclose(inputfile);
+// 	FILE* cleanFile = fopen("cleanFile.txt", "rb");
+// 	symboltable* table = makesymboltable();
+// 	addKeywords(table);
+// 	// printsymboltable(table);
+// 	while(1){
+// 		tokeninfo* ret = getNextToken(cleanFile, table);
+// 		if(strcmp(ret->tokenname,"EOF") == 0)
+// 			return 0;
+// 		printf("%s  %s  %d\n", ret->tokenname, ret->lexeme, ret->linenumber);
+// 	}
+// 	fclose(cleanFile);
+// 	return 0;
+// }
