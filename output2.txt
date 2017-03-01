@@ -1,0 +1,20 @@
+DECLARE  declare  1
+MODULE  module  1
+ID  compute  1
+SEMICOL  ;  1
+DRIVERDEF  <<<  2
+DRIVER  driver  2
+PROGRAM  program  2
+DRIVERENDDEF  >>>  2
+START  start  3
+DECLARE  declare  4
+ID  var_1_  4
+COMMA  ,  4
+ID  var_2_  4
+COMMA  ,  4
+ID  var_3_  4
+COLON  :  4
+INTEGER  integer  4
+SEMICOL  ;  4
+DECLARE  declare  5
+END OF CLEAN FILE
