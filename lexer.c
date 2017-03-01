@@ -2,6 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "token.h"
+#include "symboltable.h"
+
+char* upperstr(char* str)
+{
+	int l = strlen(str);
+	char* temp = malloc(sizeof(char) * (l+1));
+	strcpy(temp, str);
+	for(int i=0; i<l; i++)
+	{
+		temp[i] = toupper(temp[i]);
+	}
+	return temp;
+}
 
 char* getStream(FILE** fp)
 {
@@ -10,6 +24,29 @@ char* getStream(FILE** fp)
 	testCaseFile = (char*)calloc(sizeof(char), inputsize * (sizeof(char)));
 	fread(testCaseFile, sizeof(char), inputsize, *fp);
 	return testCaseFile;
+}
+
+int isdelim(char ch)
+{
+	return (ch==' ' || ch=='\t' || ch=='\n' || ch=='\r' || ch==':' || ch=='=' 
+		|| ch=='<' || ch=='>' || ch=='!' || ch=='(' || ch==')' 
+		|| ch=='[' || ch==']' || ch==';' || ch=='+' || ch=='-' 
+		|| ch=='*' || ch=='/' || ch==',');
+}
+
+void addKeywords(symboltable* table)
+{
+	FILE* fp = fopen("keywords.txt", "r");
+
+	for(int i=0; i<30; i++)
+	{
+		char buff[50];
+		fscanf(fp, "%s", buff);
+		// printf("%s\n",upperstr(buff));
+		insertsymboltable(table, upperstr(buff), buff, i+1);
+	}
+	// printsymboltable(table);
+	return;
 }
 
 void removeComments(FILE* fp)
@@ -65,410 +102,680 @@ void removeComments(FILE* fp)
 	return ;
 }
 
-typedef struct tokeninfo tokeninfo;
-
-struct tokeninfo
-{
-	char* tokenname;
-	int linenumber;
-	char* value;
-};
-
-tokeninfo* makeToken(char* tokenname, int linenumber)
-{
-	tokeninfo* temp = (tokeninfo*)malloc(sizeof(tokeninfo));
-	temp->tokenname = tokenname;
-	temp->linenumber = linenumber;
-	temp->value = NULL;
-	return temp;
-}
-
 char* buff;
+char val[100];
 int i = 0;
 int linenumber = 1;
 
-tokeninfo* getNextToken(FILE* cleanFile)
+tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 {
-	// static int i = 0;
-	// static int linenumber = 1;
-	if(buff == NULL)
+	if(buff == NULL)// take buffer for the first time
 		buff = getStream(&cleanFile);
-
-label:
-
-	if(buff[i] == '\0')
-	{
-		buff = getStream(&cleanFile);
-		i = 0;
-		if(buff[0] == '\0')
-			return makeToken(NULL,linenumber);
-	}
 
 	while(1)
-	switch(buff[i])
 	{
-		case ' ':
-		case '\t':
-			i++;
-			if(buff[i] == '\0')
+		if(buff[i] == '\0')
+		{
+			buff = getStream(&cleanFile);
+			i = 0;
+			if(buff == NULL || buff[0] == '\0')
 			{
-				buff = getStream(&cleanFile);
-				i = 0;
-				if(buff[0] == '\0')
-					return makeToken(NULL,linenumber);
+				printf("END OF CLEAN FILE");
+				return makeToken("EOF", "EOF", linenumber);
 			}
-			continue;
-			// goto label;
-		case '\n':
-			linenumber++;
-			i++;
-			if(buff[i] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				i = 0;
-				if(buff[0] == '\0')
-					return makeToken(NULL,linenumber);
-			}
-			continue;
-			// goto label;
-		case '\r':
-			i++;
-			if(buff[i] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				i = 0;
-				if(buff[0] == '\0')
-					return makeToken(NULL,linenumber);
-			}
-			continue;
-			// goto label;
-		case '+':
-			i++;
-			return makeToken("PLUS", linenumber);
-		case '-':
-			i++;
-			return makeToken("MINUS", linenumber);
-		case '*':
-			i++;
-			return makeToken("MUL", linenumber);
-		case '/':
-			i++;
-			return makeToken("DIV", linenumber);
-		case ';':
-			i++;
-			return makeToken("SEMICOL", linenumber);
-		case ',':
-			i++;
-			return makeToken("COMMA", linenumber);
-		case '(':
-			i++;
-			return makeToken("BO", linenumber);
-		case ')':
-			i++;
-			return makeToken("BC", linenumber);
-		case '[':
-			i++;
-			return makeToken("SQBO", linenumber);
-		case ']':
-			i++;
-			return makeToken("SQBC", linenumber);
-		case '<':
-			if(buff[i+1] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				if(buff[0] == '\0')
-					return makeToken(NULL, linenumber);
-				i = -1;
-			}
-			switch(buff[i+1])
-			{
-				case '<':
-					i+=2;
-					return makeToken("DEF", linenumber);
-				case '=':
-					i+=2;
-					return makeToken("LE", linenumber);
-				default:
-					i++;
-					return makeToken("LT", linenumber);
-			}
-		case '>':
-			if(buff[i+1] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				if(buff[0] == '\0')
-					return makeToken(NULL, linenumber);
-				i = -1;
-			}
-			switch(buff[i+1])
-			{
-				case '>':
-					i+=2;
-					return makeToken("ENDDEF", linenumber);
-				case '=':
-					i+=2;
-					return makeToken("GE", linenumber);
-				default:
-					i++;
-					return makeToken("GT", linenumber);
-			}
-		case '=':
-			if(buff[i+1] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				if(buff[0] == '\0')
-					return makeToken(NULL, linenumber);
-				i = -1;
-			}
-			switch(buff[i+1])
-			{
-				case '=':
-					i+=2;
-					return makeToken("EQ", linenumber);
-			}
-		case '!':
-			if(buff[i+1] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				if(buff[0] == '\0')
-					return makeToken(NULL, linenumber);
-				i = -1;
-			}
-			switch(buff[i+1])
-			{
-				case '=':
-					i+=2;
-					return makeToken("NE", linenumber);
-			}
-		case ':':
-			if(buff[i+1] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				if(buff[0] == '\0')
-					return makeToken(NULL, linenumber);
-				i = -1;
-			}
-			switch(buff[i+1])
-			{
-				case '=':
-					i+=2;
-					return makeToken("ASSIGNOP", linenumber);
-				default:
-					i++;
-					return makeToken("COLON", linenumber);
-			}
-		case '.':
-			if(buff[i+1] == '\0')
-			{
-				buff = getStream(&cleanFile);
-				if(buff[0] == '\0')
-					return makeToken(NULL, linenumber);
-				i = -1;
-			}
-			switch(buff[i+1])
-			{
-				case '.':
-					i+=2;
-					return makeToken("RANGEOP", linenumber);
-			}
-		default:
-			if(isdigit(buff[i])) //check
-			{
-				// i++;
+		}
+
+		switch(buff[i])
+		{
+			case ' ':
+			case '\t':
+				i++;
+				continue;
+			case '\n':
+				linenumber++;
+				i++;
+				continue;
+			case '\r':
+				i++;
+				continue;
+			case '+':
+				i++;
+				return makeToken("PLUS", "+", linenumber);
+			case '-':
+				i++;
+				return makeToken("MINUS", "-", linenumber);
+			case '*':
+				i++;
+				return makeToken("MUL", "*", linenumber);
+			case '/':
+				i++;
+				return makeToken("DIV", "/", linenumber);
+			case ';':
+				i++;
+				return makeToken("SEMICOL", ";", linenumber);
+			case ',':
+				i++;
+				return makeToken("COMMA", ",", linenumber);
+			case '(':
+				i++;
+				return makeToken("BO", "(", linenumber);
+			case ')':
+				i++;
+				return makeToken("BC", ")", linenumber);
+			case '[':
+				i++;
+				return makeToken("SQBO", "[", linenumber);
+			case ']':
+				i++;
+				return makeToken("SQBC", "]", linenumber);
+			case '<':
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
 					if(buff[0] == '\0')
-						return makeToken("NUM", linenumber);
+					{
+						i = 0;
+						return makeToken("LT", "<", linenumber);
+					}
 					i = -1;
 				}
-				while(isdigit(buff[i+1]))
+				switch(buff[i+1])
 				{
-					i++;
-					if(buff[i+1] == '\0')
-					{
-						buff = getStream(&cleanFile);
-						if(buff[0] == '\0')
-							return makeToken("NUM", linenumber);
-						i = -1;
-					}
-				}
-				if(buff[i+1] == '.')
-				{
-					i++;
-					if(buff[i+1] == '\0')
-					{
-						buff = getStream(&cleanFile);
-						if(buff[0] == '\0')
-							return makeToken(NULL, linenumber);
-						i = -1;
-					}
-					if(buff[i+1] == '.')
-					{
-						// currently on the first .
-						i--;
-						return makeToken("NUM", linenumber);
-					}
-					else if(isdigit(buff[i+1]))
-					{
+					case '<':
 						i++;
 						if(buff[i+1] == '\0')
 						{
 							buff = getStream(&cleanFile);
 							if(buff[0] == '\0')
-								return makeToken("RNUM", linenumber);
+							{
+								i = 0;
+								return makeToken("DEF", "<<", linenumber);
+							}
 							i = -1;
 						}
-						while(isdigit(buff[i+1]))
+						if(buff[i+1] == '<')
 						{
-							i++;
-							if(buff[i+1] == '\0')
-							{
-								buff = getStream(&cleanFile);
-								if(buff[0] == '\0')
-									return makeToken("RNUM", linenumber);
-								i = -1;
-							}
+							i += 2;
+							return makeToken("DRIVERDEF", "<<<", linenumber);
 						}
-						if(buff[i+1] == 'e' || buff[i+1] == 'E')
+						i++;
+						return makeToken("DEF", "<<", linenumber);
+					case '=':
+						i+=2;
+						return makeToken("LE", "<=", linenumber);
+					default:
+						i++;
+						return makeToken("LT", "<", linenumber);
+				}
+			case '>':
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+					{
+						i = 0;
+						return makeToken("GT", ">", linenumber);
+					}
+					i = -1;
+				}
+				switch(buff[i+1])
+				{
+					case '>':
+						i++;
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+							{
+								i = 0;
+								return makeToken("ENDDEF", ">>", linenumber);
+							}
+							i = -1;
+						}
+						if(buff[i+1] == '>')
+						{
+							i += 2;
+							return makeToken("DRIVERENDDEF", ">>>", linenumber);
+						}
+						i++;
+						return makeToken("ENDDEF", ">>", linenumber);
+					case '=':
+						i+=2;
+						return makeToken("GE", ">=", linenumber);
+					default:
+						i++;
+						return makeToken("GT", ">", linenumber);
+				}
+			case '=':
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+					{
+						i=0;
+						return makeToken("ERROR_2", "=", linenumber);
+					}
+					i = -1;
+				}
+				switch(buff[i+1])
+				{
+					case '=':
+						i+=2;
+						return makeToken("EQ", "==", linenumber);
+					default :
+						i++;
+						return makeToken("ERROR_2", "=", linenumber);
+				}
+			case '!':
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+					{
+						i=0;
+						return makeToken("ERROR_2", "!", linenumber);
+					}
+					i = -1;
+				}
+				switch(buff[i+1])
+				{
+					case '=':
+						i+=2;
+						return makeToken("NE", "!=", linenumber);
+					default:
+						i++;
+						return makeToken("ERROR_2", "!", linenumber);
+				}
+			case ':':
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+					{
+						i = 0;
+						return makeToken("COLON", ":", linenumber);
+					}
+					i = -1;
+				}
+				switch(buff[i+1])
+				{
+					case '=':
+						i+=2;
+						return makeToken("ASSIGNOP", ":=", linenumber);
+					default:
+						i++;
+						return makeToken("COLON", ":", linenumber);
+				}
+			case '.':
+				if(buff[i+1] == '\0')
+				{
+					buff = getStream(&cleanFile);
+					if(buff[0] == '\0')
+					{
+						i = 0;
+						return makeToken("ERROR_2", ".", linenumber);
+					}
+					i = -1;
+				}
+				switch(buff[i+1])
+				{
+					case '.':
+						i+=2;
+						return makeToken("RANGEOP", "..", linenumber);
+					default:
+						i++;
+						return makeToken("ERROR_2", ".", linenumber);
+				}
+			default:
+				if(isdigit(buff[i]))
+				{
+					int lo = 0; //pinter for val char array
+					val[lo++] = buff[i]; //inserting first digit scanned
+
+					if(buff[i+1] == '\0')
+					{
+						buff = getStream(&cleanFile);
+						if(buff[0] == '\0')
+						{
+							i = 0;
+							val[lo] = '\0';
+							return makeToken("NUM", val, linenumber);
+						}
+						i = -1;
+					}
+					while(isdigit(buff[i+1]))
+					{
+						i++;
+						val[lo++] = buff[i];
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+							{
+								i = 0;
+								val[lo] = '\0';
+								return makeToken("NUM", val, linenumber);
+							}
+							i = -1;
+						}
+					}
+					if(buff[i+1] == '.')
+					{
+						i++;
+						val[lo++] = buff[i];
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+							{
+								i=0;
+								val[lo] = '\0';
+								return makeToken("ERROR_3", val, linenumber);
+							}
+							i = -1;
+						}
+						if(buff[i+1] == '.')
+						{
+							// currently on the first .
+							// no need for i--
+							val[lo-1] = '\0';
+							return makeToken("NUM", val, linenumber);
+						}
+						else if(isdigit(buff[i+1]))
 						{
 							i++;
+							val[lo++] = buff[i];
 							if(buff[i+1] == '\0')
 							{
 								buff = getStream(&cleanFile);
 								if(buff[0] == '\0')
-									return makeToken(NULL, linenumber);
+								{
+									i = 0;
+									val[lo] = '\0';
+									return makeToken("RNUM", val, linenumber);
+								}
 								i = -1;
 							}
-							if(buff[i+1] == '+' || buff[i+1] == '-')
+							while(isdigit(buff[i+1]))
 							{
 								i++;
+								val[lo++] = buff[i];
 								if(buff[i+1] == '\0')
 								{
 									buff = getStream(&cleanFile);
 									if(buff[0] == '\0')
-										return makeToken(NULL, linenumber);
+									{
+										i = 0;
+										val[lo] = '\0';
+										return makeToken("RNUM", val, linenumber);
+									}
 									i = -1;
 								}
-								if(isdigit(buff[i+1]))
+							}
+							if(buff[i+1] == 'e' || buff[i+1] == 'E')
+							{
+								i++;
+								val[lo++] = buff[i];
+								if(buff[i+1] == '\0')
+								{
+									buff = getStream(&cleanFile);
+									if(buff[0] == '\0')
+									{
+										i = 0;
+										val[lo] = '\0';
+										return makeToken("ERROR_3", val, linenumber);
+									}
+									i = -1;
+								}
+								if(buff[i+1] == '+' || buff[i+1] == '-')
 								{
 									i++;
+									val[lo++] = buff[i];
 									if(buff[i+1] == '\0')
 									{
 										buff = getStream(&cleanFile);
 										if(buff[0] == '\0')
-											return makeToken("RNUM", linenumber);
+										{
+											i = 0;
+											val[lo] = '\0';
+											return makeToken("ERROR_3", val, linenumber);
+										}
+										i = -1;
+									}
+									if(isdigit(buff[i+1]))
+									{
+										i++;
+										val[lo++] = buff[i];
+										if(buff[i+1] == '\0')
+										{
+											buff = getStream(&cleanFile);
+											if(buff[0] == '\0')
+											{
+												i = 0;
+												val[lo] = '\0';
+												return makeToken("RNUM", val, linenumber);
+											}
+											i = -1;
+										}
+										while(isdigit(buff[i+1]))
+										{
+											i++;
+											val[lo++] = buff[i];
+											if(buff[i+1] == '\0')
+											{
+												buff = getStream(&cleanFile);
+												if(buff[0] == '\0')
+												{
+													i = 0;
+													val[lo] = '\0';
+													return makeToken("RNUM",val, linenumber);
+												}
+												i = -1;
+											}
+										}
+										if(isdelim(buff[i+1]))
+										{
+											i++;
+											val[lo] = '\0';
+											return makeToken("RNUM",val, linenumber);
+										}
+										while(!isdelim(buff[i+1]))
+										{
+											i++;
+											val[lo++] = buff[i];
+											if(buff[i+1] == '\0')
+											{
+												buff = getStream(&cleanFile);
+												if(buff[0] == '\0')
+												{
+													i = 0;
+													val[lo] = '\0';
+													return makeToken("ERROR_3", val, linenumber);
+												}
+												i = -1;
+											}
+										}
+										i++;
+										val[lo] = '\0';
+										return makeToken("ERROR_3", val, linenumber);
+									}
+									else
+									{
+										while(!isdelim(buff[i+1]))
+										{
+											i++;
+											val[lo++] = buff[i];
+											if(buff[i+1] == '\0')
+											{
+												buff = getStream(&cleanFile);
+												if(buff[0] == '\0')
+												{
+													i = 0;
+													val[lo] = '\0';
+													return makeToken("ERROR_3", val, linenumber);
+												}
+												i = -1;
+											}
+										}
+										i++;
+										val[lo] = '\0';
+										return makeToken("ERROR_3", val, linenumber);
+									}
+								}
+								else if(isdigit(buff[i+1]))
+								{
+									i++;
+									val[lo++] = buff[i];
+									if(buff[i+1] == '\0')
+									{
+										buff = getStream(&cleanFile);
+										if(buff[0] == '\0')
+										{
+											i = 0;
+											val[lo] = '\0';
+											return makeToken("RNUM", val, linenumber);
+										}
 										i = -1;
 									}
 									while(isdigit(buff[i+1]))
 									{
 										i++;
+										val[lo++] = buff[i];
 										if(buff[i+1] == '\0')
 										{
 											buff = getStream(&cleanFile);
 											if(buff[0] == '\0')
-												return makeToken("RNUM", linenumber);
+											{
+												i = 0;
+												val[lo] = '\0';
+												return makeToken("RNUM", val, linenumber);
+											}
+											i = -1;
+										}
+									}
+									if(isdelim(buff[i+1]))
+									{
+										i++;
+										val[lo] = '\0';
+										return makeToken("RNUM", val, linenumber);
+									}
+									while(!isdelim(buff[i+1]))
+									{
+										i++;
+										val[lo++] = buff[i];
+										if(buff[i+1] == '\0')
+										{
+											buff = getStream(&cleanFile);
+											if(buff[0] == '\0')
+											{
+												i = 0;
+												val[lo] = '\0';
+												return makeToken("ERROR_3", val, linenumber);
+											}
 											i = -1;
 										}
 									}
 									i++;
-									return makeToken("RNUM", linenumber);
+									val[lo] = '\0';
+									return makeToken("ERROR_3", val, linenumber);
 								}
 								else
 								{
-									return makeToken(NULL, linenumber);
+									while(!isdelim(buff[i+1]))
+									{
+										i++;
+										val[lo++] = buff[i];
+										if(buff[i+1] == '\0')
+										{
+											buff = getStream(&cleanFile);
+											if(buff[0] == '\0')
+											{
+												i = 0;
+												val[lo] = '\0';
+												return makeToken("ERROR_3", val, linenumber);
+											}
+											i = -1;
+										}
+									}
+									i++;
+									val[lo] = '\0';
+									return makeToken("ERROR_3", val, linenumber);
 								}
 							}
-							else if(isdigit(buff[i+1]))
+							else
 							{
-								i++;
-								if(buff[i+1] == '\0')
-								{
-									buff = getStream(&cleanFile);
-									if(buff[0] == '\0')
-										return makeToken("RNUM", linenumber);
-									i = -1;
-								}
-								while(isdigit(buff[i+1]))
+								if(isdelim(buff[i+1]))
 								{
 									i++;
+									val[lo] = '\0';
+									return makeToken("RNUM", val, linenumber);
+								}
+								while(!isdelim(buff[i+1]))
+								{
+									i++;
+									val[lo++] = buff[i];
 									if(buff[i+1] == '\0')
 									{
 										buff = getStream(&cleanFile);
 										if(buff[0] == '\0')
-											return makeToken("RNUM", linenumber);
+										{
+											i = 0;
+											val[lo] = '\0';
+											return makeToken("ERROR_3", val, linenumber);
+										}
 										i = -1;
 									}
 								}
 								i++;
-								return makeToken("RNUM", linenumber);
-							}
-							else
-							{
-								return makeToken(NULL, linenumber);
+								val[lo] = '\0';
+								return makeToken("ERROR_3", val, linenumber);
 							}
 						}
 						else
 						{
+							while(!isdelim(buff[i+1]))
+							{
+								i++;
+								val[lo++] = buff[i];
+								if(buff[i+1] == '\0')
+								{
+									buff = getStream(&cleanFile);
+									if(buff[0] == '\0')
+									{
+										i = 0;
+										val[lo] = '\0';
+										return makeToken("ERROR_3", val, linenumber);
+									}
+									i = -1;
+								}
+							}
 							i++;
-							return makeToken("RNUM", linenumber);
-						}
+							val[lo] = '\0';
+							return makeToken("ERROR_3", val, linenumber);
+						}			
 					}
 					else
 					{
-						return makeToken(NULL, linenumber);
-					}			
+						if(isdelim(buff[i+1]))
+						{
+							i++;
+							val[lo] = '\0';
+							return makeToken("NUM", val, linenumber);
+						}
+						while(!isdelim(buff[i+1]))
+						{
+							i++;
+							val[lo++] = buff[i];
+							if(buff[i+1] == '\0')
+							{
+								buff = getStream(&cleanFile);
+								if(buff[0] == '\0')
+								{
+									i = 0;
+									val[lo] = '\0';
+									return makeToken("ERROR_3", val, linenumber);
+								}
+								i = -1;
+							}
+						}
+						i++;
+						val[lo] = '\0';
+						return makeToken("ERROR_3", val, linenumber);
+					}
 				}
-				else
+				else if(isalpha(buff[i]))
 				{
-					i++;
-					return makeToken("NUM", linenumber);
-				}
-			}
-			else if(isalpha(buff[i]))
-			{
-				// i++;
-				if(buff[i+1] == '\0')
-				{
-					buff = getStream(&cleanFile);
-					if(buff[0] == '\0')
-						return makeToken("ID", linenumber);
-					i = -1;
-				}
-				while(buff[i+1] == '_' || isdigit(buff[i+1]) || isalpha(buff[i+1]) )
-				{
-					i++;
-					if(buff[i] == '\0')
+					int lo = 0;
+					val[lo++] = buff[i];
+					if(buff[i+1] == '\0')
 					{
 						buff = getStream(&cleanFile);
 						if(buff[0] == '\0')
-							return makeToken("ID", linenumber);
+						{
+							i = 0;
+							val[lo] = '\0';
+							tokeninfo* presentornot = presentsymboltable(table, val);
+							if(presentornot)
+							{
+								return makeToken(presentornot->tokenname, val, linenumber);
+							}
+							if(lo > 8)
+							{
+								return makeToken("ERROR_1", val, linenumber);
+							}
+							insertsymboltable(table, "ID", val, linenumber);
+							return makeToken("ID", val, linenumber);
+						}
 						i = -1;
 					}
+					while(buff[i+1] == '_' || isdigit(buff[i+1]) || isalpha(buff[i+1]) )
+					{
+						i++;
+						val[lo++] = buff[i];
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+							{
+								i = 0;
+								val[lo] = '\0';
+								tokeninfo* presentornot = presentsymboltable(table, val);
+								if(presentornot)
+								{
+									return makeToken(presentornot->tokenname, val, linenumber);
+								}
+								if(lo > 8)
+								{
+									return makeToken("ERROR_1", val, linenumber);
+								}
+								insertsymboltable(table, "ID", val, linenumber);
+								return makeToken("ID", val, linenumber);
+							}
+							i = -1;
+						}
+					}
+					i++;
+					val[lo] = '\0';
+					tokeninfo* presentornot = presentsymboltable(table, val);
+					if(presentornot)
+					{
+						return makeToken(presentornot->tokenname, val, linenumber);
+					}
+					if(lo > 8)
+					{
+						return makeToken("ERROR_1", val, linenumber);
+					}
+					insertsymboltable(table, "ID", val, linenumber);
+					return makeToken("ID", val, linenumber);
 				}
-				i++;
-				return makeToken("ID", linenumber);
-			}
-			else
-			{
-				return makeToken(NULL, linenumber);
-			}
+				else
+				{
+					char wronginput[2];
+					wronginput[0] = buff[i];
+					wronginput[1] = '\0';
+					return makeToken("ERROR_2", wronginput, linenumber);
+				}
+		}
 	}
 
-	return makeToken(NULL, linenumber);
+	printf("###########ERROR AT END OF GETNEXTTOKEN FUNCTION#########");
+	return makeToken("EOF", "EOF", linenumber);
 }
 
-int main()
+int main(int argc, char const *argv[])
 {
 	FILE* inputfile = fopen("testcase4.txt","rb");
 	removeComments(inputfile);
 	fclose(inputfile);
 	FILE* cleanFile = fopen("cleanFile.txt", "rb");
+	symboltable* table = makesymboltable();
+	addKeywords(table);
+	// printsymboltable(table);
 	while(1){
-		tokeninfo* ret = getNextToken(cleanFile);
-		if(ret->tokenname == NULL)
+		tokeninfo* ret = getNextToken(cleanFile, table);
+		if(strcmp(ret->tokenname,"EOF") == 0)
 			return 0;
-		printf("%s %d\n", ret->tokenname, ret->linenumber);
+		printf("%s  %s  %d\n", ret->tokenname, ret->lexeme, ret->linenumber);
 	}
 	fclose(cleanFile);
 	return 0;
