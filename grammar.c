@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -19,11 +25,12 @@ node* makenode()
 	return temp;
 }
 
-void populateGrammar(hashtable* table)
+void populateGrammar(hashtable* table) 
 {
 	FILE* fp = fopen("newGrammar.txt","rb");
 	insert(table, "$");
-	for(int i=0; i<51; i++)
+
+	for(int i=0; i<maxnonterminals; i++)
 	{
 		char lhsNT[100];
 		fscanf(fp,"%s",buff); //scanning LHS nonterminal
@@ -93,10 +100,10 @@ void populateGrammar(hashtable* table)
 	return;
 }
 
-void printTopDownGrammar(hashtable* table)
+void printTopDownGrammar(hashtable* table) //printing grammar down pointers
 {
 	FILE* fp = fopen("nonterminals.txt", "rb");
-	for(int i=0; i<51; i++)
+	for(int i=0; i<maxnonterminals; i++)
 	{
 		fscanf(fp,"%s",buff);
 		int ind = present(table, buff);
@@ -122,10 +129,10 @@ void printTopDownGrammar(hashtable* table)
 	return ;
 }
 
-void printGrammar(hashtable* table)
+void printGrammar(hashtable* table) //printing grammar
 {
 	FILE* fp = fopen("nonterminals.txt", "rb");
-	for(int i=0; i<51; i++)
+	for(int i=0; i<maxnonterminals; i++)
 	{
 		fscanf(fp,"%s",buff);
 		int ind = present(table, buff);
