@@ -12,6 +12,7 @@ Karan Deep Batra(2014A7PS160P)
 #include "lexerDef.h"
 #include "lexer.h"
 #include "grammar.h"
+#include "first.h"
 
 void printCleanFile()
 {
@@ -67,10 +68,12 @@ int main(int argc, char* argv[])
 
 	hashtable* table = makehashtable();
 	populateGrammar(table);
-	/*FOR DEBUGGING GRAMMAR*/
+	printhashtable(table);
 	// printGrammar(table);
 	// printTopDownGrammar(table);
 
+	populateFirstSets(table);
+	// printFirstSets(table);
 
 	
 	int control;

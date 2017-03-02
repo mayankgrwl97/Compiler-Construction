@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #ifndef _first_h_
 #define _first_h_
 
@@ -5,10 +11,11 @@
 #include "hashtable.h"
 #include "grammar.h"
 
-extern ntort* firstSets[60];
-int done[60];
+ntort* firstSets[maxnonterminals];
+int done[maxnonterminals];
 
 int calculateFirst(int ind);
 void populateFirstSets(hashtable* table);
+void printFirstSets(hashtable* table);
 
 #endif
