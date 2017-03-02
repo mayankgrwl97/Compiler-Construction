@@ -5,7 +5,9 @@
 
 void insertstack(stack* st, ntort* node)
 {
-	ntort* newelem = makentortnode(node->nt, node->val, node->str);
+	stacknode* newelem = (stacknode*)malloc(sizeof(stacknode));
+	newelem->stackelem = makentortnode(node->nt, node->val, node->str);
+	// ntort* newelem = makentortnode(node->nt, node->val, node->str);
 	newelem->next = st->top;
 	st->top = newelem;
 	return;
@@ -15,15 +17,17 @@ ntort* popstack(stack* st)
 {
 	if(st->top == NULL)
 		return NULL;
-	ntort* topelem = st->top;
+	ntort* topelem = st->top->stackelem;
 	st->top = st->top->next;
-	topelem->next = NULL;
+	// topelem->next = NULL;
 	return topelem;
 }
 
 ntort* topstack(stack* st)
 {
-	return st->top;
+	if(st->top == NULL)
+		return NULL;
+	return st->top->stackelem;
 }
 
 stack* makestack()

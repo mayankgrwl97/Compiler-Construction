@@ -3,11 +3,19 @@
 
 #include "ntort.h"
 
+typedef struct stacknode stacknode;
+struct stacknode
+{
+	ntort* stackelem;
+	stacknode* next;
+};
+
 typedef struct stack stack;
 struct stack
 {
-	ntort* top;
+	stacknode* top;
 };
+
 
 void insertstack(stack* st, ntort* node);
 ntort* popstack(stack* st);

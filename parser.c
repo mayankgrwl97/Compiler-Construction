@@ -140,6 +140,7 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 	// tokeninfo* lookahead = getAllTokens(testcasefile);
 
 	// root = makentortnode(1, present(table,"<program>"), "<program>");
+
 	while(strcmp(topstack(st)->str, "$") != 0 && lookahead != NULL)
 	{
 		topelem = topstack(st);
@@ -180,8 +181,8 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 			while(topstack(tempst) != NULL)
 			{
 				insertstack(st, popstack(tempst));
-				// topstack(st)->next = topelem->down;
-				// topelem->down = topstack(st);
+				topstack(st)->next = topelem->down;
+				topelem->down = topstack(st);
 			}
 			printf("\n");
 		}
@@ -189,7 +190,7 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 	return;
 }
 
-
+void printParseTree()
 
 int main()
 {
@@ -209,6 +210,9 @@ int main()
 
 	parseGrammar(table, tokens);
 
+	printf("%s \n", root->str);
+	printf("%s \n", root->down->str);
+	printf("%s \n", root->down->next->str);
 	fclose(fp);
 	// printParseTable(table);
 	// printGrammar(table);
