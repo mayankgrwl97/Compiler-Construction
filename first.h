@@ -11,8 +11,8 @@ Karan Deep Batra(2014A7PS160P)
 #include "hashtable.h"
 #include "grammar.h"
 
-ntort* firstSets[maxnonterminals];
-int done[maxnonterminals];
+ntort* firstSets[maxnonterminals+5];
+int done[maxnonterminals+5];
 
 int calculateFirst(int ind);
 void populateFirstSets(hashtable* table);

@@ -13,9 +13,10 @@ Karan Deep Batra(2014A7PS160P)
 #include "first.h"
 #include "lexerDef.h"
 
-ntort* followSets[maxnonterminals];
-int followdone[maxnonterminals];
-int terminaladded[maxnonterminals][numberofterminals];
+ntort* followSets[maxnonterminals+5];
+int followdone[maxnonterminals+5];
+
+
 void calculateFollow(int ind);
 void populateFollowSets(hashtable* table);
 void printFollowSets(hashtable* table);

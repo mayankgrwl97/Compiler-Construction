@@ -53,23 +53,23 @@ int main(int argc, char* argv[])
 	printf("(c) Parse Tree also implemented\n\n");
 	printf("-----------------------------------------------------------\n\n");
 	
-	if(argc < 2)
-	{
-		printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
-		return 0;
-	}
+	// if(argc < 2)
+	// {
+	// 	printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
+	// 	return 0;
+	// }
 
-	FILE* fp = fopen(argv[1], "rb");
+	FILE* fp = fopen("testcase1.txt", "rb");
 	removeComments(fp);
 	fclose(fp);
 	
-	fp = fopen(argv[1], "rb");
+	fp = fopen("testcase1.txt", "rb");
 	tokenlist = getAllTokens(fp);
 	fclose(fp);
 
 	hashtable* table = makehashtable();
 	populateGrammar(table);
-	
+
 	// printhashtable(table);
 	// printGrammar(table);
 	// printTopDownGrammar(table);

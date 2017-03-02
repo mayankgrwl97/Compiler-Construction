@@ -15,6 +15,8 @@ Karan Deep Batra(2014A7PS160P)
 #include "follow.h"
 #include "lexerDef.h"
 
+int terminaladded[maxnonterminals+5][numberofterminals+5];
+
 void calculateFollow(int ind)
 {
 	if(followdone[ind] == 1)
@@ -41,12 +43,19 @@ void calculateFollow(int ind)
 				if(followSets[ind] == NULL)
 				{
 					followSets[ind] = makentortnode(0, followhelper->val, followhelper->str);
+					terminaladded[ind][followhelper->val] = 1;
 					last = followSets[ind];
 					followhelper = followhelper->next;
 				}
 				while(followhelper != NULL)
 				{
+					if(terminaladded[ind][followhelper->val] == 1)
+					{
+						followhelper = followhelper->next;
+						continue;
+					}
 					last->next = makentortnode(0, followhelper->val, followhelper->str);
+					terminaladded[ind][followhelper->val] = 1;
 					last = last->next;
 					followhelper = followhelper->next;
 				}
@@ -58,11 +67,15 @@ void calculateFollow(int ind)
 				if(followSets[ind] == NULL)
 				{
 					followSets[ind] = makentortnode(0, temp->next->val, temp->next->str);
+					terminaladded[ind][temp->next->val] = 1;
 					last = followSets[ind];
 				}
 				else
 				{
+					if(terminaladded[ind][temp->next->val] == 1)
+						break;
 					last->next = makentortnode(0, temp->next->val, temp->next->str);
+					terminaladded[ind][temp->next->val] = 1;
 					last = last->next;
 				}
 				break;
@@ -78,6 +91,7 @@ void calculateFollow(int ind)
 					else
 					{
 						followSets[ind] = makentortnode(0, followhelper->val, followhelper->str);
+						terminaladded[ind][followhelper->val] = 1;
 						last = followSets[ind];
 					}
 					followhelper = followhelper->next;
@@ -88,7 +102,13 @@ void calculateFollow(int ind)
 						containseps = 1;
 					else
 					{
+						if(terminaladded[ind][followhelper->val] == 1)
+						{
+							followhelper = followhelper->next;
+							continue;
+						}
 						last->next = makentortnode(0, followhelper->val, followhelper->str);
+						terminaladded[ind][followhelper->val] = 1;
 						last = last->next;
 					}
 					followhelper = followhelper->next;
@@ -150,32 +170,3 @@ void printFollowSets(hashtable* table)
 	fclose(fp);
 	return;
 }
-
-// int main()
-// {
-// 	hashtable* table = makehashtable();
-// 	populateGrammar(table);
-// 	populateFirstSets(table);
-
-// 	FILE* fp = fopen("nonterminals.txt", "rb");
-// 	char buff[100];
-// 	fscanf(fp, "%s", buff);
-// 	int ind = present(table,buff);
-// 	followSets[ind] = makentortnode(0, 200, "$");
-// 	followdone[ind] = 1;
-
-// 	for(int i = 1;i < 51; i++)
-// 	{
-// 		fscanf(fp, "%s", buff);
-// 		ind = present(table, buff);
-// 		calculateFollow(ind);
-// 		printf("%s --> ", buff);
-// 		ntort* temp = followSets[ind];
-// 		while(temp != NULL){
-// 			printf(" %s ", temp->str);
-// 			temp = temp->next;
-// 		}
-// 		printf("\n");
-// 	}
-// 	return 0;
-// }
