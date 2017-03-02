@@ -200,16 +200,16 @@ void printParseTree(stacknode* curr, char* parent)
 	//itself
 
 	if(curr->tokinfo != NULL)
-		printf("%s    %d    %s    ", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
+		printf("%s\t\t%d\t\t%s\t\t", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
 	else
-		printf("----    ----    ----    ");
+		printf("----\t\t----\t\t----\t\t");
 
 	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname,"NUM")==0 || strcmp(curr->tokinfo->tokenname,"RNUM")==0))
-		printf("%s    ", curr->tokinfo->lexeme);
+		printf("%s\t\t", curr->tokinfo->lexeme);
 	else
-		printf("----    ");
+		printf("----\t\t");
 
-	printf("%s    %s    ", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
+	printf("%s\t\t%s\t\t", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
 
 	if(curr->tokinfo == NULL)
 		printf("%s\n", curr->ntortinfo->str);
