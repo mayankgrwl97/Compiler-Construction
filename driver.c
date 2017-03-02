@@ -13,6 +13,7 @@ Karan Deep Batra(2014A7PS160P)
 #include "lexer.h"
 #include "grammar.h"
 #include "first.h"
+#include "follow.h"
 
 void printCleanFile()
 {
@@ -68,13 +69,16 @@ int main(int argc, char* argv[])
 
 	hashtable* table = makehashtable();
 	populateGrammar(table);
-	printhashtable(table);
+	
+	// printhashtable(table);
 	// printGrammar(table);
 	// printTopDownGrammar(table);
 
 	populateFirstSets(table);
 	// printFirstSets(table);
 
+	populateFollowSets(table);
+	printFollowSets(table);
 	
 	int control;
 	printf("Press the appropriate option\n");

@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -7,10 +13,11 @@
 #include "grammar.h"
 #include "first.h"
 #include "follow.h"
+#include "lexerDef.h"
 
 void calculateFollow(int ind)
 {
-	if(done2[ind] == 1)
+	if(followdone[ind] == 1)
 		return;
 
 	ntort* start = toppointers[ind].firstntort;
@@ -27,7 +34,7 @@ void calculateFollow(int ind)
 				//copy follow of temp->next->next to follow[ind]
 				if(ind == temp->next->next->val)
 					break;
-				if(!done2[temp->next->next->val])
+				if(!followdone[temp->next->next->val])
 					calculateFollow(temp->next->next->val);
 
 				followhelper = followSets[temp->next->next->val];
@@ -98,7 +105,7 @@ void calculateFollow(int ind)
 		start = start->down;
 	}
 
-	done2[ind] = 1;
+	followdone[ind] = 1;
 	return;
 }
 
@@ -109,7 +116,7 @@ void populateFollowSets(hashtable* table)
 	fscanf(fp, "%s", buff);
 	int ind = present(table, buff);
 	followSets[ind] = makentortnode(0, present(table,"$"), "$");
-	done2[ind] = 1;
+	followdone[ind] = 1;
 	for(int i = 1;i < 51; i++)
 	{
 		fscanf(fp, "%s", buff);
@@ -120,6 +127,29 @@ void populateFollowSets(hashtable* table)
 	return;
 }
 
+void printFollowSets(hashtable* table)
+{
+	FILE* fp = fopen("nonterminals.txt", "r");
+
+	char buff[100];
+
+ 	for(int i=0; i<maxnonterminals; i++)
+	{
+		fscanf(fp, "%s", buff);
+		int ind = present(table, buff);
+		printf("%s --> ", buff);
+		ntort* temp = followSets[ind];
+		while(temp != NULL)
+		{
+			printf(" %s ", temp->str);
+			temp = temp->next;
+		}
+		printf("\n");
+	}
+
+	fclose(fp);
+	return;
+}
 
 // int main()
 // {
@@ -132,7 +162,7 @@ void populateFollowSets(hashtable* table)
 // 	fscanf(fp, "%s", buff);
 // 	int ind = present(table,buff);
 // 	followSets[ind] = makentortnode(0, 200, "$");
-// 	done2[ind] = 1;
+// 	followdone[ind] = 1;
 
 // 	for(int i = 1;i < 51; i++)
 // 	{
