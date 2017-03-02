@@ -11,6 +11,7 @@ Karan Deep Batra(2014A7PS160P)
 
 #include "lexerDef.h"
 #include "lexer.h"
+#include "grammar.h"
 
 void printCleanFile()
 {
@@ -63,10 +64,15 @@ int main(int argc, char* argv[])
 	fp = fopen(argv[1], "rb");
 	tokenlist = getAllTokens(fp);
 	fclose(fp);
-	// fp = fopen("cleanFile.txt", "r");
-	// tokenlist = getAllTokens(fp);
-	// fclose(fp);
 
+	hashtable* table = makehashtable();
+	populateGrammar(table);
+	/*FOR DEBUGGING GRAMMAR*/
+	// printGrammar(table);
+	// printTopDownGrammar(table);
+
+
+	
 	int control;
 	printf("Press the appropriate option\n");
 	printf("1 : For removal of comments\n");

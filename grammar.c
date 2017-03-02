@@ -12,8 +12,6 @@ Karan Deep Batra(2014A7PS160P)
 #include "hashtable.h"
 #include "grammar.h"
 
-node* grammar[60];
-node toppointers[60];
 char buff[500];
 
 node* makenode()
