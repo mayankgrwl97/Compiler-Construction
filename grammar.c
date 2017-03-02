@@ -22,6 +22,7 @@ node* makenode()
 void populateGrammar(hashtable* table)
 {
 	FILE* fp = fopen("newGrammar.txt","rb");
+	insert(table, "$");
 	for(int i=0; i<51; i++)
 	{
 		char lhsNT[100];
@@ -43,7 +44,7 @@ void populateGrammar(hashtable* table)
 			if(buff[0] == '|')
 			{
 				// insert $
-				curr->lastntort->next = makentortnode(buff[0]=='<' ? 1 : 0, 200, "$");
+				curr->lastntort->next = makentortnode(buff[0]=='<' ? 1 : 0, present(table,"$"), "$");
 				curr->lastntort = curr->lastntort->next;
 				curr->lastntort->next = makentortnode(1, present(table, lhsNT), lhsNT);
 				curr->lastntort = curr->lastntort->next;
@@ -82,7 +83,7 @@ void populateGrammar(hashtable* table)
 			fscanf(fp, "%s", buff);
 		}
 		// insert $
-		curr->lastntort->next = makentortnode(buff[0]=='<' ? 1 : 0, 1000, "$");
+		curr->lastntort->next = makentortnode(buff[0]=='<' ? 1 : 0, present(table,"$"), "$");
 		curr->lastntort = curr->lastntort->next;
 		curr->lastntort->next = makentortnode(1, present(table, lhsNT), lhsNT);
 		curr->lastntort = curr->lastntort->next;

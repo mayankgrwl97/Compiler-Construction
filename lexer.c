@@ -114,13 +114,13 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 
 	while(1)
 	{
-		if(buff[i] == '\0')
+		if(buff == NULL || buff[i] == '\0')
 		{
 			buff = getStream(&cleanFile);
 			i = 0;
 			if(buff == NULL || buff[0] == '\0')
 			{
-				printf("END OF CLEAN FILE");
+				// printf("END OF CLEAN FILE");
 				return makeToken("EOF", "EOF", linenumber);
 			}
 		}
@@ -762,21 +762,42 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 	return makeToken("EOF", "EOF", linenumber);
 }
 
+tokeninfo* getAllTokens(FILE* testCaseFile)
+{
+	removeComments(testCaseFile);
+	FILE* cleanFile = fopen("cleanFile.txt", "rb");
+	symboltable* table = makesymboltable();
+	addKeywords(table);
+
+	tokeninfo* listoftokens = NULL;
+	tokeninfo* last = NULL;
+
+	listoftokens = last = getNextToken(cleanFile, table);
+
+	while(1)
+	{
+		tokeninfo* ret = getNextToken(cleanFile, table);
+		if(strcmp(ret->tokenname, "EOF") == 0)
+		{
+			fclose(cleanFile);
+			return listoftokens;
+		}
+		last->next = ret;
+		last = last->next;
+	}
+	last->next = makeToken("$", "$", 0);
+	return listoftokens;
+}
+
 // int main(int argc, char const *argv[])
 // {
-// 	FILE* inputfile = fopen("testcase4.txt","rb");
-// 	removeComments(inputfile);
-// 	fclose(inputfile);
-// 	FILE* cleanFile = fopen("cleanFile.txt", "rb");
-// 	symboltable* table = makesymboltable();
-// 	addKeywords(table);
-// 	// printsymboltable(table);
-// 	while(1){
-// 		tokeninfo* ret = getNextToken(cleanFile, table);
-// 		if(strcmp(ret->tokenname,"EOF") == 0)
-// 			return 0;
-// 		printf("%s  %s  %d\n", ret->tokenname, ret->lexeme, ret->linenumber);
+// 	FILE* fp = fopen("testcase1.txt", "r");
+// 	tokeninfo* tokens = getAllTokens(fp);
+// 	while(tokens != NULL)
+// 	{
+// 		printf("%s  %s  %d\n", tokens->tokenname, tokens->lexeme, tokens->linenumber);
+// 		tokens = tokens->next;
 // 	}
-// 	fclose(cleanFile);
+// 	fclose(fp);
 // 	return 0;
 // }

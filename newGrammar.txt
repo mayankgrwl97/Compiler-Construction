@@ -47,5 +47,5 @@
 <N9> --> CASE <value> COLON <statements> BREAK SEMICOL <N9> | eps $
 <value> --> NUM | TRUE | FALSE $
 <default> --> DEFAULT COLON <statements> BREAK SEMICOL | eps $
-<iterativeStmt> --> FOR BO ID IN <range> BC START <statements> END | WHILE BO <booleanExpr> BC START <statements> END $
+<iterativeStmt> --> FOR BO ID IN <range> BC START <statements> END | WHILE BO <arithmeticOrBooleanExpr> BC START <statements> END $
 <range> --> NUM RANGEOP NUM $

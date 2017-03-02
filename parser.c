@@ -7,6 +7,9 @@
 #include "follow.h"
 #include "first.h"
 #include "ntort.h"
+#include "stack.h"
+#include "token.h"
+#include "lexer.h"
 
 #define maxterminals 500
 #define maxnterminals 500
@@ -31,6 +34,7 @@ void makeParseTable(hashtable* table)
 				ntort* followhelper = followSets[ind];
 				while(followhelper != NULL)
 				{
+
 					int terminalind = followhelper->val;
 					ParseTable[ind][terminalind] = currnode->firstntort;
 					followhelper = followhelper->next;
@@ -92,7 +96,7 @@ void printParseTable(hashtable* table)
 	char term[60][20];
 	FILE* fp = fopen("nonterminals.txt", "r");
 	FILE* fp2 = fopen("terminals.txt","r");
-	for(int i=0; i<57; i++)
+	for(int i=0; i<58; i++)
 		fscanf(fp2, "%s", term[i]);
 	fclose(fp2);
 
@@ -102,7 +106,7 @@ void printParseTable(hashtable* table)
 		fscanf(fp, "%s", buff);
 		printf("%s \n", buff);
 		int ind = present(table, buff);
-		for(int j=0; j<57; j++)
+		for(int j=0; j<58; j++)
 		{
 			int terminalind = present(table, term[j]);
 			// printf("%d ", terminalind);
@@ -124,14 +128,89 @@ void printParseTable(hashtable* table)
 	return;
 }
 
+ntort* root;
+
+void parseGrammar(hashtable* table, tokeninfo* lookahead)
+{
+	stack* st = makestack();
+	insertstack(st, getnodehashtable(table, "$"));// insert $
+	insertstack(st, getnodehashtable(table, "<program>")); //insert start symbol
+	root = topstack(st);
+	ntort* topelem;
+	// tokeninfo* lookahead = getAllTokens(testcasefile);
+
+	// root = makentortnode(1, present(table,"<program>"), "<program>");
+	while(strcmp(topstack(st)->str, "$") != 0 && lookahead != NULL)
+	{
+		topelem = topstack(st);
+		if(strcmp(topelem->str, lookahead->tokenname) == 0)
+		{
+			topelem = popstack(st);
+			lookahead = lookahead->next;
+			if(lookahead == NULL)
+				return;
+		}
+		else if(strcmp(topelem->str, "eps") == 0)
+		{
+			topelem = popstack(st);
+		}
+		else if(topelem->nt == 0)
+		{
+			printf("ERROR1");
+			return;
+		}
+		else if(ParseTable[topelem->val][present(table, lookahead->tokenname)] == NULL)
+		{
+			printf("ERROR2");
+			return;
+		}
+		else if(ParseTable[topelem->val][present(table, lookahead->tokenname)] != NULL)
+		{
+			printf("%s -> ", topelem->str);
+			ntort* rule = ParseTable[topelem->val][present(table, lookahead->tokenname)];
+			// topelem->down = rule;
+			stack* tempst = makestack();
+			while(strcmp(rule->str, "$") != 0)
+			{
+				insertstack(tempst, rule);
+				printf("%s ", rule->str);
+				rule = rule->next;
+			}
+			topelem = popstack(st);
+			while(topstack(tempst) != NULL)
+			{
+				insertstack(st, popstack(tempst));
+				// topstack(st)->next = topelem->down;
+				// topelem->down = topstack(st);
+			}
+			printf("\n");
+		}
+	}
+	return;
+}
+
+
+
 int main()
 {
+	FILE* fp = fopen("testcase1.txt", "r");
+	tokeninfo* tokens = getAllTokens(fp);
+	// while(tokens != NULL)
+	// {
+	// 	printf("%s  %s  %d\n", tokens->tokenname, tokens->lexeme, tokens->linenumber);
+	// 	tokens = tokens->next;
+	// }
+
 	hashtable* table = makehashtable();
 	populateGrammar(table);
 	populateFirstSets(table);
 	populateFollowSets(table);
 	makeParseTable(table);
-	printParseTable(table);
+
+	parseGrammar(table, tokens);
+
+	fclose(fp);
+	// printParseTable(table);
 	// printGrammar(table);
 	return 0;
 }

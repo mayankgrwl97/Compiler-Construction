@@ -78,3 +78,17 @@ void insert(hashtable* table, char* str)
 	}
 	return;
 }
+
+ntort* getnodehashtable(hashtable* table, char* str)
+{
+	int h = hash(str);
+	ntort* pt = table->buckets[h];
+
+	while(pt != NULL)
+	{
+		if(strcmp(str,pt->str) == 0)
+			return pt;
+		pt = pt->next;
+	}
+	return pt;
+}

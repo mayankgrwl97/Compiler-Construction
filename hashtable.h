@@ -17,5 +17,6 @@ void printhashtable(hashtable* table);
 hashtable* makehashtable();
 int present(hashtable* table, char* str);
 void insert(hashtable* table, char* str);
+ntort* getnodehashtable(hashtable* table, char* str);
 
 #endif
