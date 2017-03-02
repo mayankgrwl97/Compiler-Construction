@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,7 +19,7 @@ symboltable* makesymboltable()
 	return temp;
 }
 
-tokeninfo* presentsymboltable(symboltable* table, char* lexeme)
+tokeninfo* presentsymboltable(symboltable* table, char* lexeme) //checks if lexeme is already present in symbol table and returns pointer to it
 {
 	int h = hash(lexeme);
 	tokeninfo* pt = table->buckets[h];
@@ -27,7 +33,7 @@ tokeninfo* presentsymboltable(symboltable* table, char* lexeme)
 	return NULL;
 }
 
-void insertsymboltable(symboltable* table, char* tokenname, char* lexeme, int linenumber)
+void insertsymboltable(symboltable* table, char* tokenname, char* lexeme, int linenumber) //insert token to symbol table
 {
 	// printf("%s\n",str);
 	// static int ntval=1, tval=1;

@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #ifndef _symboltable_h_
 #define _symboltable_h_
 
@@ -7,6 +13,8 @@
 
 #define symboltablesize 100
 
+
+//Used for adding identifiers and keywords in lexer phase
 typedef struct symboltable symboltable;
 struct symboltable
 {
