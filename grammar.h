@@ -20,8 +20,8 @@ struct node
 	ntort* lastntort; //pointer to last ntort in node
 };
 
-node* grammar[maxnonterminals]; 
-node toppointers[maxnonterminals];
+node* grammar[maxnonterminals+5]; 
+node toppointers[maxnonterminals+5];
 
 node* makenode();
 void populateGrammar(hashtable* table);

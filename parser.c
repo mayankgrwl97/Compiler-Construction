@@ -1,25 +1,24 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "grammar.h"
-#include "hashtable.h"
 #include "follow.h"
-#include "first.h"
-#include "ntort.h"
-#include "stack.h"
 #include "token.h"
 #include "lexer.h"
+#include "parserDef.h"
 
-#define maxterminals 500
-#define maxnterminals 500
-
-ntort* ParseTable[maxnterminals][maxterminals];
+// ntort* ParseTable[maxnonterminals][numberofterminals];
 
 void makeParseTable(hashtable* table)
 {
 	FILE* fp = fopen("nonterminals.txt", "rb");
-	for(int i = 0;i < 51; i++)
+	for(int i = 0; i <maxnonterminals; i++)
 	{
 		char buff[100];
 		fscanf(fp, "%s", buff);
@@ -82,7 +81,6 @@ void makeParseTable(hashtable* table)
 						followhelper = followhelper->next;
 					}
 				}
-
 				currnode = currnode->next;
 			}
 		}
@@ -93,20 +91,21 @@ void makeParseTable(hashtable* table)
 
 void printParseTable(hashtable* table)
 {
-	char term[60][20];
+	char term[numberofterminals+5][20];
+
 	FILE* fp = fopen("nonterminals.txt", "r");
 	FILE* fp2 = fopen("terminals.txt","r");
-	for(int i=0; i<58; i++)
+	for(int i=0; i<numberofterminals; i++)
 		fscanf(fp2, "%s", term[i]);
 	fclose(fp2);
 
-	for(int i=0; i<51; i++)
+	for(int i=0; i<maxnonterminals; i++)
 	{
 		char buff[50];
 		fscanf(fp, "%s", buff);
 		printf("%s \n", buff);
 		int ind = present(table, buff);
-		for(int j=0; j<58; j++)
+		for(int j=0; j<numberofterminals; j++)
 		{
 			int terminalind = present(table, term[j]);
 			// printf("%d ", terminalind);
@@ -123,14 +122,11 @@ void printParseTable(hashtable* table)
 			}
 		}
 		printf("\n");
-
 	}
 	return;
 }
 
-stacknode* root;
-
-void parseGrammar(hashtable* table, tokeninfo* lookahead)
+int parseGrammar(hashtable* table, tokeninfo* lookahead)
 {
 	stack* st = makestack();
 	insertstack(st, getnodehashtable(table, "$"), NULL);// insert $
@@ -150,7 +146,10 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 			topelem->tokinfo = lookahead;
 			lookahead = lookahead->next;
 			if(lookahead == NULL)
-				return;
+			{
+				// printf("%s\n", st->top->ntortinfo->str);
+				return (strcmp(st->top->ntortinfo->str, "$") == 0);
+			}
 		}
 		else if(strcmp(topelem->ntortinfo->str, "eps") == 0)
 		{
@@ -159,12 +158,12 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 		else if(topelem->ntortinfo->nt == 0)
 		{
 			printf("ERROR1");
-			return;
+			return 0;
 		}
 		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] == NULL)
 		{
 			printf("ERROR2");
-			return;
+			return 0;
 		}
 		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] != NULL)
 		{
@@ -188,7 +187,8 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 			printf("\n");
 		}
 	}
-	return;
+	// printf("????%s\n?????", st->top->ntortinfo->str);
+	return (strcmp(st->top->ntortinfo->str, "$") == 0);
 }
 
 void printParseTree(stacknode* curr, char* parent)
@@ -227,38 +227,4 @@ void printParseTree(stacknode* curr, char* parent)
 		temp = temp->sibling;
 	}
 	return;
-}
-
-int main()
-{
-	FILE* fp = fopen("testcase1.txt", "r");
-	tokeninfo* tokens = getAllTokens(fp);
-	// while(tokens != NULL)
-	// {
-	// 	printf("%s  %s  %d\n", tokens->tokenname, tokens->lexeme, tokens->linenumber);
-	// 	tokens = tokens->next;
-	// }
-
-	hashtable* table = makehashtable();
-	populateGrammar(table);
-	populateFirstSets(table);
-	populateFollowSets(table);
-	makeParseTable(table);
-
-	// tokeninfo* ptr = tokens;
-	// while(ptr != NULL)
-	// {
-	// 	printf("%s ", ptr->tokenname);
-	// 	ptr = ptr->next;
-	// }
-	parseGrammar(table, tokens);
-	printf("\n\n\n");
-	// printf("%s \n", root->str);
-	// printf("%s \n", root->down->str);
-	// printf("%s \n", root->down->next->str);
-	printParseTree(root, "ROOT");
-	fclose(fp);
-	// printParseTable(table);
-	// printGrammar(table);
-	return 0;
 }

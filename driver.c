@@ -14,6 +14,8 @@ Karan Deep Batra(2014A7PS160P)
 #include "grammar.h"
 #include "first.h"
 #include "follow.h"
+#include "parser.h"
+#include "parserDef.h"
 
 void printCleanFile()
 {
@@ -53,17 +55,17 @@ int main(int argc, char* argv[])
 	printf("(c) Parse Tree also implemented\n\n");
 	printf("-----------------------------------------------------------\n\n");
 	
-	// if(argc < 2)
-	// {
-	// 	printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
-	// 	return 0;
-	// }
+	if(argc < 2)
+	{
+		printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
+		return 0;
+	}
 
-	FILE* fp = fopen("testcase1.txt", "rb");
+	FILE* fp = fopen(argv[1], "rb");
 	removeComments(fp);
 	fclose(fp);
 	
-	fp = fopen("testcase1.txt", "rb");
+	fp = fopen(argv[1], "rb");
 	tokenlist = getAllTokens(fp);
 	fclose(fp);
 
@@ -78,8 +80,15 @@ int main(int argc, char* argv[])
 	// printFirstSets(table);
 
 	populateFollowSets(table);
-	printFollowSets(table);
-	
+	// printFollowSets(table);
+
+	makeParseTable(table);
+	// printParseTable(table);
+
+	int syntaxcorrect = parseGrammar(table, tokenlist);
+	// printf("-------------------------------------------------\n");
+	// printParseTree(root, "ROOT");
+
 	int control;
 	printf("Press the appropriate option\n");
 	printf("1 : For removal of comments\n");
@@ -95,6 +104,17 @@ int main(int argc, char* argv[])
 	if(control == 2)
 	{
 		printTokens();
+	}
+	if(control == 3)
+	{
+		if(syntaxcorrect)
+			printf("Input source code is syntactically correct...........\n");
+		else
+			printf("ERROR in input source code parsing\n");
+	}
+	if(control == 4)
+	{
+		printParseTree(root, "ROOT");
 	}
 	return 0;
 }

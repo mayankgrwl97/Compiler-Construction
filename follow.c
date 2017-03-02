@@ -137,7 +137,7 @@ void populateFollowSets(hashtable* table)
 	int ind = present(table, buff);
 	followSets[ind] = makentortnode(0, present(table,"$"), "$");
 	followdone[ind] = 1;
-	for(int i = 1;i < 51; i++)
+	for(int i = 1;i < maxnonterminals; i++)
 	{
 		fscanf(fp, "%s", buff);
 		ind = present(table,buff);
