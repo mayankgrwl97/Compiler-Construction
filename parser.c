@@ -128,61 +128,62 @@ void printParseTable(hashtable* table)
 	return;
 }
 
-ntort* root;
+stacknode* root;
 
 void parseGrammar(hashtable* table, tokeninfo* lookahead)
 {
 	stack* st = makestack();
-	insertstack(st, getnodehashtable(table, "$"));// insert $
-	insertstack(st, getnodehashtable(table, "<program>")); //insert start symbol
+	insertstack(st, getnodehashtable(table, "$"), NULL);// insert $
+	insertstack(st, getnodehashtable(table, "<program>"), NULL); //insert start symbol
 	root = topstack(st);
-	ntort* topelem;
+	stacknode* topelem;
 	// tokeninfo* lookahead = getAllTokens(testcasefile);
 
 	// root = makentortnode(1, present(table,"<program>"), "<program>");
 
-	while(strcmp(topstack(st)->str, "$") != 0 && lookahead != NULL)
+	while(strcmp(topstack(st)->ntortinfo->str, "$") != 0 && lookahead != NULL)
 	{
 		topelem = topstack(st);
-		if(strcmp(topelem->str, lookahead->tokenname) == 0)
+		if(strcmp(topelem->ntortinfo->str, lookahead->tokenname) == 0)
 		{
 			topelem = popstack(st);
+			topelem->tokinfo = lookahead;
 			lookahead = lookahead->next;
 			if(lookahead == NULL)
 				return;
 		}
-		else if(strcmp(topelem->str, "eps") == 0)
+		else if(strcmp(topelem->ntortinfo->str, "eps") == 0)
 		{
 			topelem = popstack(st);
 		}
-		else if(topelem->nt == 0)
+		else if(topelem->ntortinfo->nt == 0)
 		{
 			printf("ERROR1");
 			return;
 		}
-		else if(ParseTable[topelem->val][present(table, lookahead->tokenname)] == NULL)
+		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] == NULL)
 		{
 			printf("ERROR2");
 			return;
 		}
-		else if(ParseTable[topelem->val][present(table, lookahead->tokenname)] != NULL)
+		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] != NULL)
 		{
-			printf("%s -> ", topelem->str);
-			ntort* rule = ParseTable[topelem->val][present(table, lookahead->tokenname)];
+			printf("%s -> ", topelem->ntortinfo->str);
+			ntort* rule = ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)];
 			// topelem->down = rule;
 			stack* tempst = makestack();
 			while(strcmp(rule->str, "$") != 0)
 			{
-				insertstack(tempst, rule);
+				insertstack(tempst, rule, NULL);
 				printf("%s ", rule->str);
 				rule = rule->next;
 			}
 			topelem = popstack(st);
 			while(topstack(tempst) != NULL)
 			{
-				insertstack(st, popstack(tempst));
-				topstack(st)->next = topelem->down;
-				topelem->down = topstack(st);
+				insertstack(st, popstack(tempst)->ntortinfo, NULL);
+				topstack(st)->sibling = topelem->child;
+				topelem->child = topstack(st);
 			}
 			printf("\n");
 		}
@@ -190,21 +191,40 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 	return;
 }
 
-void printParseTree(ntort* curr, ntort* parent)
+void printParseTree(stacknode* curr, char* parent)
 {
 	// go on the first child itself then on remaining
 	if(curr == NULL)
 		return;
-	printParseTree(curr->down, curr);
+	printParseTree(curr->child, curr->ntortinfo->str);
 	//itself
-	printf("%s\n", curr->str);
-	if(curr->down == NULL)
+
+	if(curr->tokinfo != NULL)
+		printf("%s    %d    %s    ", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
+	else
+		printf("----    ----    ----    ");
+
+	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname,"NUM")==0 || strcmp(curr->tokinfo->tokenname,"RNUM")==0))
+		printf("%s    ", curr->tokinfo->lexeme);
+	else
+		printf("----    ");
+
+	printf("%s    %s    ", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
+
+	if(curr->tokinfo == NULL)
+		printf("%s\n", curr->ntortinfo->str);
+	else
+		printf("----\n");
+
+	// printf("%s %s %s\n", curr->ntortinfo->str, parent, ());
+	
+	if(curr->child == NULL)
 		return;
-	ntort* temp = curr->down->next;
+	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
 	{
-		printParseTree(temp, curr);
-		temp = temp->next;
+		printParseTree(temp, curr->ntortinfo->str);
+		temp = temp->sibling;
 	}
 	return;
 }
@@ -225,12 +245,18 @@ int main()
 	populateFollowSets(table);
 	makeParseTable(table);
 
+	// tokeninfo* ptr = tokens;
+	// while(ptr != NULL)
+	// {
+	// 	printf("%s ", ptr->tokenname);
+	// 	ptr = ptr->next;
+	// }
 	parseGrammar(table, tokens);
 	printf("\n\n\n");
 	// printf("%s \n", root->str);
 	// printf("%s \n", root->down->str);
 	// printf("%s \n", root->down->next->str);
-	// printParseTree(root, NULL);
+	printParseTree(root, "ROOT");
 	fclose(fp);
 	// printParseTable(table);
 	// printGrammar(table);

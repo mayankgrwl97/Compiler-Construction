@@ -2,32 +2,37 @@
 #include <stdlib.h>
 #include "stack.h"
 #include "ntort.h"
+#include "token.h"
 
-void insertstack(stack* st, ntort* node)
+void insertstack(stack* st, ntort* ntortinfo, tokeninfo* tokinfo)
 {
 	stacknode* newelem = (stacknode*)malloc(sizeof(stacknode));
-	newelem->stackelem = makentortnode(node->nt, node->val, node->str);
+	newelem->ntortinfo = makentortnode(ntortinfo->nt, ntortinfo->val, ntortinfo->str);
+	newelem->tokinfo = tokinfo;
 	// ntort* newelem = makentortnode(node->nt, node->val, node->str);
 	newelem->next = st->top;
+	newelem->child = NULL;
+	newelem->sibling = NULL;
+
 	st->top = newelem;
 	return;
 }
 
-ntort* popstack(stack* st)
+stacknode* popstack(stack* st)
 {
 	if(st->top == NULL)
 		return NULL;
-	ntort* topelem = st->top->stackelem;
+	stacknode* topelem = st->top;
 	st->top = st->top->next;
 	// topelem->next = NULL;
 	return topelem;
 }
 
-ntort* topstack(stack* st)
+stacknode* topstack(stack* st)
 {
 	if(st->top == NULL)
 		return NULL;
-	return st->top->stackelem;
+	return st->top;
 }
 
 stack* makestack()

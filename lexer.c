@@ -780,6 +780,7 @@ tokeninfo* getAllTokens(FILE* testCaseFile)
 		if(strcmp(ret->tokenname, "EOF") == 0)
 		{
 			fclose(cleanFile);
+			last->next = makeToken("$", "$", 0);
 			return listoftokens;
 		}
 		last->next = ret;
