@@ -190,7 +190,24 @@ void parseGrammar(hashtable* table, tokeninfo* lookahead)
 	return;
 }
 
-void printParseTree()
+void printParseTree(ntort* curr, ntort* parent)
+{
+	// go on the first child itself then on remaining
+	if(curr == NULL)
+		return;
+	printParseTree(curr->down, curr);
+	//itself
+	printf("%s\n", curr->str);
+	if(curr->down == NULL)
+		return;
+	ntort* temp = curr->down->next;
+	while(temp != NULL)
+	{
+		printParseTree(temp, curr);
+		temp = temp->next;
+	}
+	return;
+}
 
 int main()
 {
@@ -209,10 +226,11 @@ int main()
 	makeParseTable(table);
 
 	parseGrammar(table, tokens);
-
-	printf("%s \n", root->str);
-	printf("%s \n", root->down->str);
-	printf("%s \n", root->down->next->str);
+	printf("\n\n\n");
+	// printf("%s \n", root->str);
+	// printf("%s \n", root->down->str);
+	// printf("%s \n", root->down->next->str);
+	// printParseTree(root, NULL);
 	fclose(fp);
 	// printParseTable(table);
 	// printGrammar(table);
