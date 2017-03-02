@@ -157,24 +157,24 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 		}
 		else if(topelem->ntortinfo->nt == 0)
 		{
-			printf("ERROR1");
+			// printf("ERROR1");
 			return 0;
 		}
 		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] == NULL)
 		{
-			printf("ERROR2");
+			// printf("ERROR2");
 			return 0;
 		}
 		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] != NULL)
 		{
-			printf("%s -> ", topelem->ntortinfo->str);
+			// printf("%s -> ", topelem->ntortinfo->str);
 			ntort* rule = ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)];
 			// topelem->down = rule;
 			stack* tempst = makestack();
 			while(strcmp(rule->str, "$") != 0)
 			{
 				insertstack(tempst, rule, NULL);
-				printf("%s ", rule->str);
+				// printf("%s ", rule->str);
 				rule = rule->next;
 			}
 			topelem = popstack(st);
@@ -184,7 +184,7 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 				topstack(st)->sibling = topelem->child;
 				topelem->child = topstack(st);
 			}
-			printf("\n");
+			// printf("\n");
 		}
 	}
 	// printf("????%s\n?????", st->top->ntortinfo->str);
