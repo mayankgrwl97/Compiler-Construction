@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #ifndef _hashtable_h_
 #define _hashtable_h_
 
@@ -8,8 +14,6 @@ typedef struct hashtable hashtable;
 struct hashtable
 {
 	ntort* buckets[hashtablesize];
-	int ntval;
-	int val;
 };
 
 int hash(char* str);

@@ -1,8 +1,16 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "ntort.h"
 
+
+//Non Terminal or Terminal node
 ntort* makentortnode(int nt, int val, char* str)
 {
 	ntort* temp = (ntort*)malloc(sizeof(ntort));

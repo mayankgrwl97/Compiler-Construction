@@ -1,10 +1,16 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "hashtable.h"
 #include "ntort.h"
 
-int hash(char* str)
+int hash(char* str)//hash from string to bucket number
 {
 	unsigned long hash = 5381;
 	int c;
@@ -15,7 +21,7 @@ int hash(char* str)
 	return (int)(hash % hashtablesize);
 }
 
-void printhashtable(hashtable* table)
+void printhashtable(hashtable* table) //print hash table
 {
 	for(int i=0; i<hashtablesize; i++)
 	{
@@ -31,7 +37,7 @@ void printhashtable(hashtable* table)
 	return;
 }
 
-hashtable* makehashtable()
+hashtable* makehashtable() //returns pointer to new hash table
 {
 	hashtable* temp = (hashtable*)malloc(sizeof(hashtable));
 	for(int i=0; i<hashtablesize; i++)
@@ -39,7 +45,7 @@ hashtable* makehashtable()
 	return temp;
 }
 
-int present(hashtable* table, char* str)
+int present(hashtable* table, char* str) //checks if str is present in table and returns corresponding mapping to integer
 {
 	int h = hash(str);
 	ntort* pt = table->buckets[h];
@@ -53,7 +59,7 @@ int present(hashtable* table, char* str)
 	return 0;
 }
 
-void insert(hashtable* table, char* str)
+void insert(hashtable* table, char* str) //inserts str to table and assigns number according to terminal or non terminal
 {
 	// printf("%s\n",str);
 	static int ntval=1, tval=1;
@@ -79,7 +85,7 @@ void insert(hashtable* table, char* str)
 	return;
 }
 
-ntort* getnodehashtable(hashtable* table, char* str)
+ntort* getnodehashtable(hashtable* table, char* str) //finds and returns node from hashtable table
 {
 	int h = hash(str);
 	ntort* pt = table->buckets[h];
