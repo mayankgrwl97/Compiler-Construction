@@ -1,23 +1,42 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "lexerDef.h"
 #include "token.h"
 #include "symboltable.h"
 
-char* upperstr(char* str)
+char terminals[numberofterminals][20] = 
+{
+"NUM", "RNUM", "ID", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TRUE", "FALSE", "TAKES",
+"INPUT", "RETURNS", "AND", "OR", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "COLON", "RANGEOP", "SEMICOL",
+"COMMA","ASSIGNOP","SQBO","SQBC","BO","BC","DRIVERDEF","DRIVERENDDEF","eps", "$"
+};
+
+char keywords[numberofkeywords][20] = 
+{
+"integer", "real", "boolean", "of", "array", "start", "end", "declare", "module", "driver", "program", "get_value", "print", "use", "with", "parameters", "true",
+"false", "takes", "input", "returns", "AND", "OR", "for", "in", "switch", "case", "break", "default", "while"
+};
+
+
+char* upperstr(char* str) //returns string to uppercase
 {
 	int l = strlen(str);
 	char* temp = malloc(sizeof(char) * (l+1));
 	strcpy(temp, str);
 	for(int i=0; i<l; i++)
-	{
 		temp[i] = toupper(temp[i]);
-	}
 	return temp;
 }
 
-char* getStream(FILE** fp)
+char* getStream(FILE** fp) //takes input_size(100) bytes input in buffer
 {
 	char* testCaseFile;
 	size_t inputsize = 100;
@@ -26,7 +45,7 @@ char* getStream(FILE** fp)
 	return testCaseFile;
 }
 
-int isdelim(char ch)
+int isdelim(char ch) //returns true if ch is delimiter
 {
 	return (ch==' ' || ch=='\t' || ch=='\n' || ch=='\r' || ch==':' || ch=='=' 
 		|| ch=='<' || ch=='>' || ch=='!' || ch=='(' || ch==')' 
@@ -34,24 +53,17 @@ int isdelim(char ch)
 		|| ch=='*' || ch=='/' || ch==',');
 }
 
-void addKeywords(symboltable* table)
+void addKeywords(symboltable* table) //add all keywords in symboltable
 {
-	FILE* fp = fopen("keywords.txt", "r");
-
-	for(int i=0; i<30; i++)
-	{
-		char buff[50];
-		fscanf(fp, "%s", buff);
-		// printf("%s\n",upperstr(buff));
-		insertsymboltable(table, upperstr(buff), buff, i+1);
-	}
+	for(int i=0; i<numberofkeywords; i++)
+		insertsymboltable(table, upperstr(keywords[i]), keywords[i], i+1);
 	// printsymboltable(table);
 	return;
 }
 
-void removeComments(FILE* fp)
+void removeComments(FILE* fp) //fp is the filepointer for test case file //writes output in cleanFile.txt
 {
-	FILE* cleanFile = fopen("cleanFile.txt", "w+");//change to append
+	FILE* cleanFile = fopen("cleanFile.txt", "w+");
 	char* testCaseFile = getStream(&fp);
 	if(testCaseFile[0] == '\0')
 		return ;
@@ -102,12 +114,12 @@ void removeComments(FILE* fp)
 	return ;
 }
 
-char* buff;
-char val[100];
-int i = 0;
-int linenumber = 1;
+char* buff; //pointer to buffer from getStream
+char val[100]; //to extract the lexeme
+int i = 0; //index of character in buff
+int linenumber = 1; //current linenumber
 
-tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
+tokeninfo* getNextToken(FILE* cleanFile, symboltable* table) //returns next Token from clean File
 {
 	if(buff == NULL)// take buffer for the first time
 		buff = getStream(&cleanFile);
@@ -168,7 +180,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 			case ']':
 				i++;
 				return makeToken("SQBC", "]", linenumber);
-			case '<':
+			case '<': //check for < | << | <<< | <=
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
@@ -207,7 +219,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						i++;
 						return makeToken("LT", "<", linenumber);
 				}
-			case '>':
+			case '>': //check for > | >> | >>> | >=
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
@@ -246,7 +258,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						i++;
 						return makeToken("GT", ">", linenumber);
 				}
-			case '=':
+			case '=': //check for == 
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
@@ -266,7 +278,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						i++;
 						return makeToken("ERROR_2", "=", linenumber);
 				}
-			case '!':
+			case '!': //check for != 
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
@@ -286,7 +298,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						i++;
 						return makeToken("ERROR_2", "!", linenumber);
 				}
-			case ':':
+			case ':': //check for :=
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
@@ -306,7 +318,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						i++;
 						return makeToken("COLON", ":", linenumber);
 				}
-			case '.':
+			case '.': //check for ..
 				if(buff[i+1] == '\0')
 				{
 					buff = getStream(&cleanFile);
@@ -327,7 +339,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						return makeToken("ERROR_2", ".", linenumber);
 				}
 			default:
-				if(isdigit(buff[i]))
+				if(isdigit(buff[i])) //check for NUM and RNUM
 				{
 					int lo = 0; //pinter for val char array
 					val[lo++] = buff[i]; //inserting first digit scanned
@@ -683,7 +695,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 						return makeToken("ERROR_3", val, linenumber);
 					}
 				}
-				else if(isalpha(buff[i]))
+				else if(isalpha(buff[i])) //check for identifier and keywords
 				{
 					int lo = 0;
 					val[lo++] = buff[i];
@@ -748,7 +760,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 					insertsymboltable(table, "ID", val, linenumber);
 					return makeToken("ID", val, linenumber);
 				}
-				else
+				else //wrongput
 				{
 					char wronginput[2];
 					wronginput[0] = buff[i];
@@ -762,7 +774,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table)
 	return makeToken("EOF", "EOF", linenumber);
 }
 
-tokeninfo* getAllTokens(FILE* testCaseFile)
+tokeninfo* getAllTokens(FILE* testCaseFile) //returns list of all tokens
 {
 	removeComments(testCaseFile);
 	FILE* cleanFile = fopen("cleanFile.txt", "rb");
@@ -786,19 +798,7 @@ tokeninfo* getAllTokens(FILE* testCaseFile)
 		last->next = ret;
 		last = last->next;
 	}
+	fclose(cleanFile);
 	last->next = makeToken("$", "$", 0);
 	return listoftokens;
 }
-
-// int main(int argc, char const *argv[])
-// {
-// 	FILE* fp = fopen("testcase1.txt", "r");
-// 	tokeninfo* tokens = getAllTokens(fp);
-// 	while(tokens != NULL)
-// 	{
-// 		printf("%s  %s  %d\n", tokens->tokenname, tokens->lexeme, tokens->linenumber);
-// 		tokens = tokens->next;
-// 	}
-// 	fclose(fp);
-// 	return 0;
-// }

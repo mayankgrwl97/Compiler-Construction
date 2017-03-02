@@ -1,12 +1,13 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #ifndef _lexer_h_
 #define _lexer_h_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include "token.h"
-#include "symboltable.h"
+#include "lexerDef.h"
 
 char* upperstr(char* str);
 char* getStream(FILE** fp);
