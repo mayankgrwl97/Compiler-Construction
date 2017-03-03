@@ -766,11 +766,39 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table) //returns next Toke
 				}
 				else //wrongput
 				{
-					char wronginput[2];
-					wronginput[0] = buff[i];
-					wronginput[1] = '\0';
+					int lo = 0; //pinter for val char array
+					val[lo++] = buff[i]; //inserting first wrong character scanned
+
+					if(buff[i+1] == '\0')
+					{
+						buff = getStream(&cleanFile);
+						if(buff[0] == '\0')
+						{
+							i = 0;
+							val[lo] = '\0';
+							return makeToken("ERROR_3", val, linenumber);
+						}
+						i = -1;
+					}
+					while(!isdelim(buff[i+1]))
+					{
+						i++;
+						val[lo++] = buff[i];
+						if(buff[i+1] == '\0')
+						{
+							buff = getStream(&cleanFile);
+							if(buff[0] == '\0')
+							{
+								i = 0;
+								val[lo] = '\0';
+								return makeToken("ERROR_3", val, linenumber);
+							}
+							i = -1;
+						}
+					}
 					i++;
-					return makeToken("ERROR_2", wronginput, linenumber);
+					val[lo] = '\0';
+					return makeToken("ERROR_3", val, linenumber);
 				}
 		}
 	}

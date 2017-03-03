@@ -194,6 +194,11 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 			// printf("Unexpected token %s found at line number ",topelem->ntortinfo->str);
 		}
 
+		else if(strcmp(lookahead->tokenname, "ERROR_1") == 0 || strcmp(lookahead->tokenname, "ERROR_2") == 0 || strcmp(lookahead->tokenname, "ERROR_3") == 0)
+		{
+			lookahead = lookahead->next;
+		}
+
 		else if(strcmp(topelem->ntortinfo->str, "$") == 0)//lookahead is something other than $ but top of stack is $
 		{
 			printf("Unexpected symbol %s at line %d\n", lookahead->lexeme, lookahead->linenumber);
