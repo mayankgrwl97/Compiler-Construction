@@ -1,0 +1,2 @@
+driver: driver.c follow.c hashtable.c ntort.c stack.c token.c first.c grammar.c lexer.c parser.c symboltable.c
+	gcc -o driver driver.c follow.c hashtable.c ntort.c stack.c token.c first.c grammar.c lexer.c parser.c symboltable.c
