@@ -792,7 +792,7 @@ tokeninfo* getAllTokens(FILE* testCaseFile) //returns list of all tokens
 		if(strcmp(ret->tokenname, "EOF") == 0)
 		{
 			fclose(cleanFile);
-			last->next = makeToken("$", "$", 0);
+			last->next = makeToken("$", "$", last->linenumber);
 			return listoftokens;
 		}
 		last->next = ret;

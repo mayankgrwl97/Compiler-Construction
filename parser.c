@@ -129,66 +129,130 @@ void printParseTable(hashtable* table)
 int parseGrammar(hashtable* table, tokeninfo* lookahead)
 {
 	stack* st = makestack();
-	insertstack(st, getnodehashtable(table, "$"), NULL);// insert $
-	insertstack(st, getnodehashtable(table, "<program>"), NULL); //insert start symbol
-	root = topstack(st);
+	insertstack(st, getnodehashtable(table, "$"), NULL);// insert $ on stack
+	insertstack(st, getnodehashtable(table, "<program>"), NULL); //insert start symbol on stack
+
+	root = topstack(st); //make root node of parse tree as topstack which is the start symbol
 	stacknode* topelem;
-	// tokeninfo* lookahead = getAllTokens(testcasefile);
 
-	// root = makentortnode(1, present(table,"<program>"), "<program>");
-
-	while(strcmp(topstack(st)->ntortinfo->str, "$") != 0 && lookahead != NULL)
+	while(1)
 	{
 		topelem = topstack(st);
-		if(strcmp(topelem->ntortinfo->str, lookahead->tokenname) == 0)
+		if(strcmp(lookahead->tokenname, "$") == 0)
 		{
-			topelem = popstack(st);
-			topelem->tokinfo = lookahead;
-			lookahead = lookahead->next;
-			if(lookahead == NULL)
+			// printf("%s\n",topelem->ntortinfo->str);
+			if(topelem != NULL && strcmp(topelem->ntortinfo->str, "$") == 0)//if $ reached and top of stack is $
 			{
-				// printf("%s\n", st->top->ntortinfo->str);
-				return (strcmp(st->top->ntortinfo->str, "$") == 0);
+				lookahead = lookahead->next;
+				popstack(st);
+				return 1;
 			}
+			if(topelem != NULL && topelem->ntortinfo->nt == 0)//if $ reached and top of stack is terminal
+			{
+				if(strcmp(topelem->ntortinfo->str, "eps") == 0)
+				{
+					popstack(st);
+					continue;
+				}
+
+				printf("Expected %s at line1 %d\n", topelem->ntortinfo->str, lookahead->linenumber);
+				lookahead = lookahead->next;
+				return 0;
+			}
+			if(topelem != NULL && topelem->ntortinfo->nt == 1)//if $ reached and top of stack is non terminal
+			{
+
+				int ind = topelem->ntortinfo->val;
+				int tind = present(table, lookahead->tokenname);//tind for $
+
+				if(ParseTable[ind][tind] != NULL)
+				{
+					ntort* rule = ParseTable[ind][tind];
+					stack* tempst = makestack();
+
+					while(strcmp(rule->str, "$") != 0)
+					{
+						insertstack(tempst, rule, NULL);
+						rule = rule->next;
+					}
+					topelem = popstack(st);
+					while(topstack(tempst) != NULL)
+					{
+						insertstack(st, popstack(tempst)->ntortinfo, NULL);
+						topstack(st)->sibling = topelem->child;
+						topelem->child = topstack(st);
+					}
+				}
+				else
+				{
+					printf("Expected %s at line2 %d\n", (firstSets[ind])->str, lookahead->linenumber);
+					return 0;
+				}
+			}
+			// printf("Some other error\n");
+			// return 0;
+			// printf("Unexpected token %s found at line number ",topelem->ntortinfo->str);
 		}
-		else if(strcmp(topelem->ntortinfo->str, "eps") == 0)
+
+		else if(strcmp(topelem->ntortinfo->str, "$") == 0)//lookahead is something other than $ but top of stack is $
 		{
-			topelem = popstack(st);
-		}
-		else if(topelem->ntortinfo->nt == 0)
-		{
-			// printf("ERROR1");
+			printf("Unexpected symbol %s at line %d\n", lookahead->lexeme, lookahead->linenumber);
 			return 0;
 		}
-		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] == NULL)
+
+		else if(topelem->ntortinfo->nt == 0) //top of stack is terminal
 		{
-			// printf("ERROR2");
-			return 0;
+			// printf("%s\n", topelem->ntortinfo->str);
+			if(strcmp(topelem->ntortinfo->str, "eps") == 0)
+			{
+				topelem = popstack(st);
+				// printf("%s\n");
+			}
+			else if(strcmp(lookahead->tokenname, topelem->ntortinfo->str) == 0)
+			{
+				topelem = popstack(st);
+				topelem->tokinfo = lookahead;
+				lookahead = lookahead->next;
+			}
+			else
+			{
+				printf("Expected %s at line3 %d\n", topelem->ntortinfo->str, lookahead->linenumber);
+				return 0;
+			}
 		}
-		else if(ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)] != NULL)
+
+		else if(topelem->ntortinfo->nt == 1) //top of stack is non terminal
 		{
-			// printf("%s -> ", topelem->ntortinfo->str);
-			ntort* rule = ParseTable[topelem->ntortinfo->val][present(table, lookahead->tokenname)];
-			// topelem->down = rule;
-			stack* tempst = makestack();
-			while(strcmp(rule->str, "$") != 0)
+			int ind = topelem->ntortinfo->val;
+			int tind = present(table, lookahead->tokenname);
+
+			if(ParseTable[ind][tind] != NULL)
 			{
-				insertstack(tempst, rule, NULL);
-				// printf("%s ", rule->str);
-				rule = rule->next;
+				ntort* rule = ParseTable[ind][tind];
+				stack* tempst = makestack();
+
+				while(strcmp(rule->str, "$") != 0)
+				{
+					insertstack(tempst, rule, NULL);
+					rule = rule->next;
+				}
+				topelem = popstack(st);
+				while(topstack(tempst) != NULL)
+				{
+					insertstack(st, popstack(tempst)->ntortinfo, NULL);
+					topstack(st)->sibling = topelem->child;
+					topelem->child = topstack(st);
+				}
 			}
-			topelem = popstack(st);
-			while(topstack(tempst) != NULL)
+			else
 			{
-				insertstack(st, popstack(tempst)->ntortinfo, NULL);
-				topstack(st)->sibling = topelem->child;
-				topelem->child = topstack(st);
+				printf("Expected %s at line4 %d\n", (firstSets[ind])->str, lookahead->linenumber);
+				return 0;
 			}
-			// printf("\n");
 		}
 	}
-	// printf("????%s\n?????", st->top->ntortinfo->str);
-	return (strcmp(st->top->ntortinfo->str, "$") == 0);
+	return 0;
+	// return (strcmp(st->top->ntortinfo->str, "$") == 0);
 }
 
 void printParseTree(stacknode* curr, char* parent)
