@@ -1,21 +1,22 @@
-declare module mod1;
-<<driver Program>>
+<<<driver program>>>
 start
-declare v, w, r :integer;
-get_value(v);
-w:=22;
-declare m:real;
-[r,m] := use mod1 with parameters v, w;
-print(r);
-print(m);
-end ** asdf
-<<module mod1>>
-takes input [a:integer, b:integer];
-returns [x:integer, abc:real];
-start
-declare c:real;
-c:=10.4;
-x:=a+b-10;
-abc:=b/5+c;
+	declare v_1_2_3:integer;
+	declare _v_1_2_3:integer;
+	
+	get_value(v_1_2_3);
+	declare result_:integer;
+	[result_]:=use module square with parameters v_1_2_3;
+	print(result);
 end
 
+<<module square>>
+takes input [x:integer];
+returns [value:integer];
+start
+	value:= x*x;
+end
+
+**notice that this test case does not declare the module before the driver module, still it is syntactically correct
+as moduleDeclarations is optional. Testing whether a module is declared before usage is a matter of semantic analysis**
+
+DEF

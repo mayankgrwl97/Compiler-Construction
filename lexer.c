@@ -80,8 +80,12 @@ void removeComments(FILE* fp) //fp is the filepointer for test case file //write
 				break;
 			i = 0;
 		}
-
-		if(testCaseFile[i] == '*')//one star found
+		if(testCaseFile[i] == '\n')
+		{
+			fputc(testCaseFile[i], cleanFile);
+			i++;
+		}
+		else if(testCaseFile[i] == '*')//one star found
 		{
 			if(testCaseFile[i+1] == '\0')
 			{
@@ -765,6 +769,7 @@ tokeninfo* getNextToken(FILE* cleanFile, symboltable* table) //returns next Toke
 					char wronginput[2];
 					wronginput[0] = buff[i];
 					wronginput[1] = '\0';
+					i++;
 					return makeToken("ERROR_2", wronginput, linenumber);
 				}
 		}

@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 	// printFollowSets(table);
 
 	makeParseTable(table);
-	// printParseTable(table);
+	printParseTable(table);
 
 	int syntaxcorrect = parseGrammar(table, tokenlist);
 	// printParseTree(root, "ROOT");
@@ -115,9 +115,16 @@ int main(int argc, char* argv[])
 		}
 		if(control == 4)
 		{
-			FILE* parsetreefile = fopen(argv[2],"w+");
-			printParseTree(root, "ROOT", parsetreefile);
-			fclose(parsetreefile);
+			if(syntaxcorrect)
+			{
+				FILE* parsetreefile = fopen(argv[2],"w+");
+				printParseTree(root, "ROOT", parsetreefile);
+				fclose(parsetreefile);
+			}
+			else
+			{
+				printf("ERROR in printing parse tree because parsing is not correct");
+			}
 		}
 	}
 	return 0;
