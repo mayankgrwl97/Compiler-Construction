@@ -10,7 +10,7 @@ Karan Deep Batra(2014A7PS160P)
 #include "ntort.h"
 #include "hashtable.h"
 
-#define maxnonterminals 51
+#define maxnonterminals 50
 //node stores the antecedent of a rule in the grammar
 typedef struct node node;
 struct node

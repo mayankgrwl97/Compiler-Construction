@@ -27,16 +27,15 @@
 <optional> --> SQBO <idList> SQBC ASSIGNOP | eps $
 <idList> --> ID <N3> $
 <N3> --> COMMA ID <N3> | eps $
-<expression> --> <arithmeticOrBooleanExpr> | MINUS BO <arithmeticExpr> BC $
-<arithmeticOrBooleanExpr> --> <AnyTerm> <N7> | BO <arithmeticOrBooleanExpr> BC $
-<N7> --> <logicalOp> <AnyTerm> <N7> | eps $
-<AnyTerm> --> <arithmeticExpr> <N8> $
-<N8> --> <relationalOp> <arithmeticExpr> <N8> | eps $
-<arithmeticExpr> --> <term> <N4> $
-<N4> --> <op1> <term> <N4> | eps $
-<term> --> <factor> <N5> $
-<N5> --> <op2> <factor> <N5> | eps $
-<factor> --> <var> $
+<expression> --> <level1> <temp1> $
+<temp1> --> <logicalOp> <level1> <temp1> | eps $
+<level1> --> <level2> <temp2> $
+<temp2> --> <relationalOp> <level2> <temp2> | eps $
+<level2> --> <level3> <temp3> $
+<temp3> --> <op1> <level3> <temp3> | eps $
+<level3> --> <level4> <temp4> $
+<temp4> --> <op2> <level4> <temp4> | eps $
+<level4> --> BO <expression> BC | MINUS BO <expression> BC | <var> | TRUE | FALSE $
 <op1> --> PLUS | MINUS $
 <op2> --> MUL | DIV $
 <logicalOp> --> AND | OR $
@@ -47,5 +46,5 @@
 <N9> --> CASE <value> COLON <statements> BREAK SEMICOL <N9> | eps $
 <value> --> NUM | TRUE | FALSE $
 <default> --> DEFAULT COLON <statements> BREAK SEMICOL | eps $
-<iterativeStmt> --> FOR BO ID IN <range> BC START <statements> END | WHILE BO <arithmeticOrBooleanExpr> BC START <statements> END $
+<iterativeStmt> --> FOR BO ID IN <range> BC START <statements> END | WHILE BO <expression> BC START <statements> END $
 <range> --> NUM RANGEOP NUM $

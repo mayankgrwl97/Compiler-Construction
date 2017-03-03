@@ -73,7 +73,6 @@ int main(int argc, char* argv[])
 		printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
 		return 0;
 	}
-
 	FILE* fp = fopen(argv[1], "rb");
 	removeComments(fp);
 	fclose(fp);
