@@ -52,9 +52,9 @@ int main(int argc, char* argv[])
 {
 	printf("(a) FIRST and FOLLOW set automated\n");
 	printf("(b) Both lexical and syntax analysis modules implemented\n");
-	printf("(c) Parse Tree also implemented\n\n");
-	
-	if(argc < 2)
+	printf("(c) Parse Tree also implemented\n");
+	printf("(d) Error handling implemented\n\n");	
+	if(argc < 3)
 	{
 		printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
 		return 0;
@@ -115,7 +115,9 @@ int main(int argc, char* argv[])
 		}
 		if(control == 4)
 		{
-			printParseTree(root, "ROOT");
+			FILE* parsetreefile = fopen(argv[2],"w+");
+			printParseTree(root, "ROOT", parsetreefile);
+			fclose(parsetreefile);
 		}
 	}
 	return 0;

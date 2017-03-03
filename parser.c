@@ -255,30 +255,30 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 	// return (strcmp(st->top->ntortinfo->str, "$") == 0);
 }
 
-void printParseTree(stacknode* curr, char* parent)
+void printParseTree(stacknode* curr, char* parent, FILE* fp)
 {
 	// go on the first child itself then on remaining
 	if(curr == NULL)
 		return;
-	printParseTree(curr->child, curr->ntortinfo->str);
+	printParseTree(curr->child, curr->ntortinfo->str, fp);
 	//itself
 
 	if(curr->tokinfo != NULL)
-		printf("%s\t\t%d\t\t%s\t\t", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
+		fprintf(fp, "%-14s%-8d%-14s", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
 	else
-		printf("----\t\t----\t\t----\t\t");
+		fprintf(fp, "----          ----    ----          ");
 
 	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname,"NUM")==0 || strcmp(curr->tokinfo->tokenname,"RNUM")==0))
-		printf("%s\t\t", curr->tokinfo->lexeme);
+		fprintf(fp, "%-8s", curr->tokinfo->lexeme);
 	else
-		printf("----\t\t");
+		fprintf(fp, "----    ");
 
-	printf("%s\t\t%s\t\t", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
+	fprintf(fp, "%-27s%-8s", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
 
 	if(curr->tokinfo == NULL)
-		printf("%s\n", curr->ntortinfo->str);
+		fprintf(fp, "%s\n", curr->ntortinfo->str);
 	else
-		printf("----\n");
+		fprintf(fp, "----\n");
 
 	// printf("%s %s %s\n", curr->ntortinfo->str, parent, ());
 	
@@ -287,7 +287,7 @@ void printParseTree(stacknode* curr, char* parent)
 	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
 	{
-		printParseTree(temp, curr->ntortinfo->str);
+		printParseTree(temp, curr->ntortinfo->str, fp);
 		temp = temp->sibling;
 	}
 	return;
