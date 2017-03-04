@@ -1,0 +1,11 @@
+**Error handling by parser ignoring 123.e wrong token**
+
+<<<driver program>>>
+start
+	123.e	
+end
+<<module empty>>
+takes input[a:boolean];
+start
+
+end
