@@ -328,17 +328,29 @@ void makeAST(stacknode* curr, char* parent)
 	if(strcmp(curr->ntortinfo->str, "<statements>") == 0)
 	{
 		if(strcmp(parent, "<statements>") != 0)
-			curr->nptr = curr; //maintain <statements> if not part of recursion
-		else
-			curr->nptr = curr->child->nptr; //otherwise store <statement>.nptr
-
-		if(strcmp(curr->child->ntortinfo->str, "eps") == 0)
 		{
-			curr->nptr->child = NULL;
-			return;
+			curr->nptr = curr;
+			if(strcmp(curr->child->ntortinfo->str, "eps") == 0)
+				curr->child = NULL;
+			else
+			{
+				stacknode* temp = curr->child->sibling->nptr;
+				curr->child = curr->child->nptr;
+				curr->child->sibling = temp;
+			}
 		}
-		curr->child->sibling = curr->child->sibling->nptr;
-		// curr->nptr = curr->child->nptr;
+		else
+		{
+			if(strcmp(curr->child->ntortinfo->str, "eps") == 0)
+				curr->child = NULL;
+			else
+			{
+				stacknode* temp = curr->child->sibling->nptr;
+				curr->child = curr->child->nptr;
+				curr->child->sibling = temp;
+			}
+			curr->nptr = curr->child;
+		}
 		return;
 	}
 
@@ -419,7 +431,7 @@ void makeAST(stacknode* curr, char* parent)
 		}
 	}
 
-	if((strcmp(curr->ntortinfo->str, "<level3>") == 0) || (strcmp(curr->ntortinfo->str, "<level2>") == 0) || (strcmp(curr->ntortinfo->str, "<level1>") == 0) || (strcmp(curr->ntortinfo->str, "<expression>") == 0))
+	if((strcmp(curr->ntortinfo->str, "<level3>") == 0) || (strcmp(curr->ntortinfo->str, "<level2>") == 0) || (strcmp(curr->ntortinfo->str, "<level1>") == 0))
 	{
 		if(curr->child->sibling->nptr == NULL)
 		{
@@ -438,6 +450,28 @@ void makeAST(stacknode* curr, char* parent)
 			return;
 		}
 	}
+	if(strcmp(curr->ntortinfo->str, "<expression>") == 0)
+	{
+		if(curr->child->sibling->nptr == NULL)
+		{
+			curr->nptr = curr;
+			curr->child = curr->child->nptr;
+			return;
+		}
+		else
+		{
+			stacknode* temp = curr->child->sibling->nptr->child;
+			stacknode* temp2 = curr->child->sibling->nptr;
+
+			temp2->child = curr->child->nptr;
+			temp2->child->sibling = temp;
+			curr->child = temp2;
+			curr->nptr = curr;
+			// curr->nptr->sibling = NULL;
+			return;
+
+		}
+	}
 
 // ================================================================== //
 
@@ -452,7 +486,7 @@ void makeAST(stacknode* curr, char* parent)
 		curr->nptr = curr;
 		curr->child = curr->child->sibling->nptr;
 		curr->child->sibling = curr->child->sibling->sibling->nptr;
-		curr->child->sibling->sibling->nptr = NULL;
+		curr->child->sibling->sibling = NULL;
 		return;
 	}
 
