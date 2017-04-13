@@ -83,8 +83,9 @@ void makeAST(stacknode* curr, char* parent)
 		curr->nptr = curr;
 		curr->child = curr->child->sibling->sibling; //for ID
 		curr->child->sibling = curr->child->sibling->sibling->sibling->sibling->sibling->nptr; //for input_plist
+		stacknode* temp = curr->child->sibling->sibling->sibling->sibling->sibling->nptr;
 		curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->sibling->nptr; //for ret
-		curr->child->sibling->sibling->sibling = curr->child->sibling->sibling->sibling->nptr; //for moduleDef
+		curr->child->sibling->sibling->sibling = temp; //for moduleDef
 		curr->sibling = curr->sibling->nptr;
 		return;
 	}
@@ -134,8 +135,9 @@ void makeAST(stacknode* curr, char* parent)
 			return;
 		}
 		curr->nptr = curr->child->sibling; //for ID
-		curr->nptr->child = curr->nptr->sibling->sibling->nptr; //for dataType
-		curr->nptr->sibling = curr->nptr->child->sibling->nptr; //for N1
+		stacknode* temp = curr->nptr->sibling->sibling->sibling->nptr;
+		curr->nptr->child = curr->nptr->sibling->sibling->nptr; //for type
+		curr->nptr->sibling = temp; //for N2
 		curr->nptr->child->sibling = NULL;
 		return;
 	}
@@ -143,8 +145,9 @@ void makeAST(stacknode* curr, char* parent)
 	if(strcmp(curr->ntortinfo->str, "<input_plist>") == 0)
 	{
 		curr->nptr = curr;
+		stacknode* temp = curr->child->sibling->sibling->sibling->nptr;
 		curr->child->child = curr->child->sibling->sibling->nptr;//for making dataType a child of ID
-		curr->child->sibling = curr->child->child->sibling->nptr;//for making N1.nptr the sibling of ID
+		curr->child->sibling = temp;//for making N1.nptr the sibling of ID
 		curr->child->child->sibling = NULL;
 		return;
 	}
@@ -165,8 +168,9 @@ void makeAST(stacknode* curr, char* parent)
 	if(strcmp(curr->ntortinfo->str, "<output_plist>") == 0)
 	{
 		curr->nptr = curr;
+		stacknode* temp = curr->child->sibling->sibling->sibling->nptr;
 		curr->child->child = curr->child->sibling->sibling->nptr;
-		curr->child->sibling = curr->child->child->sibling->nptr;
+		curr->child->sibling = temp;
 		curr->child->child->sibling = NULL;
 		return;
 	}
@@ -179,8 +183,9 @@ void makeAST(stacknode* curr, char* parent)
 			return;
 		}
 		curr->nptr = curr->child->sibling; //for ID
+		stacknode* temp = curr->nptr->sibling->sibling->sibling->nptr;
 		curr->nptr->child = curr->nptr->sibling->sibling->nptr; //for type
-		curr->nptr->sibling = curr->nptr->child->sibling->nptr; //for N2
+		curr->nptr->sibling = temp; //for N2
 		curr->nptr->child->sibling = NULL;
 		return;
 	}
@@ -450,6 +455,7 @@ void makeAST(stacknode* curr, char* parent)
 			return;
 		}
 	}
+
 	if(strcmp(curr->ntortinfo->str, "<expression>") == 0)
 	{
 		if(curr->child->sibling->nptr == NULL)
@@ -496,6 +502,7 @@ void makeAST(stacknode* curr, char* parent)
 		curr->child = curr->child->sibling->sibling;
 		curr->child->sibling = curr->child->sibling->sibling->sibling->nptr;
 		curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->nptr;
+		curr->child->sibling->sibling->sibling = NULL;
 		return;
 	}
 
