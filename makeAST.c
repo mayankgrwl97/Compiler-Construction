@@ -252,6 +252,7 @@ void makeAST(stacknode* curr, char* parent)
 	{
 		curr->nptr = curr;
 		curr->child = curr->child->sibling->nptr;
+		curr->child->sibling = NULL;
 		return;
 	}
 
@@ -326,16 +327,18 @@ void makeAST(stacknode* curr, char* parent)
 
 	if(strcmp(curr->ntortinfo->str, "<statements>") == 0)
 	{
+		if(strcmp(parent, "<statements>") != 0)
+			curr->nptr = curr; //maintain <statements> if not part of recursion
+		else
+			curr->nptr = curr->child->nptr; //otherwise store <statement>.nptr
+
 		if(strcmp(curr->child->ntortinfo->str, "eps") == 0)
 		{
-			curr->nptr = NULL;
+			curr->nptr->child = NULL;
 			return;
 		}
 		curr->child->sibling = curr->child->sibling->nptr;
-		if(strcmp(parent, "<statements>") != 0)
-			curr->nptr = curr;
-		else
-			curr->nptr = curr->child->nptr;
+		// curr->nptr = curr->child->nptr;
 		return;
 	}
 
