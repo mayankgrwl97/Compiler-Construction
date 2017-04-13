@@ -536,17 +536,15 @@ void printAST(stacknode* curr)
 	if(curr == NULL)
 		return;
 
-	// if(strcmp(curr->ntortinfo->str, "<moduleDeclarations>") == 0)
-	// {
-	printAST(curr->child);
 	printf("%s\n", curr->ntortinfo->str);
-	printf("Child is %s\n", curr->child->tokinfo->lexeme);
+	
+	printAST(curr->child);
+
+	if(curr->child == NULL)		return;
 	stacknode* sib = curr->child->sibling;
 	while(sib != NULL){
-		printf("%s\n", sib->tokinfo->lexeme);
+		printAST(sib);
 		sib = sib->sibling;
 	}
-	// }
-	// printAST(curr->child);
 	return;
 }

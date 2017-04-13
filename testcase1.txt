@@ -1,9 +1,5 @@
 <<<driver program>>>
 start
-	
-end
-<<module empty>>
-takes input[a:boolean];
-start
-
+	declare var_1_:integer;
+	var_2_:=3+2;
 end

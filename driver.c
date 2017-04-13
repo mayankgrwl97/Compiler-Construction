@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 		// printmainsymboltable(globaltable);
 
 		makeAST(root, "ROOT");
-		printAST(root->child);
+		printAST(root);
 	}
 	return 0;
 }
