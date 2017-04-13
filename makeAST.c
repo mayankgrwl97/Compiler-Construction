@@ -35,24 +35,18 @@ void makeAST(stacknode* curr, char* parent)
 		{
 			curr->nptr = curr;
 			curr->child = curr->child->nptr;	// eps also handled
-			return;
 		}
 		else if(strcmp(curr->child->ntortinfo->str, "eps") == 0)
-		{
 			curr->nptr = NULL;
-			return;
-		}
 		else
-		{
 			curr->nptr = curr->child->nptr;
-			return;
-		}
+		return;
 	}
 
 	if(strcmp(curr->ntortinfo->str, "<moduleDeclaration>") == 0)
 	{
 		curr->nptr = curr->child->sibling->sibling;
-		curr->nptr->sibling = curr->sibling->nptr;
+		curr->nptr->sibling = curr->sibling->nptr;	// making ID's sibling
 		return;
 	}
 
@@ -64,18 +58,12 @@ void makeAST(stacknode* curr, char* parent)
 		{
 			curr->nptr = curr;
 			curr->child = curr->child->nptr;
-			return;
 		}
 		else if(strcmp(curr->child->ntortinfo->str, "eps") == 0)
-		{
 			curr->nptr = NULL;
-			return;
-		}
 		else
-		{
 			curr->nptr = curr->child->nptr;
-			return;
-		}
+		return;
 	}
 
 	if(strcmp(curr->ntortinfo->str, "<module>") == 0)
@@ -83,7 +71,7 @@ void makeAST(stacknode* curr, char* parent)
 		curr->nptr = curr;
 		curr->child = curr->child->sibling->sibling; //for ID
 		curr->child->sibling = curr->child->sibling->sibling->sibling->sibling->sibling->nptr; //for input_plist
-		stacknode* temp = curr->child->sibling->sibling->sibling->sibling->sibling->nptr;
+		stacknode* temp = curr->child->sibling->sibling->sibling->sibling->sibling->nptr;	// pointing to moduleDef
 		curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->sibling->nptr; //for ret
 		curr->child->sibling->sibling->sibling = temp; //for moduleDef
 		curr->sibling = curr->sibling->nptr;
@@ -102,14 +90,13 @@ void makeAST(stacknode* curr, char* parent)
 			curr->child->child = curr->child->sibling = curr->child->next = curr->child->nptr = NULL;
 			curr->child->ntortinfo = makentortnode(1, 0, "<output_plist>");
 			curr->nptr = curr->child;
-			return;
 		}
 		else
 		{
 			curr->nptr = curr->child->sibling->sibling->nptr;
 			curr->nptr->sibling = NULL;
-			return;
 		}
+		return;
 	}
 
 	if(strcmp(curr->ntortinfo->str, "ARRAY") == 0)
@@ -135,10 +122,10 @@ void makeAST(stacknode* curr, char* parent)
 			return;
 		}
 		curr->nptr = curr->child->sibling; //for ID
-		stacknode* temp = curr->nptr->sibling->sibling->sibling->nptr;
-		curr->nptr->child = curr->nptr->sibling->sibling->nptr; //for type
-		curr->nptr->sibling = temp; //for N2
-		curr->nptr->child->sibling = NULL;
+		stacknode* temp = curr->nptr->sibling->sibling->sibling->nptr;	// temporary storage for N1
+		curr->nptr->child = curr->nptr->sibling->sibling->nptr; // making dataType child of ID
+		curr->nptr->sibling = temp; //for N1
+		curr->nptr->child->sibling = NULL;	// making sibling of dataType NULL
 		return;
 	}
 
@@ -147,7 +134,7 @@ void makeAST(stacknode* curr, char* parent)
 		curr->nptr = curr;
 		stacknode* temp = curr->child->sibling->sibling->sibling->nptr;
 		curr->child->child = curr->child->sibling->sibling->nptr;//for making dataType a child of ID
-		curr->child->sibling = temp;//for making N1.nptr the sibling of ID
+		curr->child->sibling = temp;	//for making N1.nptr the sibling of ID
 		curr->child->child->sibling = NULL;
 		return;
 	}
@@ -205,15 +192,14 @@ void makeAST(stacknode* curr, char* parent)
 			curr->nptr = curr;
 			curr->child->sibling = curr->child->sibling->sibling;
 			curr->child->sibling->sibling = NULL;
-			return;
 		}
 		else
 		{
 			curr->nptr = curr;
 			curr->child->sibling = curr->child->sibling->sibling->nptr;
 			curr->child->sibling->sibling = NULL;
-			return;
 		}
+		return;
 	}
 
 	if(strcmp(curr->ntortinfo->str, "<var>") == 0)
@@ -323,9 +309,11 @@ void makeAST(stacknode* curr, char* parent)
 	if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
 	{
 		curr->nptr = curr;
+		stacknode* temp = curr->child->sibling->sibling->sibling;
+		stacknode* temp2 = curr->child->sibling->sibling->sibling->sibling->sibling->sibling->nptr;
 		curr->child = curr->child->nptr;
-		curr->child->sibling = curr->child->sibling->sibling->sibling;
-		curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->sibling->nptr;
+		curr->child->sibling = temp;
+		curr->child->sibling->sibling = temp2;
 		curr->child->sibling->sibling->sibling = NULL;
 		return;
 	}
