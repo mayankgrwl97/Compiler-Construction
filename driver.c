@@ -16,6 +16,8 @@ Karan Deep Batra(2014A7PS160P)
 #include "follow.h"
 #include "parser.h"
 #include "parserDef.h"
+#include "mainsymboltable.h"
+#include "makeAST.h"
 
 void printCleanFile()
 {
@@ -139,6 +141,15 @@ int main(int argc, char* argv[])
 		{
 			printf("ERROR in making Parse Tree because parsing is not correct\n");
 		}
+		// mainsymboltable* globaltable = (mainsymboltable*)malloc(sizeof(mainsymboltable));
+		// for(int i=0; i<mainsymboltablesize; i++)
+		// 	globaltable->buckets[i] = NULL;
+
+		// populatemainsymboltable(root, "ROOT", globaltable);
+		// printmainsymboltable(globaltable);
+
+		makeAST(root, "ROOT");
+		printAST(root->child);
 	}
 	return 0;
 }

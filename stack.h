@@ -18,6 +18,7 @@ struct stacknode
 	stacknode* next;
 	stacknode* child;
 	stacknode* sibling;
+	stacknode* nptr;
 };
 
 typedef struct stack stack;
