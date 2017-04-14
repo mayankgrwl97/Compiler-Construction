@@ -243,9 +243,35 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	{
 		func_name = parent->child->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		currsymboltable = pt->idst = makeidsymboltable();
-
-		
+		// pt->idst = makeidsymboltable();
+		populateStatements(curr->child->child, pt->idst);		
+	}
+	else if(strcmp(curr->ntortinfo->str, "<driverModule>") == 0)
+	{
+		insertmainsymboltable(globaltable, curr->child);
+	}
+	else if(strcmp(curr->ntortinfo->str, "<input_plist>") == 0)
+	{
+		func_name = parent->child->tokinfo->lexeme;
+		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
+		pt->idst = makeidsymboltable();
+		stacknode* temp = curr->child;
+		while(temp != NULL)
+		{
+			insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+			temp = temp->sibling;				
+		}
+	}
+	else if(strcmp(curr->ntortinfo->str, "<output_plist>") == 0)
+	{
+		func_name = parent->child->tokinfo->lexeme;
+		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
+		stacknode* temp = curr->child;
+		while(temp != NULL)
+		{
+			insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+			temp = temp->sibling;				
+		}
 	}
 
 	stacknode* temp = curr->child->sibling;
