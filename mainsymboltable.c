@@ -226,6 +226,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 				printf("ERROR %s not declared in this scope\n", temp2->tokinfo->lexeme);
 			else
 				temp2->idst = temp3;
+			temp2 = temp2->sibling;
 		}
 	}
 }
@@ -267,7 +268,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		stacknode* temp = curr->child->child;
 		while(temp != NULL)
 		{
-			populateStatements(curr->child->child, pt->idst);		
+			populateStatements(temp, pt->idst);		
 			temp = temp->sibling;
 		}
 	}
