@@ -32,14 +32,13 @@ void populateExpression(stacknode* curr, idsymboltable* currIdst)
 	{
 		idsymboltable* temp = checkScope(currIdst, curr->tokinfo->lexeme);
 		if(temp == NULL)
-		{
 			printf("ERROR %s not declared in this scope\n", curr->tokinfo->lexeme);
-		}
 		else
-		{
 			curr->idst = temp;
-		}
 	}
+
+	if(curr->child == NULL)		return;
+
 	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
 	{
@@ -59,13 +58,9 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		{
 			idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
 			if(temp == NULL)
-			{
 				printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
-			}
 			else
-			{
-				curr->child->sibling->idst = temp;	
-			}
+				curr->child->sibling->idst = temp;		// setting symbol table link for this ID
 		}
 		else
 		{
@@ -73,36 +68,28 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			{
 				idsymboltable* temp = checkScope(currIdst, curr->child->sibling->child->tokinfo->lexeme);
 				if(temp == NULL)
-				{
 					printf("ERROR %s not declared in this scope\n", curr->child->sibling->child->tokinfo->lexeme);
-				}
 				else
-				{
-					curr->child->sibling->child->idst = temp;
-				}
+					curr->child->sibling->child->idst = temp;	// setting symbol table link for this ID
 				
-				if(curr->child->sibling->child->sibling->child != NULL) // whichId
+				if(curr->child->sibling->child->sibling->child != NULL) // whichId's child ID
 				{
 					idsymboltable* temp2 = checkScope(currIdst, curr->child->sibling->child->sibling->child->tokinfo->lexeme);
 					if(temp2 == NULL)
-					{
 						printf("ERROR %s not declared in scope\n", curr->child->sibling->child->sibling->child->tokinfo->lexeme);
-					}
 					else
-					{
 						curr->child->sibling->child->sibling->child->idst = temp2;
-					}
 				}
 			}
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<declareStmt>") == 0)
 	{
-		stacknode* temp = curr->child->child;
+		stacknode* temp = curr->child->child;	// pointing to ID
 		while(temp != NULL)
 		{
-			insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type node // offset not considered
-			temp->idst = currIdst;
+			insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type, offset not considered
+			temp->idst = currIdst;	// setting symbol table link for this ID
 			temp = temp->sibling;
 		}
 	}
@@ -112,16 +99,13 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		{
 			idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
 			if(temp == NULL)
-			{
 				printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
-			}
 			else
-			{
-				curr->child->sibling->idst = temp;
-			}
+				curr->child->sibling->idst = temp;	// setting symbol table link for this ID
+
 			idsymboltable* newIdst = makeidsymboltable();
 			newIdst->parent = currIdst;
-			stacknode* temp2 = curr->child->sibling->sibling->sibling->child;
+			stacknode* temp2 = curr->child->sibling->sibling->sibling->sibling->child;
 			while(temp2 != NULL)
 			{
 				populateStatements(temp2, newIdst);
@@ -130,10 +114,10 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		}
 		else
 		{
-			// populateExpression()
+			populateExpression(curr->child->sibling, currIdst);
 			idsymboltable* newIdst = makeidsymboltable();
 			newIdst->parent = currIdst;
-			stacknode* temp = curr->child->sibling->sibling->child;
+			stacknode* temp = curr->child->sibling->sibling->sibling->child;
 			while(temp != NULL)
 			{
 				populateStatements(temp, newIdst);
@@ -147,12 +131,10 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		if(temp == NULL)
 			printf("ERROR %s not declared in this scope\n", curr->child->tokinfo->lexeme);
 		else
-			curr->child->idst = temp;
+			curr->child->idst = temp;	// setting symbol table link for this ID
 
 		if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
-		{
-			// populateExpression();
-		}
+			populateExpression(curr->child->sibling->child, currIdst);
 		else
 		{
 			if(strcmp(curr->child->sibling->child->child->ntortinfo->str, "ID") == 0)
@@ -161,9 +143,9 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 				if(temp == NULL)
 					printf("ERROR %s not declared in this scope\n", curr->child->sibling->child->child->tokinfo->lexeme);
 				else
-					curr->child->sibling->child->child->idst = temp;
+					curr->child->sibling->child->child->idst = temp;	// setting symbol table link for this ID
 			}
-			// populateExpression();
+			populateExpression(curr->child->sibling->child->sibling, currIdst);
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<condionalStmt>") == 0)
@@ -172,25 +154,25 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		if(temp == NULL)
 			printf("ERROR %s not declared in this scope\n", curr->child->tokinfo->lexeme);
 		else
-			curr->child->idst = temp;
+			curr->child->idst = temp;	// setting symbol table link for this ID
 
 		idsymboltable* newIdst = makeidsymboltable();
 		newIdst->parent = currIdst;
 
-		stacknode* temp2 = curr->child->sibling->child->sibling;//<caseStmt>
+		stacknode* temp2 = curr->child->sibling->sibling->child->sibling;	//<caseStmts>
 		while(temp2 != NULL)
 		{
 			populateStatements(temp2->child, newIdst);
-			temp2 = temp2->sibling->sibling;
+			temp2 = temp2->sibling;
 		}
 
-		if(curr->child->sibling->sibling->child != NULL)
+		if(curr->child->sibling->sibling->sibling->child != NULL)
 		{
-			stacknode* temp = curr->child->sibling->sibling->child->child;
+			stacknode* temp = curr->child->sibling->sibling->sibling->child->child;
 			while(temp != NULL)
 			{
 				populateStatements(temp, currIdst);
-				temp = temp->next;
+				temp = temp->sibling;
 			}
 		}
 	}
@@ -239,7 +221,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 
 	if(strcmp(curr->ntortinfo->str, "<moduleDeclarations>") == 0)
 	{
-		stacknode* temp = curr->child;
+		stacknode* temp = curr->child;	// pointing to function name ID, if the ID is func name, not storing it's symbol table link as it will always be globaltable
 		while(temp != NULL)
 		{
 			insertmainsymboltable(globaltable, temp->tokinfo->lexeme);
@@ -248,24 +230,24 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	}
 	else if(strcmp(curr->ntortinfo->str, "<module>") == 0)
 	{
-		func_name = curr->child->tokinfo->lexeme;
+		func_name = curr->child->tokinfo->lexeme;	// pointing to function name ID, if the ID is func name, not storing it's symbol table link as it will always be globaltable
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
 		if(pt == NULL)
-			pt = insertmainsymboltable(globaltable, func_name);
+			pt = insertmainsymboltable(globaltable, func_name);		// if not already declared insert into main symbol table
 
 		pt->isdefined = 1;
-		pt->iplist = curr->child->sibling;
-		pt->oplist = pt->iplist->sibling;
+		pt->iplist = curr->child->sibling;	// pointing to input_plist
+		pt->oplist = pt->iplist->sibling;	// pointing to output_plist
 	}
 	else if(strcmp(curr->ntortinfo->str, "<moduleDef>") == 0)
 	{
 		func_name = parent->child->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		if(strcmp(func_name, "program") == 0)
+		if(strcmp(func_name, "program") == 0)	// func_name would not be preset in case of "program"
 		{
 			pt->idst = makeidsymboltable();
 		}
-		stacknode* temp = curr->child->child;
+		stacknode* temp = curr->child->sibling->child;	// pointing to <ioStmt> (and similar)
 		while(temp != NULL)
 		{
 			populateStatements(temp, pt->idst);		
@@ -274,41 +256,45 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	}
 	else if(strcmp(curr->ntortinfo->str, "<driverModule>") == 0)
 	{
-		insertmainsymboltable(globaltable, curr->child->tokinfo->lexeme);
+		insertmainsymboltable(globaltable, curr->child->tokinfo->lexeme);	// inserting "program"
 	}
 	else if(strcmp(curr->ntortinfo->str, "<input_plist>") == 0)
 	{
 		func_name = parent->child->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
 		pt->idst = makeidsymboltable();
-		stacknode* temp = curr->child;
+		stacknode* temp = curr->child;	// pointing to ID
 		while(temp != NULL)
 		{
 			insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
-			temp = temp->sibling;				
+			temp->idst = pt->idst;	// setting symbol table link for ID
+			temp = temp->sibling;	// type considered
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<output_plist>") == 0)
 	{
 		func_name = parent->child->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		stacknode* temp = curr->child;
+		stacknode* temp = curr->child;	// pointing to ID
 		while(temp != NULL)
 		{
 			insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
-			temp = temp->sibling;				
+			temp->idst = pt->idst;	// setting symbol table link for ID
+			temp = temp->sibling;	// type considered		
 		}
 	}
+	
 	if(curr->child == NULL)
 		return;
+	
 	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
 	{
 		populatemainsymboltable(temp, curr, globaltable);
 		temp = temp->sibling;
 	}
-	return;
 
+	return;
 }
 
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name)
