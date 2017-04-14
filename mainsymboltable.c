@@ -180,7 +180,36 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 
 	else if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
 	{
-		
+		if(curr->child->child != NULL)
+		{
+			stacknode* temp = curr->child->child;
+			while(temp != NULL)
+			{
+				idsymboltable* temp2 = checkScope(currIdst, temp->tokinfo->lexeme);
+				if(temp2 == NULL)
+					printf("ERROR %s not declared in this scope\n", temp->tokinfo->lexeme);
+				else
+					temp->idst = temp2;
+
+				temp = temp->sibling;
+			}
+		}
+
+		idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
+		if(temp == NULL)
+			printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
+		else
+			curr->child->sibling->idst = temp;
+
+		stacknode* temp2 = curr->child->sibling->sibling->child;
+		while(temp2 != NULL)
+		{
+			idsymboltable* temp3 = checkScope(temp2->tokinfo->lexeme);
+			if(temp3 == NULL)
+				printf("ERROR %s not declared in this scope\n", temp2->tokinfo->lexeme);
+			else
+				temp2->idst = temp3;
+		}
 	}
 }
 
