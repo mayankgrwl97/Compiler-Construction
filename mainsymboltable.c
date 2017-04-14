@@ -20,6 +20,34 @@ idsymboltable* checkScope(idsymboltable* currIdst, char* idlex)
 	return checkScope(currIdst->parent, idlex);
 }
 
+void populateExpression(stacknode* curr, idsymboltable* currIdst)
+{
+	if(curr == NULL)
+		return;
+
+	populateExpression(curr->child, currIdst);
+
+	// itself
+	if(strcmp(curr->ntortinfo->str, "ID") == 0)
+	{
+		idsymboltable* temp = checkScope(currIdst, curr->tokinfo->lexeme);
+		if(temp == NULL)
+		{
+			printf("ERROR %s not declared in this scope\n", curr->tokinfo->lexeme);
+		}
+		else
+		{
+			curr->idst = temp;
+		}
+	}
+	stacknode* temp = curr->child->sibling;
+	while(temp != NULL)
+	{
+		populateExpression(temp, currIdst);
+		temp = temp->sibling;
+	}
+}
+
 void getStatements(stacknode* curr, idsymboltable* currIdst)
 {
 	if(strcmp(curr->ntortinfo->str, "<ioStmt>") == 0)
