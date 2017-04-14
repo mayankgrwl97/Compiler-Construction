@@ -16,6 +16,12 @@ void makeAST(stacknode* curr, char* parent)
 	if(curr->child != NULL)
 		makeAST(curr->child, curr->ntortinfo->str);
 
+	if(strcmp(curr->ntortinfo->str, "eps") == 0)
+	{
+		curr->nptr = NULL;
+		return;
+	}	// not stroing eps
+
 	if(curr->ntortinfo->nt == 0)
 	{
 		curr->nptr = curr;

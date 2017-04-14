@@ -204,7 +204,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		stacknode* temp2 = curr->child->sibling->sibling->child;
 		while(temp2 != NULL)
 		{
-			idsymboltable* temp3 = checkScope(temp2->tokinfo->lexeme);
+			idsymboltable* temp3 = checkScope(currIdst, temp2->tokinfo->lexeme);
 			if(temp3 == NULL)
 				printf("ERROR %s not declared in this scope\n", temp2->tokinfo->lexeme);
 			else
@@ -243,12 +243,15 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	{
 		func_name = parent->child->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		// pt->idst = makeidsymboltable();
+		if(strcmp(func_name, "program") == 0)
+		{
+			pt->idst = makeidsymboltable();
+		}
 		populateStatements(curr->child->child, pt->idst);		
 	}
 	else if(strcmp(curr->ntortinfo->str, "<driverModule>") == 0)
 	{
-		insertmainsymboltable(globaltable, curr->child);
+		insertmainsymboltable(globaltable, curr->child->tokinfo->lexeme);
 	}
 	else if(strcmp(curr->ntortinfo->str, "<input_plist>") == 0)
 	{
@@ -273,7 +276,8 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 			temp = temp->sibling;				
 		}
 	}
-
+	if(curr->child == NULL)
+		return;
 	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
 	{
@@ -283,90 +287,6 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	return;
 
 }
-
-// void populatemainsymboltable(stacknode* curr, char* parent, mainsymboltable* globaltable)
-// {
-// 	if(curr == NULL)
-// 		return;
-// 	populatemainsymboltable(curr->child, curr->ntortinfo->str, globaltable);
-
-// 	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname, "PROGRAM") == 0))
-// 	{
-// 		if(!presentmainsymboltable(globaltable, "program"))
-// 		{
-// 			mainsymboltablenode* pt = insertmainsymboltable(globaltable, curr->tokinfo->lexeme);
-// 			pt->idst = makeidsymboltable();
-// 			func_name = "program";
-// 			currsymboltable = pt->idst;
-// 		}
-// 		else
-// 			printf("ERROR: program declared multiple times\n");
-// 	}
-
-// 	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname, "ID") == 0 ) && ((strcmp(parent, "<moduleDeclaration>") == 0) || (strcmp(parent, "<module>") == 0)))
-// 	{
-// 		// if(presentmainsymboltable(globaltable, "program"))
-// 		// {
-// 		// 	if(!presentmainsymboltable(globaltable, curr->tokinfo->lexeme))
-// 		// 	{
-// 		// 		printf("ERROR: %s not declared\n", curr->tokinfo->lexeme);
-// 		// 		return;
-// 		// 	}
-// 		// }
-// 		if(!presentmainsymboltable(globaltable, curr->tokinfo->lexeme))
-// 		{
-// 			mainsymboltablenode* pt = insertmainsymboltable(globaltable, curr->tokinfo->lexeme);
-// 			pt->idst = makeidsymboltable();
-// 			func_name = curr->tokinfo->lexeme;
-// 			currsymboltable = pt->idst;
-// 		}
-// 	}
-
-// 	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname, "ID") == 0) && (strcmp(parent, "<moduleReuseStmt>") == 0))
-// 	{
-// 		if(!presentmainsymboltable(globaltable, curr->tokinfo->lexeme))
-// 		{
-// 			printf("ERROR %s not declared\n", curr->tokinfo->lexeme);
-// 		}
-// 	}
-
-// 	if(strcmp(curr->tokinfo->tokenname, "START") == 0)
-// 	{
-// 		idsymboltable* pt = makeidsymboltable();
-// 		if(currsymboltable->child == NULL)
-// 		{
-// 			currsymboltable->child = pt;
-// 			currsymboltable->child->parent = currsymboltable;
-// 		}
-// 		else
-// 		{
-// 			pt->sibling = currsymboltable->child;
-// 			currsymboltable->child = pt;
-// 			currsymboltable->child->parent = currsymboltable;
-// 		}
-// 		currsymboltable = currsymboltable->child;
-// 	}
-// 	if(strcmp(curr->tokinfo->tokenname, "END") == 0)
-// 	{
-// 		currsymboltable = currsymboltable->parent;
-// 	}
-
-// 	if(curr->tokinfo != NULL && strcmp(curr->tokinfo->tokenname, "ID") == 0)
-// 	{
-// 		insertidsymboltablenode(curr->tokinfo->lexeme, 0,0,currsymboltable);
-// 	}
-
-// 	if(curr->child == NULL)
-// 		return;
-
-// 	stacknode* temp = curr->child->sibling;
-// 	while(temp != NULL)
-// 	{
-// 		populatemainsymboltable(temp, curr->ntortinfo->str, globaltable);
-// 		temp = temp->sibling;
-// 	}
-// 	return;
-// }
 
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name)
 {
@@ -410,10 +330,12 @@ void printmainsymboltable(mainsymboltable* table)
 	for(int i=0; i<mainsymboltablesize; i++)
 	{
 		mainsymboltablenode* pt = table->buckets[i];
-		printf("%d --> ", i);
+		// printf("%d --> ", i);
 		while(pt != NULL)
 		{
-			printf("%s | ", pt->func_name);
+			printf("Module Name -> %s\n", pt->func_name);
+			idsymboltable* temp = pt->idst;
+			printidsymboltable(temp);
 			pt = pt->next;
 		}
 		printf("\n");

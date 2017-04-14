@@ -46,3 +46,16 @@ idsymboltablenode* getidsymboltablenode(char* idlex, idsymboltable* idst)
 	}
 	return NULL;
 }
+
+void printidsymboltable(idsymboltable* idst)
+{
+	for(int i = 0;i < idsymboltablesize; i++)
+	{
+		idsymboltablenode* temp = idst->buckets[i];
+		while(temp != NULL)
+		{
+			printf("%s\t\n", temp->idlex);
+			temp = temp->next;
+		}
+	}
+}
