@@ -248,8 +248,9 @@ void makeAST(stacknode* curr, char* parent)
 	if(strcmp(curr->ntortinfo->str, "<moduleDef>") == 0)
 	{
 		curr->nptr = curr;
-		curr->child = curr->child->sibling->nptr;
-		curr->child->sibling = NULL;
+		curr->child->sibling = curr->child->sibling->nptr;
+		// curr->child = curr->child->sibling->nptr;
+		// curr->child->sibling = NULL;
 		return;
 	}
 
@@ -494,9 +495,10 @@ void makeAST(stacknode* curr, char* parent)
 	{
 		curr->nptr = curr;
 		curr->child = curr->child->sibling->sibling;
-		curr->child->sibling = curr->child->sibling->sibling->sibling->nptr;
-		curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->nptr;
-		curr->child->sibling->sibling->sibling = NULL;
+		curr->child->sibling = curr->child->sibling->sibling;
+		// curr->child->sibling = curr->child->sibling->sibling->sibling->nptr;
+		// curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->nptr;
+		// curr->child->sibling->sibling->sibling = NULL;
 		return;
 	}
 
@@ -552,14 +554,14 @@ void makeAST(stacknode* curr, char* parent)
 		{
 			curr->child->sibling = curr->child->sibling->sibling; //FOR -> ID
 			curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->nptr;//ID -> <range>.nptr
-			curr->child->sibling->sibling->sibling = curr->child->sibling->sibling->sibling->sibling->sibling->sibling->nptr;//<range>.nptr -> <statements>.nptr
-			curr->child->sibling->sibling->sibling->sibling = NULL;
+			curr->child->sibling->sibling->sibling = curr->child->sibling->sibling->sibling->sibling;//<range>.nptr -> START
+			// curr->child->sibling->sibling->sibling->sibling = NULL;
 		}
 		else
 		{
 			curr->child->sibling = curr->child->sibling->sibling->nptr; //WHILE -> <expression>.nptr
-			curr->child->sibling->sibling = curr->child->sibling->sibling->sibling->sibling->sibling->nptr; //<expression>.nptr -> <statements>.nptr
-			curr->child->sibling->sibling->sibling = NULL;
+			curr->child->sibling->sibling = curr->child->sibling->sibling->sibling; //<expression>.nptr -> <statements>.nptr
+			// curr->child->sibling->sibling->sibling = NULL;
 		}
 	}
 

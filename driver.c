@@ -144,11 +144,9 @@ int main(int argc, char* argv[])
 		mainsymboltable* globaltable = makemainsymboltable();
 
 		makeAST(root, "ROOT");
-		// printAST(root);
-		populatemainsymboltable(root, NULL, globaltable);
-		printmainsymboltable(globaltable);
-
-
+		printAST(root);
+		// populatemainsymboltable(root, NULL, globaltable);
+		// printmainsymboltable(globaltable);
 		// populatemainsymboltable(root, NULL, globaltable);
 	}
 	return 0;
