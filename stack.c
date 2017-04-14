@@ -20,6 +20,7 @@ void insertstack(stack* st, ntort* ntortinfo, tokeninfo* tokinfo)
 	newelem->child = NULL;
 	newelem->sibling = NULL;
 	newelem->nptr = NULL;
+	newelem->idst = NULL;
 	st->top = newelem;
 	return;
 }

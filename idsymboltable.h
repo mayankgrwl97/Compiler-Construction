@@ -14,7 +14,7 @@ typedef struct idsymboltablenode idsymboltablenode;
 struct idsymboltablenode
 {
 	char* idlex;
-	int type;
+	stacknode* type;
 	int offset;
 	idsymboltablenode* next;
 };

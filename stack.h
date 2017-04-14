@@ -9,6 +9,7 @@ Karan Deep Batra(2014A7PS160P)
 
 #include "ntort.h"
 #include "token.h"
+#include "idsymboltable.h"
 
 typedef struct stacknode stacknode;
 struct stacknode
@@ -19,6 +20,7 @@ struct stacknode
 	stacknode* child;
 	stacknode* sibling;
 	stacknode* nptr;
+	idsymboltable* idst;
 };
 
 typedef struct stack stack;

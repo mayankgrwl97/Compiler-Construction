@@ -150,6 +150,8 @@ int main(int argc, char* argv[])
 
 		makeAST(root, "ROOT");
 		printAST(root);
+
+		// populatemainsymboltable(root, NULL, globaltable);
 	}
 	return 0;
 }

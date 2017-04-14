@@ -5,6 +5,7 @@
 #include "hashtable.h"
 #include "token.h"
 #include "idsymboltable.h"
+#include "stack.h"
 
 idsymboltable* makeidsymboltable()
 {
@@ -14,7 +15,7 @@ idsymboltable* makeidsymboltable()
 	return pt;
 }
 
-idsymboltablenode* makeidsymboltablenode(char* idlex, int type, int offset)
+idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offset)
 {
 	idsymboltablenode* pt = (idsymboltablenode*)malloc(sizeof(idsymboltablenode));
 	pt->idlex = idlex;
@@ -23,7 +24,7 @@ idsymboltablenode* makeidsymboltablenode(char* idlex, int type, int offset)
 	return pt;
 }
 
-void insertidsymboltablenode(char* idlex, int type, int offset, idsymboltable* idst)
+void insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst)
 {
 	int h = hash(idlex);
 	idsymboltablenode* pt = idst->buckets[h];
