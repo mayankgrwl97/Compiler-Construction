@@ -20,8 +20,11 @@ idsymboltable* checkScope(idsymboltable* currIdst, char* idlex)
 	return checkScope(currIdst->parent, idlex);
 }
 
-void getStatements(stacknode* curr, idsymboltable* currIdst)
+void populateStatements(stacknode* curr, idsymboltable* currIdst)
 {
+	if(curr == NULL)
+		return;
+
 	if(strcmp(curr->ntortinfo->str, "<ioStmt>") == 0)
 	{
 		if(strcmp(curr->child->ntortinfo->str, "GET_VALUE") == 0)
@@ -77,16 +80,76 @@ void getStatements(stacknode* curr, idsymboltable* currIdst)
 	}
 	else if(strcmp(curr->ntortinfo->str, "<iterativeStmt>") == 0)
 	{
-		
+		if(strcmp(curr->child->ntortinfo->str, "FOR") == 0)
+		{
+			idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
+			if(temp == NULL)
+			{
+				printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
+			}
+			else
+			{
+				curr->child->sibling->idst = temp;
+			}
+			idsymboltable* newIdst = makeidsymboltable();
+			newIdst->parent = currIdst;
+			populateStatements(curr->child->sibling->sibling->sibling->child, newIdst);
+		}
+		else
+		{
+			// populateExpression()
+			idsymboltable* newIdst = makeidsymboltable();
+			newIdst->parent = currIdst;
+			populateStatements(curr->child->sibling->sibling->child, newIdst);
+		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<assignmentStmt>") == 0)
 	{
-		
+		idsymboltable* temp = checkScope(currIdst, curr->child->tokinfo->lexeme);
+		if(temp == NULL)
+			printf("ERROR %s not declared in this scope\n", curr->child->tokinfo->lexeme);
+		else
+			curr->child->idst = temp;
+
+		if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
+		{
+			// populateExpression();
+		}
+		else
+		{
+			if(strcmp(curr->child->sibling->child->child->ntortinfo->str, "ID") == 0)
+			{
+				idsymboltable* temp = checkScope(currIdst, curr->child->sibling->child->child->tokinfo->lexeme);
+				if(temp == NULL)
+					printf("ERROR %s not declared in this scope\n", curr->child->sibling->child->child->tokinfo->lexeme);
+				else
+					curr->child->sibling->child->child->idst = temp;
+			}
+			// populateExpression();
+		}
 	}
-	else if(strcmp(curr->ntortinfo->str, "<conditionalStmt>") == 0)
+	else if(strcmp(curr->ntortinfo->str, "<condionalStmt>") == 0)
 	{
-		
+		idsymboltable* temp = checkScope(currIdst, curr->child->tokinfo->lexeme);
+		if(temp == NULL)
+			printf("ERROR %s not declared in this scope\n", curr->child->tokinfo->lexeme);
+		else
+			curr->child->idst = temp;
+
+		idsymboltable* newIdst = makeidsymboltable();
+		newIdst->parent = currIdst;
+
+		stacknode* temp2 = curr->child->sibling->child->sibling;//<caseStmt>
+		while(temp2 != NULL)
+		{
+			populateStatements(temp2->child, newIdst);
+			temp2 = temp2->sibling->sibling;
+		}
+
+		if(curr->child->sibling->sibling->child != NULL)
+			populateStatements(curr->child->sibling->sibling->child->child, currIdst);
 	}
+
 	else if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
 	{
 		

@@ -9,9 +9,11 @@ Karan Deep Batra(2014A7PS160P)
 
 #include "ntort.h"
 #include "token.h"
-#include "idsymboltable.h"
+// #include "idsymboltable.h"
 
+typedef struct idsymboltable idsymboltable;
 typedef struct stacknode stacknode;
+
 struct stacknode
 {
 	ntort* ntortinfo;

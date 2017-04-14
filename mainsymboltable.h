@@ -39,7 +39,7 @@ struct mainsymboltable
 {
 	mainsymboltablenode* buckets[mainsymboltablesize];
 };
-void populatemainsymboltable(stacknode* curr, char* parent, mainsymboltable* globaltable);
+void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable);
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* insertmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* makemainsymboltablenode(char* func_name);
