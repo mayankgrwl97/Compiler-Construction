@@ -484,7 +484,7 @@ void makeAST(stacknode* curr, char* parent)
 		return;
 	}
 
-	if(strcmp(curr->ntortinfo->str, "<conditionalStmt>") == 0)
+	if(strcmp(curr->ntortinfo->str, "<condionalStmt>") == 0)
 	{
 		curr->nptr = curr;
 		curr->child = curr->child->sibling->sibling;

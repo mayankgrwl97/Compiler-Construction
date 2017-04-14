@@ -4,12 +4,14 @@
 #include "symboltable.h"
 #include "hashtable.h"
 #include "token.h"
+#include "stack.h"
 
 #define idsymboltablesize 100
 
 enum types {integer = 0, real, boolean, array};
 
 typedef struct idsymboltablenode idsymboltablenode;
+typedef struct stacknode stacknode;
 
 struct idsymboltablenode
 {
@@ -31,8 +33,8 @@ struct idsymboltable
 };
 
 idsymboltable* makeidsymboltable();
-idsymboltablenode* makeidsymboltablenode(char* idlex, int type, int offset);
-void insertidsymboltablenode(char* idlex, int type, int offset, idsymboltable* idst);
+idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offset);
+void insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst);
 idsymboltablenode* getidsymboltablenode(char* idlex, idsymboltable* idst);
 
 #endif
