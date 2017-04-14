@@ -141,9 +141,7 @@ int main(int argc, char* argv[])
 		{
 			printf("ERROR in making Parse Tree because parsing is not correct\n");
 		}
-		mainsymboltable* globaltable = (mainsymboltable*)malloc(sizeof(mainsymboltable));
-		for(int i=0; i<mainsymboltablesize; i++)
-			globaltable->buckets[i] = NULL;
+		mainsymboltable* globaltable = makemainsymboltable();
 
 		makeAST(root, "ROOT");
 		// printAST(root);

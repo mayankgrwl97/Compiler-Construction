@@ -12,6 +12,8 @@ idsymboltable* makeidsymboltable()
 	idsymboltable* pt = (idsymboltable*)malloc(sizeof(idsymboltable));
 	pt->child = pt->sibling = pt->parent = NULL;
 	pt->offset = 0;
+	for(int i=0; i<idsymboltablesize; i++)
+		pt->buckets[i] = NULL;
 	return pt;
 }
 
@@ -54,7 +56,7 @@ void printidsymboltable(idsymboltable* idst)
 		idsymboltablenode* temp = idst->buckets[i];
 		while(temp != NULL)
 		{
-			printf("%s\t\n", temp->idlex);
+			printf("%s %s\t\n", temp->idlex, temp->type->ntortinfo->str);
 			temp = temp->next;
 		}
 	}

@@ -121,14 +121,24 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			}
 			idsymboltable* newIdst = makeidsymboltable();
 			newIdst->parent = currIdst;
-			populateStatements(curr->child->sibling->sibling->sibling->child, newIdst);
+			stacknode* temp2 = curr->child->sibling->sibling->sibling->child;
+			while(temp2 != NULL)
+			{
+				populateStatements(temp2, newIdst);
+				temp2 = temp2->sibling;
+			}
 		}
 		else
 		{
 			// populateExpression()
 			idsymboltable* newIdst = makeidsymboltable();
 			newIdst->parent = currIdst;
-			populateStatements(curr->child->sibling->sibling->child, newIdst);
+			stacknode* temp = curr->child->sibling->sibling->child;
+			while(temp != NULL)
+			{
+				populateStatements(temp, newIdst);
+				temp = temp->sibling;
+			}
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<assignmentStmt>") == 0)
@@ -175,7 +185,14 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		}
 
 		if(curr->child->sibling->sibling->child != NULL)
-			populateStatements(curr->child->sibling->sibling->child->child, currIdst);
+		{
+			stacknode* temp = curr->child->sibling->sibling->child->child;
+			while(temp != NULL)
+			{
+				populateStatements(temp, currIdst);
+				temp = temp->next;
+			}
+		}
 	}
 
 	else if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
@@ -195,11 +212,11 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			}
 		}
 
-		idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
-		if(temp == NULL)
-			printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
-		else
-			curr->child->sibling->idst = temp;
+		// idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
+		// if(temp == NULL)
+		// 	printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
+		// else
+		// 	curr->child->sibling->idst = temp;
 
 		stacknode* temp2 = curr->child->sibling->sibling->child;
 		while(temp2 != NULL)
@@ -247,7 +264,12 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		{
 			pt->idst = makeidsymboltable();
 		}
-		populateStatements(curr->child->child, pt->idst);		
+		stacknode* temp = curr->child->child;
+		while(temp != NULL)
+		{
+			populateStatements(curr->child->child, pt->idst);		
+			temp = temp->sibling;
+		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<driverModule>") == 0)
 	{
@@ -338,7 +360,14 @@ void printmainsymboltable(mainsymboltable* table)
 			printidsymboltable(temp);
 			pt = pt->next;
 		}
-		printf("\n");
+		// printf("\n");
 	}
 	return;
+}
+
+mainsymboltable* makemainsymboltable()
+{
+	mainsymboltable* pt = (mainsymboltable*) malloc(sizeof(mainsymboltable));
+	for(int i=0; i<mainsymboltablesize; i++)
+		pt->buckets[i] = NULL;
 }
