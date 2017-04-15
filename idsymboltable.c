@@ -64,10 +64,12 @@ void printidsymboltable(idsymboltable* idst)
 		{
 			if(strcmp(temp->type->ntortinfo->str, "ARRAY") == 0)
 			{
-				printf("%d\t%s\tARRAY(%d, %s)\t%d to %d\t%d\t%d\t%d\n", serial_no, temp->idlex, getarrayrange(temp->type), temp->type->child->sibling->ntortinfo->str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, idst->offset);
+				char str[50];
+				sprintf(str,"ARRAY(%d, %s)", getarrayrange(temp->type), temp->type->child->sibling->ntortinfo->str);
+				printf("%d\t%s\t%-25s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
 			}
 			else
-				printf("%d\t%s\t%s\t%d to %d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, idst->offset);
+				printf("%d\t%s\t%-25s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
 				// offset not correct
 			serial_no++;
 			temp = temp->next;
