@@ -22,3 +22,5 @@
 
 <moduleReuseStmt> --> <idList> ID <idList>
 <idList> --> ID ID ...  | NULL
+
+<module> --> ID <input_plist> <ret> <moduleDef>
