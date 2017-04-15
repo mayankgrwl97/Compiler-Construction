@@ -29,14 +29,14 @@ idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offse
 	return pt;
 }
 
-void insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst)
+idsymboltablenode* insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst)
 {
 	int h = hash(idlex);
 	idsymboltablenode* pt = idst->buckets[h];
 	idsymboltablenode* node = makeidsymboltablenode(idlex, type, offset);
 	node->next = pt;
 	idst->buckets[h] = node;
-	return;
+	return node;
 }
 
 idsymboltablenode* getidsymboltablenode(char* idlex, idsymboltable* idst)

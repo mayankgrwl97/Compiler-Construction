@@ -1,0 +1,24 @@
+<iterativeStmt> --> FOR ID <range> START <statements> END
+<iterativeStmt> --> WHILE <expression> START <statements> END
+
+==============================================================
+
+<assignmentStmt> --> ID <lvalueIDStmt>
+<assignmentStmt> --> ID <lvalueARRStmt>
+
+<lvalueIDStmt> -->  <expression>
+<lvalueARRStmt> --> <index> <expression>
+
+<index> --> NUM | ID
+
+==============================================================
+
+<condionalStmt> --> ID START <caseStmts> <default> END $
+<caseStmts> --> <value> <statements> <value> <statements> .... $
+<value> --> NUM | TRUE | FALSE $
+<default> --> <statements> | NULL
+
+==============================================================
+
+<moduleReuseStmt> --> <idList> ID <idList>
+<idList> --> ID ID ...  | NULL

@@ -78,7 +78,7 @@ void populateExpression(stacknode* curr, idsymboltable* currIdst)
 	return;
 }
 
-void populateStatements(stacknode* curr, idsymboltable* currIdst)
+void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltable* globaltable)
 {
 	if(curr == NULL)
 		return;
@@ -114,8 +114,6 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			}
 		}
 	}
-
-	//checked till here
 	else if(strcmp(curr->ntortinfo->str, "<declareStmt>") == 0)
 	{
 		stacknode* temp = curr->child->child;	// pointing to ID
@@ -125,10 +123,13 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
 			else
 			{
-				insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type, offset not considered
+				idsymboltablenode* pt = insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type, offset not considered
 				temp->idst = currIdst;	// setting symbol table link for this ID
+				temp = temp->sibling;
+				pt->offset = currIdst->offset;
+				pt->widthofid = getlengthofid(pt->type);
+				currIdst->offset += pt->widthofid;
 			}
-			temp = temp->sibling;
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<iterativeStmt>") == 0)
@@ -137,16 +138,19 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		{
 			idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
 			if(temp == NULL)
-				printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
+				printf("ERROR at line %d : %s not declared in this scope\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
 			else
 				curr->child->sibling->idst = temp;	// setting symbol table link for this ID
 
 			idsymboltable* newIdst = makeidsymboltable();
+			newIdst->startline = curr->child->sibling->sibling->sibling->tokinfo->linenumber;
+			newIdst->endline = curr->child->sibling->sibling->sibling->sibling->sibling->tokinfo->linenumber;
+			newIdst->nestinglevel = currIdst->nestinglevel + 1;
 			newIdst->parent = currIdst;
 			stacknode* temp2 = curr->child->sibling->sibling->sibling->sibling->child;
 			while(temp2 != NULL)
 			{
-				populateStatements(temp2, newIdst);
+				populateStatements(temp2, newIdst, globaltable);
 				temp2 = temp2->sibling;
 			}
 		}
@@ -154,11 +158,14 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		{
 			populateExpression(curr->child->sibling, currIdst);
 			idsymboltable* newIdst = makeidsymboltable();
+			newIdst->startline = curr->child->sibling->sibling->tokinfo->linenumber;
+			newIdst->endline = curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber;
+			newIdst->nestinglevel = currIdst->nestinglevel + 1;
 			newIdst->parent = currIdst;
 			stacknode* temp = curr->child->sibling->sibling->sibling->child;
 			while(temp != NULL)
 			{
-				populateStatements(temp, newIdst);
+				populateStatements(temp, newIdst, globaltable);
 				temp = temp->sibling;
 			}
 		}
@@ -167,7 +174,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 	{
 		idsymboltable* temp = checkScope(currIdst, curr->child->tokinfo->lexeme);
 		if(temp == NULL)
-			printf("ERROR %s not declared in this scope\n", curr->child->tokinfo->lexeme);
+			printf("ERROR at line %d : %s not declared in this scope\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		else
 			curr->child->idst = temp;	// setting symbol table link for this ID
 
@@ -179,7 +186,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			{
 				idsymboltable* temp = checkScope(currIdst, curr->child->sibling->child->child->tokinfo->lexeme);
 				if(temp == NULL)
-					printf("ERROR %s not declared in this scope\n", curr->child->sibling->child->child->tokinfo->lexeme);
+					printf("ERROR at line %d : %s not declared in this scope\n", curr->child->sibling->child->child->tokinfo->linenumber, curr->child->sibling->child->child->tokinfo->lexeme);
 				else
 					curr->child->sibling->child->child->idst = temp;	// setting symbol table link for this ID
 			}
@@ -190,18 +197,27 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 	{
 		idsymboltable* temp = checkScope(currIdst, curr->child->tokinfo->lexeme);
 		if(temp == NULL)
-			printf("ERROR %s not declared in this scope\n", curr->child->tokinfo->lexeme);
+			printf("ERROR at line %d : %s not declared in this scope\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		else
 			curr->child->idst = temp;	// setting symbol table link for this ID
 
 		idsymboltable* newIdst = makeidsymboltable();
+		newIdst->startline = curr->child->sibling->tokinfo->linenumber;
+		newIdst->endline = curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber;
+		newIdst->nestinglevel = currIdst->nestinglevel + 1;
 		newIdst->parent = currIdst;
 
-		stacknode* temp2 = curr->child->sibling->sibling->child->sibling->child;	// pointing to statements
+
+		stacknode* temp2 = curr->child->sibling->sibling->child;	// pointing to <value>.nptr
 		while(temp2 != NULL)
 		{
-			populateStatements(temp2->child, newIdst);
-			temp2 = temp2->sibling;
+			stacknode* temp3 = temp2->sibling->child; // temp2->sibling pointing to <statements>.nptr
+			while(temp3 != NULL)
+			{
+				populateStatements(temp3, newIdst, globaltable);
+				temp3 = temp3->sibling;
+			}
+			temp2 = temp2->sibling->sibling;
 		}
 
 		if(curr->child->sibling->sibling->sibling->child != NULL)	// pointing to default's child
@@ -209,22 +225,21 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			stacknode* temp = curr->child->sibling->sibling->sibling->child->child;	// pointing to statement's child
 			while(temp != NULL)
 			{
-				populateStatements(temp, currIdst);
+				populateStatements(temp, currIdst, globaltable);
 				temp = temp->sibling;
 			}
 		}
 	}
-
 	else if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
 	{
-		if(curr->child != NULL)		// pointing to idList
+		if(curr->child->child != NULL)		// pointing to idList's child
 		{
 			stacknode* temp = curr->child->child;	// pointing to ID
 			while(temp != NULL)
 			{
 				idsymboltable* temp2 = checkScope(currIdst, temp->tokinfo->lexeme);
 				if(temp2 == NULL)
-					printf("ERROR %s not declared in this scope\n", temp->tokinfo->lexeme);
+					printf("ERROR at line %d : %s not declared in this scope\n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
 				else
 					temp->idst = temp2;		// setting symbol table link for this ID
 
@@ -232,23 +247,23 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			}
 		}
 
+		mainsymboltablenode* temp = presentmainsymboltable(globaltable, curr->child->sibling->tokinfo->lexeme);
 		// idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
-		// if(temp == NULL)
-		// 	printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
-		// else
-		// 	curr->child->sibling->idst = temp;
+		if(temp == NULL)
+			printf("ERROR at line %d : MODULE %s not declared in this scope\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
 
 		stacknode* temp2 = curr->child->sibling->sibling->child;	// pointing to ID
 		while(temp2 != NULL)
 		{
 			idsymboltable* temp3 = checkScope(currIdst, temp2->tokinfo->lexeme);
 			if(temp3 == NULL)
-				printf("ERROR %s not declared in this scope\n", temp2->tokinfo->lexeme);
+				printf("ERROR at line %d : %s not declared in this scope\n", temp2->tokinfo->linenumber, temp2->tokinfo->lexeme);
 			else
 				temp2->idst = temp3;
 			temp2 = temp2->sibling;
 		}
 	}
+	//checked till here
 }
 
 void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable)
@@ -288,7 +303,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		stacknode* temp = curr->child->sibling->child;	// pointing to <ioStmt> (and similar)
 		while(temp != NULL)
 		{
-			populateStatements(temp, pt->idst);		
+			populateStatements(temp, pt->idst, globaltable);		
 			temp = temp->sibling;
 		}
 	}
