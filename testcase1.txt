@@ -1,5 +1,5 @@
 <<<driver program>>>
 start
-	declare var_1_:integer;
-	var_2_:=3+2;
+	declare var_1_, var_2_:integer;
+	var_2_:=3 + TRUE;
 end

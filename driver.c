@@ -18,6 +18,7 @@ Karan Deep Batra(2014A7PS160P)
 #include "parserDef.h"
 #include "mainsymboltable.h"
 #include "makeAST.h"
+#include "typeExtractor.h"
 
 void printCleanFile()
 {
