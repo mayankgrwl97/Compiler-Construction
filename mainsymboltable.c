@@ -20,6 +20,15 @@ idsymboltable* checkScope(idsymboltable* currIdst, char* idlex)
 	return checkScope(currIdst->parent, idlex);
 }
 
+int inSameScope(idsymboltable* currIdst, char* idlex)
+{
+	if(currIdst == NULL)
+		return 0;
+	if(getidsymboltablenode(idlex, currIdst) != NULL)
+		return 1;
+	return 0;
+}
+
 int getarrayrange(stacknode* type) //type is pointer to ARRAY in AST
 {
 	int l = atoi(type->child->child->tokinfo->lexeme); //child of ARRAY is <range> and its child is NUM (l)
@@ -112,8 +121,13 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		stacknode* temp = curr->child->child;	// pointing to ID
 		while(temp != NULL)
 		{
-			insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type, offset not considered
-			temp->idst = currIdst;	// setting symbol table link for this ID
+			if(inSameScope(currIdst, temp->tokinfo->lexeme))
+				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
+			else
+			{
+				insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type, offset not considered
+				temp->idst = currIdst;	// setting symbol table link for this ID
+			}
 			temp = temp->sibling;
 		}
 	}
@@ -290,9 +304,14 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		stacknode* temp = curr->child;	// pointing to ID
 		while(temp != NULL)
 		{
-			insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
-			temp->idst = pt->idst;	// setting symbol table link for ID
-			temp = temp->sibling;	// type considered
+			if(inSameScope(pt->idst, temp->tokinfo->lexeme))
+				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
+			else
+			{
+				insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+				temp->idst = pt->idst;	// setting symbol table link for ID
+			}
+			temp = temp->sibling;
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<output_plist>") == 0)
@@ -302,9 +321,14 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		stacknode* temp = curr->child;	// pointing to ID
 		while(temp != NULL)
 		{
-			insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
-			temp->idst = pt->idst;	// setting symbol table link for ID
-			temp = temp->sibling;	// type considered		
+			if(inSameScope(pt->idst, temp->tokinfo->lexeme))
+				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
+			else
+			{
+				insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+				temp->idst = pt->idst;	// setting symbol table link for ID
+			}
+			temp = temp->sibling;
 		}
 	}
 	
