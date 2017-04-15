@@ -147,6 +147,19 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			newIdst->endline = curr->child->sibling->sibling->sibling->sibling->sibling->tokinfo->linenumber;
 			newIdst->nestinglevel = currIdst->nestinglevel + 1;
 			newIdst->parent = currIdst;
+			
+			if(currIdst->child == NULL)
+				currIdst->child = newIdst;
+			else
+			{
+				idsymboltable* helper = currIdst->child;
+				while(helper->sibling != NULL)
+				{
+					helper = helper->sibling;
+				}
+				helper->sibling = newIdst;
+			}
+
 			stacknode* temp2 = curr->child->sibling->sibling->sibling->sibling->child;
 			while(temp2 != NULL)
 			{
@@ -162,6 +175,19 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			newIdst->endline = curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber;
 			newIdst->nestinglevel = currIdst->nestinglevel + 1;
 			newIdst->parent = currIdst;
+
+			if(currIdst->child == NULL)
+				currIdst->child = newIdst;
+			else
+			{
+				idsymboltable* helper = currIdst->child;
+				while(helper->sibling != NULL)
+				{
+					helper = helper->sibling;
+				}
+				helper->sibling = newIdst;
+			}
+
 			stacknode* temp = curr->child->sibling->sibling->sibling->child;
 			while(temp != NULL)
 			{
@@ -207,6 +233,17 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 		newIdst->nestinglevel = currIdst->nestinglevel + 1;
 		newIdst->parent = currIdst;
 
+		if(currIdst->child == NULL)
+				currIdst->child = newIdst;
+		else
+		{
+			idsymboltable* helper = currIdst->child;
+			while(helper->sibling != NULL)
+			{
+				helper = helper->sibling;
+			}
+			helper->sibling = newIdst;
+		}
 
 		stacknode* temp2 = curr->child->sibling->sibling->child;	// pointing to <value>.nptr
 		while(temp2 != NULL)
@@ -250,7 +287,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 		mainsymboltablenode* temp = presentmainsymboltable(globaltable, curr->child->sibling->tokinfo->lexeme);
 		// idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
 		if(temp == NULL)
-			printf("ERROR at line %d : MODULE %s not declared in this scope\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
+			printf("ERROR at line %d : MODULE %s used but never declared before this.\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
 
 		stacknode* temp2 = curr->child->sibling->sibling->child;	// pointing to ID
 		while(temp2 != NULL)
