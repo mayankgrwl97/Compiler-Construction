@@ -123,10 +123,9 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
 			else
 			{
-				idsymboltablenode* pt = insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, 0, currIdst);	//curr->child->sibling is type, offset not considered
+				idsymboltablenode* pt = insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, currIdst->offset, currIdst);	//curr->child->sibling is type, offset not considered
 				temp->idst = currIdst;	// setting symbol table link for this ID
 				temp = temp->sibling;
-				pt->offset = currIdst->offset;
 				pt->widthofid = getlengthofid(pt->type);
 				currIdst->offset += pt->widthofid;
 			}
@@ -314,7 +313,11 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		stacknode* temp = curr->child;	// pointing to function name ID, if the ID is func name, not storing it's symbol table link as it will always be globaltable
 		while(temp != NULL)
 		{
-			insertmainsymboltable(globaltable, temp->tokinfo->lexeme);
+			if(!presentmainsymboltable(globaltable, temp->tokinfo->lexeme))
+				insertmainsymboltable(globaltable, temp->tokinfo->lexeme);
+			else
+				printf("ERROR at line %d : %s is already declared \n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
+				
 			temp = temp->sibling;
 		}
 	}
@@ -336,6 +339,9 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		if(strcmp(func_name, "program") == 0)	// func_name would not be preset in case of "program"
 		{
 			pt->idst = makeidsymboltable();
+			pt->idst->startline = curr->child->tokinfo->linenumber;
+			pt->idst->endline = curr->child->sibling->sibling->tokinfo->linenumber;
+			pt->idst->nestinglevel = 1;
 		}
 		stacknode* temp = curr->child->sibling->child;	// pointing to <ioStmt> (and similar)
 		while(temp != NULL)
@@ -348,19 +354,26 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	{
 		insertmainsymboltable(globaltable, curr->child->tokinfo->lexeme);	// inserting "program"
 	}
+	//checked till here
 	else if(strcmp(curr->ntortinfo->str, "<input_plist>") == 0)
 	{
 		func_name = parent->child->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
 		pt->idst = makeidsymboltable();
+		pt->idst->startline = curr->sibling->sibling->child->tokinfo->linenumber;
+		pt->idst->endline = curr->sibling->sibling->child->sibling->sibling->tokinfo->linenumber;
+		pt->idst->nestinglevel = 1;
+
 		stacknode* temp = curr->child;	// pointing to ID
 		while(temp != NULL)
 		{
 			if(inSameScope(pt->idst, temp->tokinfo->lexeme))
-				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
+				printf("ERROR at line %d : %s already declared in this scope\n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
 			else
 			{
-				insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+				idsymboltablenode* idstnode = insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, pt->idst->offset, pt->idst);	// offset not considered
+				idstnode->widthofid = getlengthofid(idstnode->type);
+				pt->idst->offset += idstnode->widthofid;
 				temp->idst = pt->idst;	// setting symbol table link for ID
 			}
 			temp = temp->sibling;
@@ -377,7 +390,9 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
 			else
 			{
-				insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+				idsymboltablenode* idstnode = insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+				idstnode->widthofid = getlengthofid(idstnode->type);
+				pt->idst->offset += idstnode->widthofid;
 				temp->idst = pt->idst;	// setting symbol table link for ID
 			}
 			temp = temp->sibling;
