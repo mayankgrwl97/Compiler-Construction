@@ -40,6 +40,7 @@ struct mainsymboltable
 	mainsymboltablenode* buckets[mainsymboltablesize];
 };
 
+void traverseAST_fortypechecking(stacknode* curr);
 mainsymboltable* makemainsymboltable();
 void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable);
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name);

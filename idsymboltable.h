@@ -8,7 +8,7 @@
 
 #define idsymboltablesize 100
 
-enum types {integer = 0, real, boolean, array};
+enum types {integer = 0, real = 1, boolean = 2, error = 3};
 
 typedef struct idsymboltablenode idsymboltablenode;
 typedef struct stacknode stacknode;

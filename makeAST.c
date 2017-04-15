@@ -383,7 +383,7 @@ void makeAST(stacknode* curr, char* parent)
 	if(strcmp(curr->ntortinfo->str, "<level4>") == 0) //saving NUM, RNUM, <var>, <expression>, MINUS<expression>
 	{
 		// curr->sibling = curr->sibling->nptr;
-		if(strcmp(curr->child->ntortinfo->str, "<BO>") == 0)
+		if(strcmp(curr->child->ntortinfo->str, "BO") == 0)
 		{
 			curr->nptr = curr->child->sibling->nptr;
 			curr->nptr->sibling = NULL;
@@ -412,9 +412,10 @@ void makeAST(stacknode* curr, char* parent)
 		{
 			if(curr->child->sibling->sibling->nptr == NULL)
 			{
-				curr->nptr = curr->child;
-				curr->nptr->child = curr->nptr->sibling->nptr;
-				curr->nptr->sibling = NULL;
+				curr->nptr = curr->child->nptr;
+				stacknode* temp = curr->child->sibling->nptr;
+				curr->nptr->child = temp;
+				// curr->nptr->sibling = NULL;
 			}
 			else
 			{
@@ -423,9 +424,9 @@ void makeAST(stacknode* curr, char* parent)
 
 				curr->child->sibling->sibling->nptr->child = curr->child->sibling->nptr;
 				curr->child->sibling->sibling->nptr->child->sibling = temp;
-				curr->nptr = curr->child;
+				curr->nptr = curr->child->nptr;
 				curr->nptr->child = temp2;
-				curr->nptr->sibling = NULL;
+				// curr->nptr->sibling = NULL;
 			}
 			return;
 		}
