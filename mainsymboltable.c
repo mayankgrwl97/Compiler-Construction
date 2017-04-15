@@ -20,6 +20,25 @@ idsymboltable* checkScope(idsymboltable* currIdst, char* idlex)
 	return checkScope(currIdst->parent, idlex);
 }
 
+int getlengthofid(stacknode* type)
+{
+	if(strcmp(type->ntortinfo->str, "INTEGER") == 0)
+		return 2;
+	if(strcmp(type->ntortinfo->str, "REAL") == 0)
+		return 4;
+	if(strcmp(type->ntortinfo->str, "BOOLEAN") == 0)
+		return 1;
+	
+	return getarrayrange(type)*getlengthofid(type->child->sibling);
+}
+
+int getarrayrange(stacknode* type) //type is pointer to ARRAY in AST
+{
+	int l = atoi(type->child->child->tokinfo->lexeme); //child of ARRAY is <range> and its child is NUM (l)
+	int r = atoi(type->child->child->sibling->tokinfo->lexeme); //next sibling is NUM(r)
+	return r-l;
+}
+
 void populateExpression(stacknode* curr, idsymboltable* currIdst)
 {
 	if(curr == NULL)
