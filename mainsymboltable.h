@@ -45,5 +45,5 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* insertmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* makemainsymboltablenode(char* func_name);
-void printmainsymboltable(mainsymboltable* table);
+void printmainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable);
 #endif

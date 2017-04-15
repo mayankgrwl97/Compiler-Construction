@@ -22,7 +22,7 @@ void makeAST(stacknode* curr, char* parent)
 		return;
 	}	// not stroing eps
 
-	if(curr->ntortinfo->nt == 0)
+	if(strcmp(curr->ntortinfo->str, "ARRAY") != 0 && curr->ntortinfo->nt == 0)
 	{
 		curr->nptr = curr;
 		return;
