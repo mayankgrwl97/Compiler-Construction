@@ -41,5 +41,5 @@ idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offse
 idsymboltablenode* insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst);
 idsymboltablenode* getidsymboltablenode(char* idlex, idsymboltable* idst);
 void printidsymboltable(idsymboltable* idst);
-
+void printFunctionTable(idsymboltable* idst);
 #endif

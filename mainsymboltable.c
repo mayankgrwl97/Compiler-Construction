@@ -33,7 +33,7 @@ int getarrayrange(stacknode* type) //type is pointer to ARRAY in AST
 {
 	int l = atoi(type->child->child->tokinfo->lexeme); //child of ARRAY is <range> and its child is NUM (l)
 	int r = atoi(type->child->child->sibling->tokinfo->lexeme); //next sibling is NUM(r)
-	return r-l;
+	return r-l+1;
 }
 
 int getlengthofid(stacknode* type)
@@ -120,15 +120,15 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 		while(temp != NULL)
 		{
 			if(inSameScope(currIdst, temp->tokinfo->lexeme))
-				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
+				printf("ERROR at line %d : %s already declared in this scope\n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
 			else
 			{
 				idsymboltablenode* pt = insertidsymboltablenode(temp->tokinfo->lexeme, curr->child->sibling, currIdst->offset, currIdst);	//curr->child->sibling is type, offset not considered
 				temp->idst = currIdst;	// setting symbol table link for this ID
-				temp = temp->sibling;
 				pt->widthofid = getlengthofid(pt->type);
 				currIdst->offset += pt->widthofid;
 			}
+			temp = temp->sibling;
 		}
 	}
 	else if(strcmp(curr->ntortinfo->str, "<iterativeStmt>") == 0)
@@ -449,54 +449,19 @@ mainsymboltablenode* makemainsymboltablenode(char* func_name)
 	pt->iplist = pt->oplist = NULL;
 }
 
-int serial_no = 1;
-void printmainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable)
+void printmainsymboltable(mainsymboltable* globaltable)
 {
-	if(curr == NULL)
-		return;
-	printmainsymboltable(curr->child, curr, globaltable);
-
-	if(strcmp(curr->ntortinfo->str, "ID") == 0)
+	for(int i = 0;i < mainsymboltablesize; i++)
 	{
-		if(presentmainsymboltable(globaltable, curr->tokinfo->lexeme))
+		mainsymboltablenode* pt = globaltable->buckets[i];
+		while(pt != NULL)
 		{
-			printf("%s MODULE\n", curr->tokinfo->lexeme);
-		}
-		else
-		{
-			if(curr->idst != NULL)
-			{
-				idsymboltablenode* helper = getidsymboltablenode(curr->tokinfo->lexeme, curr->idst);
-				if(strcmp(helper->type->ntortinfo->str, "ARRAY") == 0){
-					printf("%d\t%s\tARRAY(%s, %s)\n", serial_no, curr->tokinfo->lexeme, helper->type->child->child->sibling->tokinfo->lexeme, helper->type->child->sibling->ntortinfo->str);
-				}
-				else
-					printf("%d\t%s\t%s\n", serial_no, curr->tokinfo->lexeme, helper->type->ntortinfo->str);
-				serial_no++;
-			}
-			else
-			{
-				printf("%s i am not correct.\n", curr->tokinfo->lexeme);
-			}
+			printf("Module name -> %s\n", pt->func_name);
+			idsymboltable* temp = pt->idst;
+			printFunctionTable(temp);
+			pt = pt->next;
 		}
 	}
-
-	if(strcmp(curr->ntortinfo->str, "PROGRAM") == 0)
-	{
-		if(presentmainsymboltable(globaltable, curr->tokinfo->lexeme))
-		{
-			printf("PROGRAM MODULE\n");
-		}
-	}
-
-	if(curr->child == NULL)		return;
-	stacknode* sib = curr->child->sibling;
-	while(sib != NULL)
-	{
-		printmainsymboltable(sib, curr, globaltable);
-		sib = sib->sibling;
-	}
-	return;
 }
 
 mainsymboltable* makemainsymboltable()

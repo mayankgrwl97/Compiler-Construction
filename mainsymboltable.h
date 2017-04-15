@@ -45,5 +45,6 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* insertmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* makemainsymboltablenode(char* func_name);
-void printmainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable);
+void printmainsymboltable(mainsymboltable* globaltable);
+int getarrayrange(stacknode* type);
 #endif

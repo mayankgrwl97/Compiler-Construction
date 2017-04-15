@@ -6,6 +6,7 @@
 #include "token.h"
 #include "idsymboltable.h"
 #include "stack.h"
+#include "mainsymboltable.h"
 
 idsymboltable* makeidsymboltable()
 {
@@ -52,6 +53,8 @@ idsymboltablenode* getidsymboltablenode(char* idlex, idsymboltable* idst)
 	return NULL;
 }
 
+int serial_no = 1;
+
 void printidsymboltable(idsymboltable* idst)
 {
 	for(int i = 0;i < idsymboltablesize; i++)
@@ -59,8 +62,30 @@ void printidsymboltable(idsymboltable* idst)
 		idsymboltablenode* temp = idst->buckets[i];
 		while(temp != NULL)
 		{
-			printf("%s %s\t\n", temp->idlex, temp->type->ntortinfo->str);
+			if(strcmp(temp->type->ntortinfo->str, "ARRAY") == 0)
+			{
+				printf("%d\t%s\tARRAY(%d, %s)\t%d to %d\t%d\t%d\t%d\n", serial_no, temp->idlex, getarrayrange(temp->type), temp->type->child->sibling->ntortinfo->str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, idst->offset);
+			}
+			else
+				printf("%d\t%s\t%s\t%d to %d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, idst->offset);
+				// offset not correct
+			serial_no++;
 			temp = temp->next;
 		}
+	}
+}
+
+void printFunctionTable(idsymboltable* idst)
+{
+	// print itself
+	printidsymboltable(idst);
+	if(idst->child == NULL)
+		return;
+	printidsymboltable(idst->child);
+	idsymboltable* helper = idst->child->sibling;
+	while(helper != NULL)
+	{
+		printidsymboltable(helper);
+		helper = helper->sibling;
 	}
 }
