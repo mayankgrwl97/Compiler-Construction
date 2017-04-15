@@ -390,7 +390,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 				printf("ERROR %s already declared in this scope\n", temp->tokinfo->lexeme);
 			else
 			{
-				idsymboltablenode* idstnode = insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, 0, pt->idst);	// offset not considered
+				idsymboltablenode* idstnode = insertidsymboltablenode(temp->tokinfo->lexeme, temp->child, pt->idst->offset, pt->idst);	// offset not considered
 				idstnode->widthofid = getlengthofid(idstnode->type);
 				pt->idst->offset += idstnode->widthofid;
 				temp->idst = pt->idst;	// setting symbol table link for ID
