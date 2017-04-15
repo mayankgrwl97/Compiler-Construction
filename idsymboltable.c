@@ -14,6 +14,8 @@ idsymboltable* makeidsymboltable()
 	pt->offset = 0;
 	for(int i=0; i<idsymboltablesize; i++)
 		pt->buckets[i] = NULL;
+	pt->startline = pt->endline = 0;
+	pt->nestinglevel = 0;
 	return pt;
 }
 
@@ -23,6 +25,7 @@ idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offse
 	pt->idlex = idlex;
 	pt->type = type;
 	pt->offset = offset;
+	pt->widthofid = 0;
 	return pt;
 }
 

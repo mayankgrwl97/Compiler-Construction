@@ -20,6 +20,25 @@ idsymboltable* checkScope(idsymboltable* currIdst, char* idlex)
 	return checkScope(currIdst->parent, idlex);
 }
 
+int getarrayrange(stacknode* type) //type is pointer to ARRAY in AST
+{
+	int l = atoi(type->child->child->tokinfo->lexeme); //child of ARRAY is <range> and its child is NUM (l)
+	int r = atoi(type->child->child->sibling->tokinfo->lexeme); //next sibling is NUM(r)
+	return r-l;
+}
+
+int getlengthofid(stacknode* type)
+{
+	if(strcmp(type->ntortinfo->str, "INTEGER") == 0)
+		return 2;
+	if(strcmp(type->ntortinfo->str, "REAL") == 0)
+		return 4;
+	if(strcmp(type->ntortinfo->str, "BOOLEAN") == 0)
+		return 1;
+	
+	return getarrayrange(type)*getlengthofid(type->child->sibling);
+}
+
 void populateExpression(stacknode* curr, idsymboltable* currIdst)
 {
 	if(curr == NULL)
@@ -32,12 +51,13 @@ void populateExpression(stacknode* curr, idsymboltable* currIdst)
 	{
 		idsymboltable* temp = checkScope(currIdst, curr->tokinfo->lexeme);
 		if(temp == NULL)
-			printf("ERROR %s not declared in this scope\n", curr->tokinfo->lexeme);
+			printf("ERROR at line %d : %s not declared in this scope\n", curr->tokinfo->linenumber, curr->tokinfo->lexeme);
 		else
 			curr->idst = temp;
 	}
 
-	if(curr->child == NULL)		return;
+	if(curr->child == NULL)	
+		return;
 
 	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
@@ -45,6 +65,8 @@ void populateExpression(stacknode* curr, idsymboltable* currIdst)
 		populateExpression(temp, currIdst);
 		temp = temp->sibling;
 	}
+
+	return;
 }
 
 void populateStatements(stacknode* curr, idsymboltable* currIdst)
@@ -58,7 +80,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 		{
 			idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
 			if(temp == NULL)
-				printf("ERROR %s not declared in this scope\n", curr->child->sibling->tokinfo->lexeme);
+				printf("ERROR at line %d : %s not declared in this scope\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
 			else
 				curr->child->sibling->idst = temp;		// setting symbol table link for this ID
 		}
@@ -68,7 +90,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 			{
 				idsymboltable* temp = checkScope(currIdst, curr->child->sibling->child->tokinfo->lexeme);
 				if(temp == NULL)
-					printf("ERROR %s not declared in this scope\n", curr->child->sibling->child->tokinfo->lexeme);
+					printf("ERROR at line %d : %s not declared in this scope\n", curr->child->sibling->child->tokinfo->linenumber, curr->child->sibling->child->tokinfo->lexeme);
 				else
 					curr->child->sibling->child->idst = temp;	// setting symbol table link for this ID
 				
@@ -76,13 +98,15 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst)
 				{
 					idsymboltable* temp2 = checkScope(currIdst, curr->child->sibling->child->sibling->child->tokinfo->lexeme);
 					if(temp2 == NULL)
-						printf("ERROR %s not declared in scope\n", curr->child->sibling->child->sibling->child->tokinfo->lexeme);
+						printf("ERROR at line %d : %s not declared in scope\n", curr->child->sibling->child->sibling->child->tokinfo->linenumber, curr->child->sibling->child->sibling->child->tokinfo->lexeme);
 					else
 						curr->child->sibling->child->sibling->child->idst = temp2;
 				}
 			}
 		}
 	}
+
+	//checked till here
 	else if(strcmp(curr->ntortinfo->str, "<declareStmt>") == 0)
 	{
 		stacknode* temp = curr->child->child;	// pointing to ID

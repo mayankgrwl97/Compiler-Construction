@@ -19,6 +19,7 @@ struct idsymboltablenode
 	stacknode* type;
 	int offset;
 	idsymboltablenode* next;
+	int widthofid;
 };
 
 typedef struct idsymboltable idsymboltable;
@@ -27,6 +28,9 @@ struct idsymboltable
 {
 	idsymboltablenode* buckets[idsymboltablesize];
 	int offset;
+	int startline;
+	int endline;
+	int nestinglevel;
 	idsymboltable* child;
 	idsymboltable* sibling;
 	idsymboltable* parent;
