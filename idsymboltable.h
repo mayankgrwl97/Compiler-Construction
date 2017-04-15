@@ -38,7 +38,7 @@ struct idsymboltable
 
 idsymboltable* makeidsymboltable();
 idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offset);
-void insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst);
+idsymboltablenode* insertidsymboltablenode(char* idlex, stacknode* type, int offset, idsymboltable* idst);
 idsymboltablenode* getidsymboltablenode(char* idlex, idsymboltable* idst);
 void printidsymboltable(idsymboltable* idst);
 
