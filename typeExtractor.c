@@ -43,7 +43,10 @@ int typeofexpr(stacknode* curr)
 		return boolean;
 
 	if(strcmp(curr->ntortinfo->str, "MINUS") == 0)
-		return typeofexpr(curr->sibling);
+	{
+		if(curr->sibling != NULL)
+			return typeofexpr(curr->sibling);
+	}
 
 	if((strcmp(curr->ntortinfo->str, "PLUS") == 0) || (strcmp(curr->ntortinfo->str, "MINUS") == 0) || (strcmp(curr->ntortinfo->str, "MUL") == 0) || (strcmp(curr->ntortinfo->str, "DIV") == 0))
 	{
