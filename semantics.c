@@ -73,6 +73,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		
 	}
 
+	// SEMANTICS FOR "SWITCH" STATEMENTS
 	if(strcmp(curr->ntortinfo->str, "<condionalStmt>") == 0)
 	{
 		idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
@@ -135,6 +136,25 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			if(tr != 1 || fl != 1)
 			{
 				printf("ERROR : switch case with boolean id should have both TRUE and FALSE cases\n");
+			}
+		}
+	}
+
+	// SEMANTICS FOR "FOR" STATEMENTS
+	if(strcmp(curr->ntortinfo->str, "<iterativeStmt>") == 0)
+	{
+		if(strcmp(curr->child->ntortinfo->str, "FOR") == 0)
+		{
+			char* tempid = curr->child->sibling->tokinfo->lexeme;
+			stacknode* temp = curr->child->sibling->sibling->sibling->sibling->child;
+			while(temp != NULL)
+			{
+				if(strcmp(temp->ntortinfo->str, "<assignmentStmt>") == 0)
+				{
+					if(strcmp(temp->child->tokinfo->lexeme, tempid) == 0 && strcmp(temp->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
+						printf("ERROR at line %d : cannot redefine %s\n", temp->child->tokinfo->linenumber, tempid);
+				}
+				temp = temp->sibling;
 			}
 		}
 	}
