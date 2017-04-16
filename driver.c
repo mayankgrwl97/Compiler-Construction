@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 		mainsymboltable* globaltable = makemainsymboltable();
 
 		makeAST(root, "ROOT");
-		// printAST(root);
+		printAST(root);
 		populatemainsymboltable(root, NULL, globaltable);
 		// printmainsymboltable(globaltable);
 		checkSemantics(root, globaltable);

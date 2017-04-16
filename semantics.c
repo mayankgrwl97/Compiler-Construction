@@ -73,6 +73,72 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		
 	}
 
+	if(strcmp(curr->ntortinfo->str, "<condionalStmt>") == 0)
+	{
+		idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
+		int type = gettype(pt->type);
+
+
+		if(type == integer)
+		{
+			stacknode* temp = curr->child->sibling->sibling->child;
+			while(temp != NULL)
+			{
+				if(strcmp(temp->child->ntortinfo->str, "NUM") != 0)
+					printf("ERROR at line %d : integer case expected\n", temp->child->tokinfo->linenumber);
+
+				temp = temp->sibling->sibling;
+			}
+			temp = curr->child->sibling->sibling->sibling;
+			if(temp->child == NULL)
+			{
+				printf("ERROR : expected default case statement for integer type\n");
+			}
+		}
+		else if(type == real)
+		{
+			printf("ERROR : switch case does not work with real identifiers\n");
+		}
+		else if(type == boolean)
+		{
+			stacknode* temp = curr->child->sibling->sibling->sibling; //for <default>
+			if(temp->child != NULL)
+				printf("ERROR : switch case with boolean id should not have default\n");
+
+			temp = curr->child->sibling->sibling->child;
+			int count = 0;
+			while(temp != NULL)
+			{
+				count++;
+				temp = temp->sibling->sibling;
+			}
+
+			if(count != 2)
+			{
+				printf("ERROR : switch case with boolean id cannot have more than two cases\n");
+				return;
+			}
+
+			temp = curr->child->sibling->sibling->child;
+			int tr=0, fl=0;
+			while(temp != NULL)
+			{
+				if(strcmp(temp->child->ntortinfo->str, "TRUE") == 0)
+					tr++;
+				else if(strcmp(temp->child->ntortinfo->str, "FALSE") == 0)
+					fl++;
+				else
+					printf("ERROR at line %d : switch case with boolean id cannot take NUM case value\n", temp->child->tokinfo->linenumber);
+				temp = temp->sibling->sibling;
+			}
+
+			if(tr != 1 || fl != 1)
+			{
+				printf("ERROR : switch case with boolean id should have both TRUE and FALSE cases\n");
+			}
+		}
+	}
+
 	stacknode* temp = curr->child;
 	while(temp != NULL)
 	{

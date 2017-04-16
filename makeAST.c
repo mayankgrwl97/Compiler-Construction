@@ -528,7 +528,7 @@ void makeAST(stacknode* curr, char* parent)
 		else
 		{
 			curr->nptr = curr->child->sibling;
-			stacknode* temp = curr->child->sibling->sibling->sibling->sibling->sibling->nptr;
+			stacknode* temp = curr->nptr->sibling->sibling->sibling->sibling->sibling->nptr;
 			curr->nptr->sibling = curr->nptr->sibling->sibling->nptr;
 			curr->nptr->sibling->sibling = temp;
 		}
