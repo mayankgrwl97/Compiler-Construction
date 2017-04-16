@@ -19,6 +19,7 @@ Karan Deep Batra(2014A7PS160P)
 #include "mainsymboltable.h"
 #include "makeAST.h"
 #include "typeExtractor.h"
+#include "semantics.h"
 
 void printCleanFile()
 {
@@ -145,10 +146,11 @@ int main(int argc, char* argv[])
 		mainsymboltable* globaltable = makemainsymboltable();
 
 		makeAST(root, "ROOT");
-		printAST(root);
+		// printAST(root);
 		populatemainsymboltable(root, NULL, globaltable);
 		// printmainsymboltable(globaltable);
-		traverseAST_fortypechecking(root);
+		checkSemantics(root, globaltable);
+		// traverseAST_fortypechecking(root);
 		// populatemainsymboltable(root, NULL, globaltable);
 	}
 	return 0;

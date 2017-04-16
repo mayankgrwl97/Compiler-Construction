@@ -7,11 +7,9 @@
 #include "parserDef.h"
 #include "mainsymboltable.h"
 #include "idsymboltable.h"
+#include "typeExtractor.h"
 
-// <level4> --> BO <expression> BC | MINUS BO <expression> BC | <var> | TRUE | FALSE $
-// <var> --> ID <whichId> | NUM | RNUM
-
-int gettype(stacknode* type)
+int gettype(stacknode* type)	// expects ID->type
 {
 	if(strcmp(type->ntortinfo->str, "INTEGER") == 0)
 		return integer;
@@ -22,11 +20,6 @@ int gettype(stacknode* type)
 	else
 		return gettype(type->child->sibling);
 }
-
-// <op1> --> PLUS | MINUS
-// <op2> --> MUL | DIV
-// <logicalOp> --> AND | OR
-// <relationalOp> --> LT | LE | GT | GE | EQ | NE
 
 int typeofexpr(stacknode* curr)
 {

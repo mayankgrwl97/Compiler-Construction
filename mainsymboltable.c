@@ -457,9 +457,33 @@ void printmainsymboltable(mainsymboltable* globaltable)
 		while(pt != NULL)
 		{
 			printf("Module name -> %s\n", pt->func_name);
+			printf("Takes Input\n");
+			if(pt->iplist != NULL)
+			{
+				stacknode* inp = pt->iplist->child;	// pointing to ID
+				while(inp != NULL)
+				{
+					idsymboltablenode* idnode = getidsymboltablenode(inp->tokinfo->lexeme, inp->idst);
+					printf("%s %s\n", inp->tokinfo->lexeme, idnode->type->ntortinfo->str);
+					inp = inp->sibling;
+				}
+			}
+			printf("\n");
+			printf("Gives Output\n");
+			if(pt->oplist != NULL)
+			{
+				stacknode* op = pt->oplist->child;	// pointing to ID
+				while(op != NULL)
+				{
+					idsymboltablenode* idnode = getidsymboltablenode(op->tokinfo->lexeme, op->idst);
+					printf("%s %s\n", op->tokinfo->lexeme, idnode->type->ntortinfo->str);
+					op = op->sibling;
+				}
+			}
+			printf("\n");
 			idsymboltable* temp = pt->idst;
 			printFunctionTable(temp);
-			pt = pt->next;
+			pt = pt->next;	
 		}
 	}
 }
