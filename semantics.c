@@ -16,12 +16,30 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 	if(curr == NULL)
 		return;
 
+	if(strcmp(curr->ntortinfo->str, "<output_plist>") == 0)
+	{
+		stacknode* temp = curr->child;
+		while(temp != NULL)
+		{
+			idsymboltablenode* helper = getidsymboltablenode(temp->tokinfo->lexeme, temp->idst);
+			if(helper->isAssigned == 0)
+				printf("ERROR_M: The output parameter %s does not get assigned a value\n", temp->tokinfo->lexeme);
+			temp = temp->sibling;
+		}
+	}
+
 	if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
 	{
 		func_name = curr->child->sibling->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
 		if(pt == NULL){
-			printf("ERROR_M MODULE %s not known.\n", curr->child->sibling->tokinfo->lexeme);
+			printf("ERROR_M: MODULE %s not known.\n", curr->child->sibling->tokinfo->lexeme);
+			return;
+		}
+
+		if(curr->child->sibling->sibling->child->idst != NULL && strcmp(curr->child->sibling->sibling->child->idst->func_name, func_name) == 0)	
+		{
+			printf("ERROR_M: Recursion not allowed\n");
 			return;
 		}
 
@@ -58,7 +76,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 				stacknode* id2 = curr->child->child;
 				while(id1 != NULL)
 				{
-					idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);
+					idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);	// id1->idst could be null, check exception handling
 					idsymboltablenode* temp2 = getidsymboltablenode(id2->tokinfo->lexeme, id2->idst);
 					int type1 = gettype(temp1->type);
 					int type2 = gettype(temp2->type);
@@ -101,7 +119,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			stacknode* id2 = curr->child->sibling->sibling->child;	// pointing to ID
 			while(id1 != NULL)
 			{
-				idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);
+				idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);	// id1->idst could be null, check exception handling
 				idsymboltablenode* temp2 = getidsymboltablenode(id2->tokinfo->lexeme, id2->idst);
 				int type1 = gettype(temp1->type);
 				int type2 = gettype(temp2->type);

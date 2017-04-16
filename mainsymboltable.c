@@ -202,8 +202,11 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 		idsymboltable* temp = checkScope(currIdst, curr->child->tokinfo->lexeme);
 		if(temp == NULL)
 			printf("ERROR at line %d : %s not declared in this scope\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
-		else
+		else{
 			curr->child->idst = temp;	// setting symbol table link for this ID
+			idsymboltablenode* helper = getidsymboltablenode(curr->child->tokinfo->lexeme, currIdst);
+			helper->isAssigned = 1;
+		}
 
 		if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
 			populateExpression(curr->child->sibling->child, currIdst);
@@ -302,7 +305,6 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			temp2 = temp2->sibling;
 		}
 	}
-	//checked till here
 }
 
 void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable)
@@ -345,7 +347,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 			pt->idst->startline = curr->child->tokinfo->linenumber;
 			pt->idst->endline = curr->child->sibling->sibling->tokinfo->linenumber;
 			pt->idst->nestinglevel = 1;
-			pt->idst->func_name = "driver";
+			pt->idst->func_name = func_name;
 		}
 		stacknode* temp = curr->child->sibling->child;	// pointing to <ioStmt> (and similar)
 		while(temp != NULL)
@@ -356,9 +358,8 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	}
 	else if(strcmp(curr->ntortinfo->str, "<driverModule>") == 0)
 	{
-		insertmainsymboltable(globaltable, curr->child->tokinfo->lexeme);	// inserting "program"
+		insertmainsymboltable(globaltable, "program");	// inserting "program"
 	}
-	//checked till here
 	else if(strcmp(curr->ntortinfo->str, "<input_plist>") == 0)
 	{
 		func_name = parent->child->tokinfo->lexeme;
@@ -448,9 +449,6 @@ mainsymboltablenode* makemainsymboltablenode(char* func_name)
 	pt->next = NULL;
 	pt->idst = NULL;
 	pt->isdefined = pt->isused = 0;
-	// pt->iplist = (inputlist*)malloc(sizeof(inputlist));
-	// pt->oplist = (outputlist*)malloc(sizeof(outputlist));
-	// pt->iplist->first = pt->iplist->last = pt->oplist->first = pt->oplist->last = NULL;
 	pt->iplist = pt->oplist = NULL;
 }
 
@@ -461,31 +459,6 @@ void printmainsymboltable(mainsymboltable* globaltable)
 		mainsymboltablenode* pt = globaltable->buckets[i];
 		while(pt != NULL)
 		{
-			// printf("Module name -> %s\n", pt->func_name);
-			// printf("Takes Input\n");
-			// if(pt->iplist != NULL)
-			// {
-			// 	stacknode* inp = pt->iplist->child;	// pointing to ID
-			// 	while(inp != NULL)
-			// 	{
-			// 		idsymboltablenode* idnode = getidsymboltablenode(inp->tokinfo->lexeme, inp->idst);
-			// 		printf("%s %s\n", inp->tokinfo->lexeme, idnode->type->ntortinfo->str);
-			// 		inp = inp->sibling;
-			// 	}
-			// }
-			// printf("\n");
-			// printf("Gives Output\n");
-			// if(pt->oplist != NULL)
-			// {
-			// 	stacknode* op = pt->oplist->child;	// pointing to ID
-			// 	while(op != NULL)
-			// 	{
-			// 		idsymboltablenode* idnode = getidsymboltablenode(op->tokinfo->lexeme, op->idst);
-			// 		printf("%s %s\n", op->tokinfo->lexeme, idnode->type->ntortinfo->str);
-			// 		op = op->sibling;
-			// 	}
-			// }
-			// printf("\n");
 			idsymboltable* temp = pt->idst;
 			printFunctionTable(temp);
 			pt = pt->next;	

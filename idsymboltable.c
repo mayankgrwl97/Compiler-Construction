@@ -27,6 +27,7 @@ idsymboltablenode* makeidsymboltablenode(char* idlex, stacknode* type, int offse
 	pt->type = type;
 	pt->offset = offset;
 	pt->widthofid = 0;
+	pt->isAssigned = 0;
 	return pt;
 }
 
@@ -62,15 +63,17 @@ void printidsymboltable(idsymboltable* idst)
 		idsymboltablenode* temp = idst->buckets[i];
 		while(temp != NULL)
 		{
+			char* printFuncName =  idst->func_name;
+			if(strcmp(printFuncName, "program") == 0)
+				printFuncName = "driver";	// because we are storing program instead of driver
 			if(strcmp(temp->type->ntortinfo->str, "ARRAY") == 0)
 			{
 				char str[50];
 				sprintf(str,"ARRAY(%d, %s)", getarrayrange(temp->type), temp->type->child->sibling->ntortinfo->str);
-				printf("%d\t%s\t%-25s%-10s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, str, idst->func_name, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
+				printf("%d\t%-25s%-25s%-10s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, str, printFuncName, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
 			}
 			else
-				printf("%d\t%s\t%-25s%-10s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, idst->func_name,idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
-				// offset not correct
+				printf("%d\t%-25s%-25s%-10s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, printFuncName,idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
 			serial_no++;
 			temp = temp->next;
 		}
@@ -79,7 +82,6 @@ void printidsymboltable(idsymboltable* idst)
 
 void printFunctionTable(idsymboltable* idst)
 {
-	// print itself
 	printidsymboltable(idst);
 	if(idst->child == NULL)
 		return;

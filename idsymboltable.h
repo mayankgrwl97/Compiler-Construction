@@ -20,6 +20,7 @@ struct idsymboltablenode
 	int offset;
 	idsymboltablenode* next;
 	int widthofid;
+	int isAssigned;
 };
 
 typedef struct idsymboltable idsymboltable;
