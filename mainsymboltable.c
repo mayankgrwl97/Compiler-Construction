@@ -146,7 +146,8 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			newIdst->endline = curr->child->sibling->sibling->sibling->sibling->sibling->tokinfo->linenumber;
 			newIdst->nestinglevel = currIdst->nestinglevel + 1;
 			newIdst->parent = currIdst;
-			
+			newIdst->func_name = currIdst->func_name;
+
 			if(currIdst->child == NULL)
 				currIdst->child = newIdst;
 			else
@@ -174,6 +175,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			newIdst->endline = curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber;
 			newIdst->nestinglevel = currIdst->nestinglevel + 1;
 			newIdst->parent = currIdst;
+			newIdst->func_name = currIdst->func_name;
 
 			if(currIdst->child == NULL)
 				currIdst->child = newIdst;
@@ -231,6 +233,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 		newIdst->endline = curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber;
 		newIdst->nestinglevel = currIdst->nestinglevel + 1;
 		newIdst->parent = currIdst;
+		newIdst->func_name = currIdst->func_name;
 
 		if(currIdst->child == NULL)
 				currIdst->child = newIdst;
@@ -342,6 +345,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 			pt->idst->startline = curr->child->tokinfo->linenumber;
 			pt->idst->endline = curr->child->sibling->sibling->tokinfo->linenumber;
 			pt->idst->nestinglevel = 1;
+			pt->idst->func_name = "driver";
 		}
 		stacknode* temp = curr->child->sibling->child;	// pointing to <ioStmt> (and similar)
 		while(temp != NULL)
@@ -363,6 +367,7 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		pt->idst->startline = curr->sibling->sibling->child->tokinfo->linenumber;
 		pt->idst->endline = curr->sibling->sibling->child->sibling->sibling->tokinfo->linenumber;
 		pt->idst->nestinglevel = 1;
+		pt->idst->func_name = func_name;
 
 		stacknode* temp = curr->child;	// pointing to ID
 		while(temp != NULL)
@@ -456,31 +461,31 @@ void printmainsymboltable(mainsymboltable* globaltable)
 		mainsymboltablenode* pt = globaltable->buckets[i];
 		while(pt != NULL)
 		{
-			printf("Module name -> %s\n", pt->func_name);
-			printf("Takes Input\n");
-			if(pt->iplist != NULL)
-			{
-				stacknode* inp = pt->iplist->child;	// pointing to ID
-				while(inp != NULL)
-				{
-					idsymboltablenode* idnode = getidsymboltablenode(inp->tokinfo->lexeme, inp->idst);
-					printf("%s %s\n", inp->tokinfo->lexeme, idnode->type->ntortinfo->str);
-					inp = inp->sibling;
-				}
-			}
-			printf("\n");
-			printf("Gives Output\n");
-			if(pt->oplist != NULL)
-			{
-				stacknode* op = pt->oplist->child;	// pointing to ID
-				while(op != NULL)
-				{
-					idsymboltablenode* idnode = getidsymboltablenode(op->tokinfo->lexeme, op->idst);
-					printf("%s %s\n", op->tokinfo->lexeme, idnode->type->ntortinfo->str);
-					op = op->sibling;
-				}
-			}
-			printf("\n");
+			// printf("Module name -> %s\n", pt->func_name);
+			// printf("Takes Input\n");
+			// if(pt->iplist != NULL)
+			// {
+			// 	stacknode* inp = pt->iplist->child;	// pointing to ID
+			// 	while(inp != NULL)
+			// 	{
+			// 		idsymboltablenode* idnode = getidsymboltablenode(inp->tokinfo->lexeme, inp->idst);
+			// 		printf("%s %s\n", inp->tokinfo->lexeme, idnode->type->ntortinfo->str);
+			// 		inp = inp->sibling;
+			// 	}
+			// }
+			// printf("\n");
+			// printf("Gives Output\n");
+			// if(pt->oplist != NULL)
+			// {
+			// 	stacknode* op = pt->oplist->child;	// pointing to ID
+			// 	while(op != NULL)
+			// 	{
+			// 		idsymboltablenode* idnode = getidsymboltablenode(op->tokinfo->lexeme, op->idst);
+			// 		printf("%s %s\n", op->tokinfo->lexeme, idnode->type->ntortinfo->str);
+			// 		op = op->sibling;
+			// 	}
+			// }
+			// printf("\n");
 			idsymboltable* temp = pt->idst;
 			printFunctionTable(temp);
 			pt = pt->next;	

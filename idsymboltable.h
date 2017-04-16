@@ -34,6 +34,7 @@ struct idsymboltable
 	idsymboltable* child;
 	idsymboltable* sibling;
 	idsymboltable* parent;
+	char* func_name;
 };
 
 idsymboltable* makeidsymboltable();

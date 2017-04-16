@@ -66,10 +66,10 @@ void printidsymboltable(idsymboltable* idst)
 			{
 				char str[50];
 				sprintf(str,"ARRAY(%d, %s)", getarrayrange(temp->type), temp->type->child->sibling->ntortinfo->str);
-				printf("%d\t%s\t%-25s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
+				printf("%d\t%s\t%-25s%-10s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, str, idst->func_name, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
 			}
 			else
-				printf("%d\t%s\t%-25s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
+				printf("%d\t%s\t%-25s%-10s\t%d to %-5d\t%d\t%d\t%d\n", serial_no, temp->idlex, temp->type->ntortinfo->str, idst->func_name,idst->startline, idst->endline, idst->nestinglevel, temp->widthofid, temp->offset);
 				// offset not correct
 			serial_no++;
 			temp = temp->next;

@@ -20,8 +20,10 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 	{
 		func_name = curr->child->sibling->tokinfo->lexeme;
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		if(pt == NULL)
+		if(pt == NULL){
 			printf("ERROR_M MODULE %s not known.\n", curr->child->sibling->tokinfo->lexeme);
+			return;
+		}
 
 		int numActualReturn = 0, numOptional = 0;
 
@@ -63,7 +65,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 					if(type1 != type2)
 					{
 						printf("ERROR_M: Output parameters types mismatch\n");
-						return;
+						break;
 					}
 					id1 = id1->sibling;
 					id2 = id2->sibling;
@@ -71,6 +73,47 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			}
 		}
 		
+		int actualInput = 0, givenInput = 0;
+
+		if(pt->iplist != NULL)
+		{
+			stacknode* helper = pt->iplist->child;	// pointing to ID
+			while(helper != NULL)
+			{
+				actualInput++;
+				helper = helper->sibling;
+			}
+		}
+
+		stacknode* helper = curr->child->sibling->sibling->child;	// pointing to ID
+		while(helper != NULL)
+		{
+			givenInput++;
+			helper = helper->sibling;
+		}
+
+		if(actualInput != givenInput)
+			printf("ERROR_M: Input parameters numbers mismatch\n");
+		else
+		{
+			// check for types
+			stacknode* id1 = pt->iplist->child;
+			stacknode* id2 = curr->child->sibling->sibling->child;	// pointing to ID
+			while(id1 != NULL)
+			{
+				idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);
+				idsymboltablenode* temp2 = getidsymboltablenode(id2->tokinfo->lexeme, id2->idst);
+				int type1 = gettype(temp1->type);
+				int type2 = gettype(temp2->type);
+				if(type1 != type2)
+				{
+					printf("ERROR_M: Input parameters types mismatch\n");
+					break;
+				}
+				id1 = id1->sibling;
+				id2 = id2->sibling;
+			}		
+		}
 	}
 
 	stacknode* temp = curr->child;
