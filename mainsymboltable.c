@@ -204,7 +204,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			printf("ERROR at line %d : %s not declared in this scope\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		else{
 			curr->child->idst = temp;	// setting symbol table link for this ID
-			idsymboltablenode* helper = getidsymboltablenode(curr->child->tokinfo->lexeme, currIdst);
+			idsymboltablenode* helper = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 			helper->isAssigned = 1;
 		}
 

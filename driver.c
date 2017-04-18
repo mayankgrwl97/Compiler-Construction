@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
 		// printAST(root);
 		populatemainsymboltable(root, NULL, globaltable);
 		printmainsymboltable(globaltable);
-		// traverseAST_fortypechecking(root);
+		traverseAST_fortypechecking(root);
 		checkSemantics(root, globaltable);
 	}
 	return 0;

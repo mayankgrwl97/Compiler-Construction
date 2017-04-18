@@ -9,6 +9,17 @@
 #include "idsymboltable.h"
 #include "typeExtractor.h"
 
+char* findTypeString(int n)
+{
+	if(n == integer)	
+		return "integer";
+	if(n == real)
+		return "real";
+	if(n == boolean)
+		return "boolean";
+	return "ERROR";
+}
+
 int gettype(stacknode* type)	// expects ID->type
 {
 	if(strcmp(type->ntortinfo->str, "INTEGER") == 0)
@@ -18,7 +29,7 @@ int gettype(stacknode* type)	// expects ID->type
 	else if(strcmp(type->ntortinfo->str, "BOOLEAN") == 0)
 		return boolean;
 	else
-		return gettype(type->child->sibling);
+		return gettype(type->child->sibling);		// @@@@ array operations should be checked separately.@@@@
 }
 
 int typeofexpr(stacknode* curr)
@@ -58,10 +69,9 @@ int typeofexpr(stacknode* curr)
 			return real;
 		else
 		{
-			if(t1 == boolean || t2 == boolean)
-				printf("ERROR boolean incompatible with arithmetic operator %s \n", curr->ntortinfo->str);
-			else if(t1 != t2)
-				printf("ERROR type mismatch with arithmetic operator\n");
+			char* type1 = findTypeString(t1);
+			char* type2 = findTypeString(t2);
+			printf("ERROR_T: type mismatch of %s and %s operands with %s operator\n", type1, type2, curr->ntortinfo->str);
 			return error;
 		}
 	}
@@ -76,10 +86,9 @@ int typeofexpr(stacknode* curr)
 			return boolean;
 		else
 		{
-			if(t1 == boolean || t2 == boolean)
-				printf("ERROR boolean incompatible with relational operator\n");
-			else if(t1 != t2)
-				printf("ERROR type mismatch with relational operator\n");
+			char* type1 = findTypeString(t1);
+			char* type2 = findTypeString(t2);
+			printf("ERROR_T: type mismatch of %s and %s with %s operator\n", type1, type2, curr->ntortinfo->str);
 			return error;
 		}
 	}
@@ -92,10 +101,9 @@ int typeofexpr(stacknode* curr)
 			return boolean;
 		else
 		{
-			if(t1 != boolean)
-				printf("ERROR type incompatible with logical operator\n");
-			else if(t2 != boolean)
-				printf("ERROR type incompatible with logical operator\n");
+			char* type1 = findTypeString(t1);
+			char* type2 = findTypeString(t2);
+			printf("ERROR_T: type mismatch of %s and %s with logical %s\n", type1, type2, curr->ntortinfo->str);
 			return error;
 		}
 	}
@@ -108,53 +116,38 @@ void traverseAST_fortypechecking(stacknode* curr)
 	if(curr == NULL)
 		return;
 
+	// @@@@does the order of traversal matter ?@@@@
+
 	if(strcmp(curr->ntortinfo->str, "<assignmentStmt>") == 0)
 	{
-		if(curr->child->idst == NULL){
-			printf("%s not correct.\n", curr->child->tokinfo->lexeme);
+		if(curr->child->idst == NULL)
 			return;
-		}
+
 		idsymboltablenode* temp = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 		int idType = gettype(temp->type);
 		if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
 		{
 			int exprType = typeofexpr(curr->child->sibling->child);
 			if(idType != exprType)
-			{
-				printf("ERROR: type mismatch between %s\n", curr->child->tokinfo->lexeme);
-			}
+				printf("ERROR_T: type mismatch between %s\n", curr->child->tokinfo->lexeme);
 		}
 		else
 		{
 			int exprType = typeofexpr(curr->child->sibling);
 			if(idType != exprType)
-			{
-				printf("ERROR: type mismatch between %s\n", curr->child->tokinfo->lexeme);
-			}
+				printf("ERROR_T: type mismatch between %s\n", curr->child->tokinfo->lexeme);
 		}
 		return;
 	}
 
 	if(strcmp(curr->ntortinfo->str, "<iterativeStmt>") == 0)
 	{
-		// int temp = typeofexpr(curr);
-		// if(temp == 0)
-		// 	printf("type of expression is integer\n");
-		// else if(temp == 1)
-		// 	printf("type of expression is real\n");
-		// else if(temp == 2)
-		// 	printf("type of expression is boolean\n");
-		// else
-		// 	printf("ERROR_T");
-		// return;
-		int idType = 2;		// for boolean
+		int idType = boolean;
 		if(strcmp(curr->child->ntortinfo->str, "WHILE") == 0)
 		{
 			int exprType = typeofexpr(curr->child->sibling);
 			if(idType != exprType)
-			{
-				printf("ERROR: type mismatch between %s\n", curr->child->tokinfo->lexeme);
-			}
+				printf("ERROR_T: type mismatch between %s\n", curr->child->tokinfo->lexeme);
 		}
 		return;
 	}
