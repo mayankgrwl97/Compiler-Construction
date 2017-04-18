@@ -8,20 +8,6 @@
 
 #define mainsymboltablesize 100
 
-// typedef struct inputlist inputlist;
-// struct inputlist
-// {
-// 	stacknode* first; //use next field of stacknode* to maintain structure of linked list
-// 	stacknode* last;
-// };
-
-// typedef struct outputlist outputlist;
-// struct outputlist
-// {
-// 	stacknode* first;
-// 	stacknode* last;
-// };
-
 typedef struct mainsymboltablenode mainsymboltablenode;
 struct mainsymboltablenode
 {
@@ -31,7 +17,8 @@ struct mainsymboltablenode
 	stacknode* oplist;
 	idsymboltable* idst; // pointer to identifiers symbol table
 	int isdefined; //function is defined or not
-	int isused; //function is called or not
+	int isused; // function is called or not, why have we made this
+	int isdeclared; // function is declared or not
 };
 
 typedef struct mainsymboltable mainsymboltable;

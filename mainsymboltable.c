@@ -280,7 +280,7 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 			while(temp != NULL)
 			{
 				idsymboltable* temp2 = checkScope(currIdst, temp->tokinfo->lexeme);
-				if(temp2 == NULL)
+				if(temp2 == NULL)	
 					printf("ERROR at line %d : %s not declared in this scope\n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
 				else
 					temp->idst = temp2;		// setting symbol table link for this ID
@@ -290,10 +290,21 @@ void populateStatements(stacknode* curr, idsymboltable* currIdst, mainsymboltabl
 		}
 
 		mainsymboltablenode* temp = presentmainsymboltable(globaltable, curr->child->sibling->tokinfo->lexeme);
-		// idsymboltable* temp = checkScope(currIdst, curr->child->sibling->tokinfo->lexeme);
-		if(temp == NULL)
+		if(temp == NULL)	// function was neither declared nor defined
 			printf("ERROR at line %d : MODULE %s used but never declared before this.\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
+		else
+		{
+			char* f1 = temp->func_name;
+			char* f2 = currIdst->func_name;
 
+			if(temp->isdefined && temp->isdeclared)
+				printf("ERROR %s already defined before %s, no need to declare %s.\n",f1, f2, f1);
+			
+			if(!temp->isdefined){	// this would never run already done, for this temp would be already NULL
+				if(!temp->isdeclared)
+					printf("ERROR %s should be declared before %s, since defintion of %s is not present before %s.\n",f1, f2, f1, f2);
+			}
+		}
 		stacknode* temp2 = curr->child->sibling->sibling->child;	// pointing to ID
 		while(temp2 != NULL)
 		{
@@ -318,10 +329,12 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 		stacknode* temp = curr->child;	// pointing to function name ID, if the ID is func name, not storing it's symbol table link as it will always be globaltable
 		while(temp != NULL)
 		{
-			if(!presentmainsymboltable(globaltable, temp->tokinfo->lexeme))
-				insertmainsymboltable(globaltable, temp->tokinfo->lexeme);
+			if(!presentmainsymboltable(globaltable, temp->tokinfo->lexeme)){
+				mainsymboltablenode* temp2 = insertmainsymboltable(globaltable, temp->tokinfo->lexeme);
+				temp2->isdeclared = 1;
+			}
 			else
-				printf("ERROR at line %d : %s is already declared \n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
+				printf("ERROR at line %d : %s is already declared. Function overloading is not allowed.\n", temp->tokinfo->linenumber, temp->tokinfo->lexeme);
 				
 			temp = temp->sibling;
 		}
@@ -330,9 +343,15 @@ void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable
 	{
 		func_name = curr->child->tokinfo->lexeme;	// pointing to function name ID, if the ID is func name, not storing it's symbol table link as it will always be globaltable
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		if(pt == NULL)
+		if(pt == NULL)	// it means this module was not declared earlier
 			pt = insertmainsymboltable(globaltable, func_name);		// if not already declared insert into main symbol table
-
+		else
+		{
+			if(pt->isdefined){
+				printf("ERROR Function overloading is not allowed. %s already defined once.\n", func_name);
+				return;
+			}
+		}
 		pt->isdefined = 1;
 		pt->iplist = curr->child->sibling;	// pointing to input_plist
 		pt->oplist = pt->iplist->sibling;	// pointing to output_plist
@@ -448,7 +467,7 @@ mainsymboltablenode* makemainsymboltablenode(char* func_name)
 	pt->func_name = func_name;
 	pt->next = NULL;
 	pt->idst = NULL;
-	pt->isdefined = pt->isused = 0;
+	pt->isdefined = pt->isused = pt->isdeclared = 0;
 	pt->iplist = pt->oplist = NULL;
 }
 
