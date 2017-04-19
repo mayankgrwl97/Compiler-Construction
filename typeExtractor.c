@@ -45,8 +45,12 @@ int typeofexpr(stacknode* curr)
 			return real;
 		else
 		{
-			idsymboltablenode* temp = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
-			return gettype(temp->type);
+			if(curr->child->idst == NULL)
+				return error;
+			else{
+				idsymboltablenode* temp = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
+				return gettype(temp->type);
+			}
 		}
 	}
 

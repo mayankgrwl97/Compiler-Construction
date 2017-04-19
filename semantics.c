@@ -21,9 +21,14 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		stacknode* temp = curr->child;
 		while(temp != NULL)
 		{
-			idsymboltablenode* helper = getidsymboltablenode(temp->tokinfo->lexeme, temp->idst);
-			if(helper->isAssigned == 0)
+			if(temp->idst == NULL)
+				return;
+			else
+			{
+				idsymboltablenode* helper = getidsymboltablenode(temp->tokinfo->lexeme, temp->idst);
+				if(helper->isAssigned == 0)
 				printf("ERROR_M: The output parameter %s does not get assigned a value\n", temp->tokinfo->lexeme);
+			}
 			temp = temp->sibling;
 		}
 	}
@@ -76,6 +81,8 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 				stacknode* id2 = curr->child->child;
 				while(id1 != NULL)
 				{
+					if(id1->idst == NULL || id2->idst == NULL)
+						return;
 					idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);	// id1->idst could be null, check exception handling
 					idsymboltablenode* temp2 = getidsymboltablenode(id2->tokinfo->lexeme, id2->idst);
 					int type1 = gettype(temp1->type);
@@ -119,6 +126,8 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			stacknode* id2 = curr->child->sibling->sibling->child;	// pointing to ID
 			while(id1 != NULL)
 			{
+				if(id1->idst == NULL || id2->idst == NULL)
+					return;
 				idsymboltablenode* temp1 = getidsymboltablenode(id1->tokinfo->lexeme, id1->idst);	// id1->idst could be null, check exception handling
 				idsymboltablenode* temp2 = getidsymboltablenode(id2->tokinfo->lexeme, id2->idst);
 				int type1 = gettype(temp1->type);
@@ -137,6 +146,8 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 	// SEMANTICS FOR "SWITCH" STATEMENTS
 	if(strcmp(curr->ntortinfo->str, "<condionalStmt>") == 0)
 	{
+		if(curr->child->idst == NULL)
+			return;
 		idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 		int type = gettype(pt->type);
 
