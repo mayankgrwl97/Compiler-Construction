@@ -1,5 +1,13 @@
+** Test case c1.txt: Handles simple expressions**
+
 <<<driver program>>>
 start
-	declare var_1_, var_2_:integer;
-	var_2_:=3 + TRUE;
+	declare x:integer;
+
+	for(x in  1..15)				    
+	start
+		print(x);
+	end
+
+	
 end

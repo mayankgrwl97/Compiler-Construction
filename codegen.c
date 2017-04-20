@@ -8,6 +8,7 @@
 #include "mainsymboltable.h"
 #include "idsymboltable.h"
 #include "typeExtractor.h"
+#include "codegen.h"
 
 void endcode()
 {
@@ -50,91 +51,7 @@ void initialize(/*FILE* fp, */mainsymboltable* globalTable)
 	printf("main:\n");
 	return;
 }
-/*
-int typeofexpr(stacknode* curr)
-{
-	if(strcmp(curr->ntortinfo->str, "<expression>") == 0)
-		return typeofexpr(curr->child);
 
-	if(strcmp(curr->ntortinfo->str, "<var>") == 0)
-	{
-		if(strcmp(curr->child->ntortinfo->str, "NUM") == 0)
-			return integer;
-		else if(strcmp(curr->child->ntortinfo->str, "RNUM") == 0)
-			return real;
-		else
-		{
-			if(curr->child->idst == NULL)
-				return error;
-			else{
-				idsymboltablenode* temp = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
-				return gettype(temp->type);
-			}
-		}
-	}
-
-	if((strcmp(curr->ntortinfo->str, "TRUE") == 0) || (strcmp(curr->ntortinfo->str, "FALSE") == 0))
-		return boolean;
-
-	if(strcmp(curr->ntortinfo->str, "MINUS") == 0)
-	{
-		if(curr->sibling != NULL)
-			return typeofexpr(curr->sibling);
-	}
-
-	if((strcmp(curr->ntortinfo->str, "PLUS") == 0) || (strcmp(curr->ntortinfo->str, "MINUS") == 0) || (strcmp(curr->ntortinfo->str, "MUL") == 0) || (strcmp(curr->ntortinfo->str, "DIV") == 0))
-	{
-		int t1 = typeofexpr(curr->child);
-		int t2 = typeofexpr(curr->child->sibling);
-		if(t1==t2 && t1==integer)
-			return integer;
-		else if(t1==t2 && t1==real)
-			return real;
-		else
-		{
-			char* type1 = findTypeString(t1);
-			char* type2 = findTypeString(t2);
-			printf("ERROR_T: type mismatch of %s and %s operands with %s operator\n", type1, type2, curr->ntortinfo->str);
-			return error;
-		}
-	}
-
-	if((strcmp(curr->ntortinfo->str, "LT") == 0) || (strcmp(curr->ntortinfo->str, "LE") == 0) || (strcmp(curr->ntortinfo->str, "GT") == 0) || (strcmp(curr->ntortinfo->str, "GE") == 0) || (strcmp(curr->ntortinfo->str, "EQ") == 0) || (strcmp(curr->ntortinfo->str, "NE") == 0))
-	{
-		int t1 = typeofexpr(curr->child);
-		int t2 = typeofexpr(curr->child->sibling);
-		if(t1==t2 && t1==integer)
-			return boolean;
-		else if(t1==t2 && t1==real)
-			return boolean;
-		else
-		{
-			char* type1 = findTypeString(t1);
-			char* type2 = findTypeString(t2);
-			printf("ERROR_T: type mismatch of %s and %s with %s operator\n", type1, type2, curr->ntortinfo->str);
-			return error;
-		}
-	}
-
-	if((strcmp(curr->ntortinfo->str, "AND") == 0) || (strcmp(curr->ntortinfo->str, "OR") == 0))
-	{
-		int t1 = typeofexpr(curr->child);
-		int t2 = typeofexpr(curr->child->sibling);
-		if(t1==t2 && t1==boolean)
-			return boolean;
-		else
-		{
-			char* type1 = findTypeString(t1);
-			char* type2 = findTypeString(t2);
-			printf("ERROR_T: type mismatch of %s and %s with logical %s\n", type1, type2, curr->ntortinfo->str);
-			return error;
-		}
-	}
-
-	return error;
-}
-
-*/
 void codegenexp(stacknode* curr)
 {
 	if(strcmp(curr->ntortinfo->str, "<expression>") == 0)
@@ -214,6 +131,43 @@ void codegenexp(stacknode* curr)
 	return;
 }
 
+int getlabel()
+{
+	static int x = 0;
+	return x++;
+}
+
+void codegeniterative(stacknode* temp)
+{
+	if(strcmp(temp->child->ntortinfo->str, "FOR") == 0)
+	{
+		printf("\tmov r8, %s\n", temp->child->sibling->sibling->child->tokinfo->lexeme);
+		printf("\tpush r8\n");
+		int startlabel = getlabel();
+		int endlabel = getlabel();
+		printf("label_%d: ", startlabel);
+		printf("\tpop r8\n");
+		printf("\tpush r8\n");
+		printf("\tmov [%s], r8w\n", temp->child->sibling->tokinfo->lexeme);
+		printf("\tmov r9, %s\n", temp->child->sibling->sibling->child->sibling->tokinfo->lexeme);
+		printf("\tcmp r8, r9\n");
+		printf("\tjg label_%d\n", endlabel);
+
+		stacknode* temp2 = temp->child->sibling->sibling->sibling->sibling->child;
+		while(temp2 != NULL)
+		{
+			code_statement(temp2);
+			temp2 = temp2->sibling;
+		}
+
+		printf("\tpop r8\n");
+		printf("\tinc r8\n");
+		printf("\tpush r8\n");
+		printf("\tjmp label_%d\n", startlabel);
+		printf("label_%d: \n", endlabel);
+	}	
+}
+
 void code_statement(stacknode* temp)
 {
 	if(strcmp(temp->ntortinfo->str, "<declareStmt>") == 0)
@@ -270,6 +224,11 @@ void code_statement(stacknode* temp)
 			printf("\tpop r8\n");
 			printf("\tmov [%s], r8w\n", temp->child->tokinfo->lexeme);
 		}
+	}
+
+	if(strcmp(temp->ntortinfo->str, "<iterativeStmt>") == 0)
+	{
+		codegeniterative(temp);
 	}
 	return;
 }
