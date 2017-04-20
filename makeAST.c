@@ -571,20 +571,56 @@ void makeAST(stacknode* curr, char* parent)
 	return;
 }
 
-void printAST(stacknode* curr)
+void printAST(stacknode* curr, char* parent)
 {
 	if(curr == NULL)
 		return;
 
-	printf("%s\n", curr->ntortinfo->str);
+	printAST(curr->child, curr->ntortinfo->str);
 	
-	printAST(curr->child);
+	if(curr->tokinfo != NULL)
+		printf("%-14s%-8d%-14s", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
+	else
+		printf("----          ----    ----          ");
 
-	if(curr->child == NULL)		return;
+	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname,"NUM")==0 || strcmp(curr->tokinfo->tokenname,"RNUM")==0))
+		printf("%-8s", curr->tokinfo->lexeme);
+	else
+		printf("----    ");
+
+	printf("%-27s%-8s", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
+
+	if(curr->tokinfo == NULL)
+		printf("%s\n", curr->ntortinfo->str);
+	else
+		printf("----\n");
+	
+
+	if(curr->child == NULL)		
+		return;
 	stacknode* sib = curr->child->sibling;
 	while(sib != NULL){
-		printAST(sib);
+		printAST(sib, curr->ntortinfo->str);
 		sib = sib->sibling;
 	}
 	return;
+}
+
+void astMemory(stacknode* curr, int* nodes, int* memory)
+{
+	if(curr == NULL)
+		return;
+	*nodes = *nodes+1;
+	*memory = *memory + sizeof(curr);
+	parseTreeMemory(curr->child, nodes, memory);
+	
+	if(curr->child == NULL)
+		return;
+	
+	stacknode* temp = curr->child->sibling;
+	while(temp != NULL)
+	{
+		parseTreeMemory(temp, nodes, memory);
+		temp = temp->sibling;
+	}
 }

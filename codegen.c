@@ -43,6 +43,30 @@ mov eax, 3
    mov edx, 5          ;5 bytes (numeric, 1 for sign) of that information
    int 80h
 */
+
+void codegenexp(stacknode* curr)
+{
+	if(curr == NULL)
+		return;
+
+	codegenexp(curr->child);
+
+	if(curr->child == NULL)
+		return;
+
+	stacknode* temp = curr->child;
+	while(temp != NULL)
+	{
+		codegenexp(temp);
+		temp = temp->sibling;
+	}
+
+	// itself
+	// if(strcmp(curr->))
+
+}
+
+
 void code_statement(stacknode* temp)
 {
 	if(strcmp(temp->ntortinfo->str, "<ioStmt>") == 0)
@@ -57,6 +81,10 @@ void code_statement(stacknode* temp)
 			printf("mov edx, %d\n", pt->widthofid);
 			printf("int 80h\n");
 		}
+	}
+	if(strcmp(temp->ntortinfo->str, "<expression>") == 0)
+	{
+		codegenexp(temp);
 	}
 }
 

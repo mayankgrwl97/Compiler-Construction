@@ -262,30 +262,30 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 	// return (strcmp(st->top->ntortinfo->str, "$") == 0);
 }
 
-void printParseTree(stacknode* curr, char* parent, FILE* fp)
+void printParseTree(stacknode* curr, char* parent)
 {
 	// go on the first child itself then on remaining
 	if(curr == NULL)
 		return;
-	printParseTree(curr->child, curr->ntortinfo->str, fp);
+	printParseTree(curr->child, curr->ntortinfo->str);
 	//itself
 
 	if(curr->tokinfo != NULL)
-		fprintf(fp, "%-14s%-8d%-14s", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
+		printf("%-14s%-8d%-14s", curr->tokinfo->lexeme, curr->tokinfo->linenumber,  curr->tokinfo->tokenname);
 	else
-		fprintf(fp, "----          ----    ----          ");
+		printf("----          ----    ----          ");
 
 	if(curr->tokinfo != NULL && (strcmp(curr->tokinfo->tokenname,"NUM")==0 || strcmp(curr->tokinfo->tokenname,"RNUM")==0))
-		fprintf(fp, "%-8s", curr->tokinfo->lexeme);
+		printf("%-8s", curr->tokinfo->lexeme);
 	else
-		fprintf(fp, "----    ");
+		printf("----    ");
 
-	fprintf(fp, "%-27s%-8s", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
+	printf("%-27s%-8s", parent,(curr->ntortinfo->nt == 1 ? "no" : "yes"));
 
 	if(curr->tokinfo == NULL)
-		fprintf(fp, "%s\n", curr->ntortinfo->str);
+		printf("%s\n", curr->ntortinfo->str);
 	else
-		fprintf(fp, "----\n");
+		printf("----\n");
 
 	// printf("%s %s %s\n", curr->ntortinfo->str, parent, ());
 	
@@ -294,8 +294,27 @@ void printParseTree(stacknode* curr, char* parent, FILE* fp)
 	stacknode* temp = curr->child->sibling;
 	while(temp != NULL)
 	{
-		printParseTree(temp, curr->ntortinfo->str, fp);
+		printParseTree(temp, curr->ntortinfo->str);
 		temp = temp->sibling;
 	}
 	return;
+}
+
+void parseTreeMemory(stacknode* curr, int* nodes, int* memory)
+{
+	if(curr == NULL)
+		return;
+	*nodes = *nodes+1;
+	*memory = *memory + sizeof(curr);
+	parseTreeMemory(curr->child, nodes, memory);
+	
+	if(curr->child == NULL)
+		return;
+	
+	stacknode* temp = curr->child->sibling;
+	while(temp != NULL)
+	{
+		parseTreeMemory(temp, nodes, memory);
+		temp = temp->sibling;
+	}
 }

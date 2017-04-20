@@ -6,6 +6,7 @@
 
 
 void makeAST(stacknode* curr, char* parent);
-void printAST(stacknode* curr);
+void printAST(stacknode* curr, char* parent);
+void astMemory(stacknode* curr, int* nodes, int* memory);
 
 #endif
