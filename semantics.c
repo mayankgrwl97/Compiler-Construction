@@ -16,6 +16,21 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 	if(curr == NULL)
 		return;
 
+	if(strcmp(curr->ntortinfo->str, "<var>") == 0)
+	{
+		if(curr->child == NULL || curr->idst == NULL)
+			return;
+
+		idsymboltablenode* helper = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
+		if(strcmp(helper->type->ntortinfo->str, "ARRAY") == 0)
+		{
+			if(curr->child->sibling == NULL)
+			{
+				printf("ERROR_V: Array should be used by some index\n");
+			}
+		}
+	}
+
 	if(strcmp(curr->ntortinfo->str, "<output_plist>") == 0)
 	{
 		stacknode* temp = curr->child;
