@@ -10,5 +10,6 @@
 #include "typeExtractor.h"
 
 void initialize(/*FILE* fp, */mainsymboltable* globalTable);
+void generate_code(mainsymboltable* globalTable, stacknode* astroot);
 
 #endif
