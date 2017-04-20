@@ -57,6 +57,26 @@ void code_statement(stacknode* temp)
 			printf("mov edx, %d\n", pt->widthofid);
 			printf("int 80h\n");
 		}
-		else if(strcmp)
+	}
+}
+
+void traverseAST_forCodegen(stacknode* curr)
+{
+	if(curr == NULL)
+		return;
+
+	traverseAST_forCodegen(curr->child);
+
+	if(strcmp(curr->ntortinfo->str, "<statements>") == 0)
+		code_statement(curr->child);
+
+	if(curr->child == NULL)
+		return;
+	
+	stacknode* temp = curr->child;
+	while(temp != NULL)
+	{
+		traverseAST_forCodegen(temp);
+		temp = temp->sibling;
 	}
 }
