@@ -51,6 +51,28 @@ void initialize(/*FILE* fp, */mainsymboltable* globalTable)
 	return;
 }
 
+void codegenexp(stacknode* curr)
+{
+	if(curr == NULL)
+		return;
+
+	codegenexp(curr->child);
+
+	if(curr->child == NULL)
+		return;
+
+	stacknode* temp = curr->child;
+	while(temp != NULL)
+	{
+		codegenexp(temp);
+		temp = temp->sibling;
+	}
+
+	// itself
+	// if(strcmp(curr->))
+
+}
+
 void code_statement(stacknode* temp)
 {
 	if(strcmp(temp->ntortinfo->str, "<declareStmt>") == 0)
