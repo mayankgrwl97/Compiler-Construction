@@ -20,6 +20,7 @@ Karan Deep Batra(2014A7PS160P)
 #include "makeAST.h"
 #include "typeExtractor.h"
 #include "semantics.h"
+#include "codegen.h"
 
 void printCleanFile()
 {
@@ -148,9 +149,11 @@ int main(int argc, char* argv[])
 		makeAST(root, "ROOT");
 		// printAST(root);
 		populatemainsymboltable(root, NULL, globaltable);
-		printmainsymboltable(globaltable);
-		traverseAST_fortypechecking(root);
-		checkSemantics(root, globaltable);
+		// printmainsymboltable(globaltable);
+		// traverseAST_fortypechecking(root);
+		// checkSemantics(root, globaltable);
+		initialize(globaltable);
+
 	}
 	return 0;
 }
