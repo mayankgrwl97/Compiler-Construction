@@ -1,2 +1,2 @@
-driver: driver.c follow.c hashtable.c ntort.c stack.c token.c first.c grammar.c lexer.c parser.c symboltable.c
-	gcc -o driver driver.c follow.c hashtable.c ntort.c stack.c token.c first.c grammar.c lexer.c parser.c symboltable.c
+compiler: codegen.c driver.c first.c follow.c grammar.c hashtable.c idsymboltable.c lexer.c mainsymboltable.c makeAST.c ntort.c parser.c semantics.c stack.c symboltable.c token.c typeExtractor.c 
+	gcc -o compiler codegen.c driver.c first.c follow.c grammar.c hashtable.c idsymboltable.c lexer.c mainsymboltable.c makeAST.c ntort.c parser.c semantics.c stack.c symboltable.c token.c typeExtractor.c 
