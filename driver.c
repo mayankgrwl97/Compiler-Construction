@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 	if(argc < 3)
 	{
-		printf("USAGE: ./stage1exe testcase.txt parsetreeoutfile.txt");
+		printf("USAGE: ./compiler testcase.txt code.asm");
 		return 0;
 	}
 	FILE* fp = fopen(argv[1], "rb");
@@ -219,10 +219,12 @@ int main(int argc, char* argv[])
 		int syntaxcorrect = parseGrammar(table, tokenlist, 1);
 		if(syntaxcorrect)
 		{	
+			FILE* asmFile = fopen(argv[2], "w+");
 			makeAST(root, "ROOT");
 			mainsymboltable* globaltable = makemainsymboltable();
 			populatemainsymboltable(root, NULL, globaltable, 0);
-			generate_code(globaltable, root);
+			generate_code(asmFile, globaltable, root);
+			fclose(asmFile);
 		}
 		else
 			printf("ERROR, Syntax errors exist in the code.\n");
