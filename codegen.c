@@ -32,7 +32,7 @@ void initialize(/*FILE* fp, */mainsymboltable* globalTable)
 			idsymboltablenode* curr = pt->buckets[i];
 			while(curr != NULL)
 			{
-				printf("%s\tresb %d\n", curr->idlex, curr->widthofid);
+				printf("%s\tresb %d\n", curr->idlex, 2*curr->widthofid);
 				curr = curr->next;
 			}
 		}
@@ -73,6 +73,7 @@ void codegenexp(stacknode* curr)
 		{			
 			idsymboltablenode* temp = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 			printf("\tmov r8, [%s]\n", temp->idlex);
+			printf("\tand r8, 00000000000000ffh\n");
 			printf("\tpush r8\n");
 		}
 	}
@@ -94,7 +95,7 @@ void codegenexp(stacknode* curr)
 			printf("\tpop r9\n");
 			printf("\tpop r8\n");
 			printf("\tsub r8,r9\n");
-			printf("\t push r8\n");
+			printf("\tpush r8\n");
 		}
 	}
 
@@ -128,6 +129,87 @@ void codegenexp(stacknode* curr)
 		printf("\tpush r8\n");
 	}
 
+	if((strcmp(curr->ntortinfo->str, "LT") == 0) || (strcmp(curr->ntortinfo->str, "LE") == 0) || (strcmp(curr->ntortinfo->str, "GT") == 0) || (strcmp(curr->ntortinfo->str, "GE") == 0) || (strcmp(curr->ntortinfo->str, "EQ") == 0) || (strcmp(curr->ntortinfo->str, "NE") == 0))
+	{
+		codegenexp(curr->child);
+		codegenexp(curr->child->sibling);
+		int truelabel = getlabel();
+		int endlabel = getlabel();
+		printf("\tpop r9\n");
+		printf("\tpop r8\n");
+		printf("\tcmp r8,r9\n");
+		if(strcmp(curr->ntortinfo->str, "LT") == 0)
+			printf("\tjl truelabel_%d\n", truelabel);
+		else if(strcmp(curr->ntortinfo->str, "LE") == 0)
+			printf("\tjle truelabel_%d\n", truelabel);
+		else if(strcmp(curr->ntortinfo->str, "GT") == 0)
+			printf("\tjg truelabel_%d\n", truelabel);
+		else if(strcmp(curr->ntortinfo->str, "GE") == 0)
+			printf("\tjge truelabel_%d\n", truelabel);
+		else if(strcmp(curr->ntortinfo->str, "EQ") == 0)
+			printf("\tje truelabel_%d\n", truelabel);
+		else if(strcmp(curr->ntortinfo->str, "NEQ") == 0)
+			printf("\tjne truelabel_%d\n", truelabel);
+		printf("\tmov r8, 0\n");
+		printf("\tpush r8\n");
+		printf("\tjmp label_%d\n", endlabel);
+		printf("truelabel_%d:\n", truelabel);
+		printf("\tmov r8, 1\n");
+		printf("\tpush r8\n");
+		printf("label_%d:\n", endlabel);
+	}
+
+	if(strcmp(curr->ntortinfo->str, "AND") == 0)
+	{
+		codegenexp(curr->child);
+		codegenexp(curr->child->sibling);
+		printf("\tpop r9\n");
+		printf("\tpop r8\n");
+		int firsttruelabel = getlabel();
+		int secondfalselabel = getlabel();
+		int endlabel = getlabel();
+		printf("\tcmp r8, 0000000000000001h\n");
+		printf("\tje label_%d\n", firsttruelabel);
+		printf("\tmov r8, 0000000000000000h\n");
+		printf("\tpush r8\n");
+		printf("\tjmp label_%d\n", endlabel);
+		printf("label_%d:\n", firsttruelabel);
+		printf("\tcmp r9, 0000000000000001h\n");
+		printf("\tjne label_%d\n", secondfalselabel);
+		printf("\tmov r8, 0000000000000001h\n");
+		printf("\tpush r8\n");
+		printf("\tjmp label_%d\n", endlabel);
+		printf("label_%d:\n",secondfalselabel);
+		printf("\tmov r8, 0000000000000000h\n");
+		printf("\tpush r8\n");
+		printf("label_%d:\n",endlabel);
+	}
+
+	if(strcmp(curr->ntortinfo->str, "OR") == 0)
+	{
+		codegenexp(curr->child);
+		codegenexp(curr->child->sibling);
+		printf("\tpop r9\n");
+		printf("\tpop r8\n");
+		int firstfalselabel = getlabel();
+		int secondtruelabel = getlabel();
+		int endlabel = getlabel();
+		printf("\tcmp r8, 0000000000000001h\n");
+		printf("\tjne label_%d\n", firstfalselabel);
+		printf("\tmov r8, 0000000000000001h\n");
+		printf("\tpush r8\n");
+		printf("\tjmp label_%d\n", endlabel);
+		printf("label_%d:\n", firstfalselabel);
+		printf("\tcmp r9, 0000000000000001h\n");
+		printf("\tje label_%d\n", secondtruelabel);
+		printf("\tmov r8, 0000000000000000h\n");
+		printf("\tpush r8\n");
+		printf("\tjmp label_%d\n", endlabel);
+		printf("label_%d:\n",secondtruelabel);
+		printf("\tmov r8, 0000000000000001h\n");
+		printf("\tpush r8\n");
+		printf("label_%d:\n",endlabel);
+	}
 	return;
 }
 
@@ -165,6 +247,25 @@ void codegeniterative(stacknode* temp)
 		printf("\tpush r8\n");
 		printf("\tjmp label_%d\n", startlabel);
 		printf("label_%d: \n", endlabel);
+	}
+	if(strcmp(temp->child->ntortinfo->str, "WHILE") == 0)
+	{
+		int startlabel = getlabel();
+		int endlabel = getlabel();
+
+		printf("label_%d:\n", startlabel);	
+		codegenexp(temp->child->sibling);
+		printf("\tpop r8\n");
+		printf("\tcmp r8, 0000000000000001h\n");
+		printf("\tjne label_%d\n", endlabel);
+		stacknode* temp2 = temp->child->sibling->sibling->sibling->child;
+		while(temp2 != NULL)
+		{
+			code_statement(temp2);
+			temp2 = temp2->sibling;
+		}
+		printf("jmp label_%d\n", startlabel);
+		printf("label_%d:\n", endlabel);
 	}
 	return;
 }
@@ -251,11 +352,14 @@ void code_statement(stacknode* temp)
 			}
 			else
 			{
-				// idsymboltable* idst = temp2->idst;
-				// idsymboltablenode* pt = getidsymboltablenode(temp2->tokinfo->lexeme, idst);
+				idsymboltable* idst = temp2->idst;
+				idsymboltablenode* pt = getidsymboltablenode(temp2->tokinfo->lexeme, idst);
 				printf("\tmov rdi, print_val\n");
 				printf("\tmov rax, [%s]\n", temp2->tokinfo->lexeme);
-				printf("\tand rax, 00000000000000ffh\n");
+				if(pt->widthofid == 2)
+					printf("\tand rax, 00000000000000ffh\n");
+				else
+					printf("\tand rax, 000000000000000fh\n");
 				printf("\tmov rsi, rax\n");
 				printf("\tmov al, 0\n");
 				printf("\tcall printf\n");
@@ -270,7 +374,12 @@ void code_statement(stacknode* temp)
 		{
 			codegenexp(temp->child->sibling->child);
 			printf("\tpop r8\n");
-			printf("\tmov [%s], r8w\n", temp->child->tokinfo->lexeme);
+			idsymboltable* idst = temp->child->idst;
+			idsymboltablenode* pt = getidsymboltablenode(temp->child->tokinfo->lexeme, idst);
+			if(pt->widthofid == 2)
+				printf("\tmov [%s], r8w\n", temp->child->tokinfo->lexeme);//for integers
+			else
+				printf("\tmov [%s], r8b\n", temp->child->tokinfo->lexeme);//for booleans
 		}
 	}
 
