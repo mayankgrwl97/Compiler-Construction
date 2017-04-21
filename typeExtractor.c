@@ -67,7 +67,9 @@ int typeofexpr(stacknode* curr)
 	{
 		int t1 = typeofexpr(curr->child);
 		int t2 = typeofexpr(curr->child->sibling);
-		if(t1==t2 && t1==integer)
+		if(t1 == error || t2 == error)
+			return error;
+		else if(t1==t2 && t1==integer)
 			return integer;
 		else if(t1==t2 && t1==real)
 			return real;
@@ -84,7 +86,9 @@ int typeofexpr(stacknode* curr)
 	{
 		int t1 = typeofexpr(curr->child);
 		int t2 = typeofexpr(curr->child->sibling);
-		if(t1==t2 && t1==integer)
+		if(t1 == error || t2 == error)
+			return error;
+		else if(t1==t2 && t1==integer)
 			return boolean;
 		else if(t1==t2 && t1==real)
 			return boolean;
@@ -101,6 +105,8 @@ int typeofexpr(stacknode* curr)
 	{
 		int t1 = typeofexpr(curr->child);
 		int t2 = typeofexpr(curr->child->sibling);
+		if(t1 == error || t2 == error)
+			return error;
 		if(t1==t2 && t1==boolean)
 			return boolean;
 		else
@@ -111,7 +117,6 @@ int typeofexpr(stacknode* curr)
 			return error;
 		}
 	}
-
 	return error;
 }
 
@@ -119,8 +124,6 @@ void traverseAST_fortypechecking(stacknode* curr)
 {
 	if(curr == NULL)
 		return;
-
-	// @@@@does the order of traversal matter ?@@@@
 
 	if(strcmp(curr->ntortinfo->str, "<assignmentStmt>") == 0)
 	{
@@ -132,12 +135,16 @@ void traverseAST_fortypechecking(stacknode* curr)
 		if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
 		{
 			int exprType = typeofexpr(curr->child->sibling->child);
+			if(idType == error || exprType == error)
+				return;
 			if(idType != exprType)
 				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		}
 		else
 		{
 			int exprType = typeofexpr(curr->child->sibling);
+			if(idType == error || exprType == error)
+				return;
 			if(idType != exprType)
 				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		}
@@ -150,6 +157,8 @@ void traverseAST_fortypechecking(stacknode* curr)
 		if(strcmp(curr->child->ntortinfo->str, "WHILE") == 0)
 		{
 			int exprType = typeofexpr(curr->child->sibling);
+			if(idType == error || exprType == error)
+				return;
 			if(idType != exprType)
 				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->sibling->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		}
