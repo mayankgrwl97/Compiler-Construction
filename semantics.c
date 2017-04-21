@@ -33,7 +33,21 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			if(curr->child->sibling->child == NULL)
 			{
 				semanticCorrect = 1;
-				printf("ERROR_V at line %d : Array should be used by some index. %s not indexed properly.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+				printf("ERROR_V at line %d : Array %s not indexed properly.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+				return;
+			}
+			if(curr->child->sibling->child->idst == NULL)
+			{
+				semanticCorrect = 1;
+				printf("ERROR_V at line %d : Identifier %s used for indexing of %s is not present in this scope.\n", curr->child->sibling->child->tokinfo->linenumber, curr->child->sibling->child->tokinfo->lexeme, curr->child->tokinfo->lexeme);
+				return;
+			}
+			idsymboltablenode* helper2 = getidsymboltablenode(curr->child->sibling->child->tokinfo->lexeme, curr->child->sibling->child->idst);
+			if(strcmp(helper2->type->ntortinfo->str, "INTEGER") != 0)
+			{
+				semanticCorrect = 1;
+				printf("ERROR_V at line %d : Identifier %s used for indexing of %s is not of integer type.\n", curr->child->sibling->child->tokinfo->linenumber, curr->child->sibling->child->tokinfo->lexeme, curr->child->tokinfo->lexeme);
+				return;
 			}
 		}
 		else
@@ -57,7 +71,26 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
 			{
 				semanticCorrect = 1;
-				printf("ERROR_V at line %d : Array should be used by some index. %s not indexed properly.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+				printf("ERROR_V at line %d : Array %s not indexed properly.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+				return;
+			}
+			// must be lvalueARR
+			if(strcmp(curr->child->sibling->child->child->ntortinfo->str, "NUM") != 0)
+			{
+				if(curr->child->sibling->child->child->idst == NULL)
+				{
+					semanticCorrect = 1;
+					printf("ERROR_V at line %d : Identifier %s used for indexing of %s is not present in this scope.\n", curr->child->sibling->child->child->tokinfo->linenumber, curr->child->sibling->child->child->tokinfo->lexeme, curr->child->tokinfo->lexeme);
+					return;
+				}
+				// variable is valid now check for type
+				idsymboltablenode* helper2 = getidsymboltablenode(curr->child->sibling->child->child->tokinfo->lexeme, curr->child->sibling->child->child->idst);
+				if(strcmp(helper2->type->ntortinfo->str, "INTEGER") != 0)
+				{
+					semanticCorrect = 1;
+					printf("ERROR_V at line %d : Identifier %s used for indexing of %s is not of integer type.\n", curr->child->sibling->child->child->tokinfo->linenumber, curr->child->sibling->child->child->tokinfo->lexeme, curr->child->tokinfo->lexeme);
+					return;
+				}
 			}
 		}
 		else
