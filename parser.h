@@ -11,7 +11,7 @@ Karan Deep Batra(2014A7PS160P)
 
 void makeParseTable(hashtable* table);
 void printParseTable(hashtable* table);
-int parseGrammar(hashtable* table, tokeninfo* lookahead);
+int parseGrammar(hashtable* table, tokeninfo* lookahead, int toPrint);
 void printParseTree(stacknode* curr, char* parent);
 void parseTreeMemory(stacknode* curr, int* nodes, int* memory);
 

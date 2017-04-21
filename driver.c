@@ -67,6 +67,32 @@ void printTokens()
 	return;
 }
 
+void printErrorTokens()
+{
+	if(tokenlist == NULL)
+		return;
+
+	tokeninfo* temp = tokenlist;
+
+	while(strcmp(temp->tokenname, "$") != 0)
+	{
+		if(strcmp(temp->tokenname, "ERROR_1") == 0)
+		{
+			printf("ERROR_1: Identifier at line %d is longer than the prescribed length\n", temp->linenumber);
+		}
+		else if(strcmp(temp->tokenname, "ERROR_2") == 0)
+		{
+			printf("ERROR_2: Unknown Symbol %s at line %d\n", temp->lexeme, temp->linenumber);
+		}
+		else if(strcmp(temp->tokenname, "ERROR_3") == 0)
+		{
+			printf("ERROR_3: Unknown pattern %s at line %d\n", temp->lexeme, temp->linenumber);
+		}
+		temp = temp->next;
+	}
+	return;
+}
+
 int main(int argc, char* argv[])
 {
 	printf("Level 4: Symbol Table/ AST/ Type Checking/ Semantic Rules/ Code Generation modules work.\n");
@@ -117,7 +143,6 @@ int main(int argc, char* argv[])
 
 	scanf("%d",&control);
 
-	int syntaxcorrect = parseGrammar(table, tokenlist);
 
 	if(control == 1)
 	{
@@ -125,23 +150,15 @@ int main(int argc, char* argv[])
 	}
 	if(control == 2)
 	{
+		int syntaxcorrect = parseGrammar(table, tokenlist, 0);
 		if(syntaxcorrect)
 			printParseTree(root, "ROOT");
 		else
 			printf("ERROR in making Parse Tree because parsing is not correct.\n");
-		// mainsymboltable* globaltable = makemainsymboltable();
-
-		// makeAST(root, "ROOT");
-		// printAST(root);
-		// populatemainsymboltable(root, NULL, globaltable);
-		// printmainsymboltable(globaltable);
-		// traverseAST_fortypechecking(root);
-		// checkSemantics(root, globaltable);
-		// initialize(globaltable);
-
 	}
 	if(control == 3)
 	{
+		int syntaxcorrect = parseGrammar(table, tokenlist, 0);
 		if(syntaxcorrect)
 		{
 			makeAST(root, "ROOT");
@@ -152,6 +169,7 @@ int main(int argc, char* argv[])
 	}
 	if(control == 4)
 	{
+		int syntaxcorrect = parseGrammar(table, tokenlist, 0);
 		if(syntaxcorrect)
 		{
 			int nodesPT = 0, memoryPT = 0;
@@ -168,6 +186,7 @@ int main(int argc, char* argv[])
 	}
 	if(control == 5)
 	{
+		int syntaxcorrect = parseGrammar(table, tokenlist, 0);
 		if(syntaxcorrect)
 		{
 			makeAST(root, "ROOT");
@@ -178,9 +197,16 @@ int main(int argc, char* argv[])
 	}
 	if(control == 6)
 	{
+		int syntaxcorrect = parseGrammar(table, tokenlist, 0);
 		if(syntaxcorrect == 0)
-			printf("Syntax error exist\n");		// @@@@ Should print syntactic errors @@@@ 
-		else{
+		{	
+			printf("Syntax Errors :\n");
+			printErrorTokens();
+			parseGrammar(table, tokenlist, 1);
+		}
+		else
+		{
+			printf("Semantic Errors :\n");
 			makeAST(root, "ROOT");
 			mainsymboltable* globaltable = makemainsymboltable();
 			populatemainsymboltable(root, NULL, globaltable, 1);
@@ -190,6 +216,7 @@ int main(int argc, char* argv[])
 	}
 	if(control == 7)
 	{
+		int syntaxcorrect = parseGrammar(table, tokenlist, 1);
 		if(syntaxcorrect)
 		{	
 			makeAST(root, "ROOT");
