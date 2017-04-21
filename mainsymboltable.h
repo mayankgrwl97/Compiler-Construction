@@ -14,6 +14,8 @@ Karan Deep Batra(2014A7PS160P)
 
 #define mainsymboltablesize 100
 
+int semanticCorrect;
+
 typedef struct mainsymboltablenode mainsymboltablenode;
 struct mainsymboltablenode
 {

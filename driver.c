@@ -206,12 +206,13 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			printf("Semantic Errors :\n");
 			makeAST(root, "ROOT");
 			mainsymboltable* globaltable = makemainsymboltable();
 			populatemainsymboltable(root, NULL, globaltable, 1);
 			traverseAST_fortypechecking(root);
 			checkSemantics(root, globaltable);
+			if(semanticCorrect == 0)
+				printf("Code Compiled Successfully.....\n");
 		}
 	}
 	if(control == 7)

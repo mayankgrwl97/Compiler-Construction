@@ -52,7 +52,10 @@ int typeofexpr(stacknode* curr)
 		else
 		{
 			if(curr->child->idst == NULL)
+			{
+				semanticCorrect = 1;
 				return error;
+			}
 			else{
 				idsymboltablenode* temp = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 				return gettype(temp->type);
@@ -74,7 +77,10 @@ int typeofexpr(stacknode* curr)
 		int t1 = typeofexpr(curr->child);
 		int t2 = typeofexpr(curr->child->sibling);
 		if(t1 == error || t2 == error)
+		{
+			semanticCorrect = 1;
 			return error;
+		}
 		else if(t1==t2 && t1==integer)
 			return integer;
 		else if(t1==t2 && t1==real)
@@ -84,6 +90,7 @@ int typeofexpr(stacknode* curr)
 			char* type1 = findTypeString(t1);
 			char* type2 = findTypeString(t2);
 			printf("ERROR_T at line %d : Type mismatch of %s and %s operands with %s operator.\n", curr->tokinfo->linenumber, type1, type2, curr->ntortinfo->str);
+			semanticCorrect = 1;
 			return error;
 		}
 	}
@@ -93,7 +100,10 @@ int typeofexpr(stacknode* curr)
 		int t1 = typeofexpr(curr->child);
 		int t2 = typeofexpr(curr->child->sibling);
 		if(t1 == error || t2 == error)
+		{
+			semanticCorrect = 1;
 			return error;
+		}
 		else if(t1==t2 && t1==integer)
 			return boolean;
 		else if(t1==t2 && t1==real)
@@ -103,6 +113,7 @@ int typeofexpr(stacknode* curr)
 			char* type1 = findTypeString(t1);
 			char* type2 = findTypeString(t2);
 			printf("ERROR_T at line %d : Type mismatch of %s and %s with %s operator.\n", curr->tokinfo->linenumber, type1, type2, curr->ntortinfo->str);
+			semanticCorrect = 1;
 			return error;
 		}
 	}
@@ -112,7 +123,10 @@ int typeofexpr(stacknode* curr)
 		int t1 = typeofexpr(curr->child);
 		int t2 = typeofexpr(curr->child->sibling);
 		if(t1 == error || t2 == error)
+		{
+			semanticCorrect = 1;
 			return error;
+		}
 		if(t1==t2 && t1==boolean)
 			return boolean;
 		else
@@ -120,6 +134,7 @@ int typeofexpr(stacknode* curr)
 			char* type1 = findTypeString(t1);
 			char* type2 = findTypeString(t2);
 			printf("ERROR_T at line %d : Type mismatch of %s and %s with logical %s.\n", curr->tokinfo->linenumber, type1, type2, curr->ntortinfo->str);
+			semanticCorrect = 1;
 			return error;
 		}
 	}
@@ -145,6 +160,7 @@ void traverseAST_fortypechecking(stacknode* curr)
 				return;
 			if(idType != exprType)
 			{
+				semanticCorrect = 1;
 				printf("ERROR_T at line %d : Type mismatch value on the left is of type %s and on the right is %s.\n", curr->child->tokinfo->linenumber, findTypeString(idType), findTypeString(exprType));
 			}
 		}
@@ -153,8 +169,10 @@ void traverseAST_fortypechecking(stacknode* curr)
 			int exprType = typeofexpr(curr->child->sibling);
 			if(idType == error || exprType == error)
 				return;
-			if(idType != exprType)
+			if(idType != exprType){
+				semanticCorrect = 1;
 				printf("ERROR_T at line %d : Type mismatch value on the left is of type %s and on the right is %s.\n", curr->child->tokinfo->linenumber, findTypeString(idType), findTypeString(exprType));
+			}
 		}
 		return;
 	}
@@ -167,8 +185,10 @@ void traverseAST_fortypechecking(stacknode* curr)
 			int exprType = typeofexpr(curr->child->sibling);
 			if(idType == error || exprType == error)
 				return;
-			if(idType != exprType)
+			if(idType != exprType){
+				semanticCorrect = 1;
 				printf("ERROR_T at line %d : While should have boolean expression.\n", curr->child->tokinfo->linenumber);
+			}
 		}
 		return;
 	}
