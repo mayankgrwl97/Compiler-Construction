@@ -26,7 +26,14 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		{
 			if(curr->child->sibling->child == NULL)
 			{
-				printf("ERROR_V: Array should be used by some index. %s at line number %d not indexed properly.\n", curr->child->tokinfo->lexeme, curr->child->tokinfo->linenumber);
+				printf("ERROR_V at line %d : Array should be used by some index. %s not indexed properly.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+			}
+		}
+		else
+		{
+			if(curr->child->sibling->child != NULL)
+			{
+				printf("ERROR_V at line %d : Identifier %s can not be used as an array.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 			}
 		}
 	}
@@ -41,7 +48,14 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		{
 			if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
 			{
-				printf("ERROR_V: Array should be used by some index. %s at line number %d not indexed properly.\n", curr->child->tokinfo->lexeme, curr->child->tokinfo->linenumber);
+				printf("ERROR_V at line %d : Array should be used by some index. %s not indexed properly.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+			}
+		}
+		else
+		{
+			if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueARRStmt>") == 0)
+			{
+				printf("ERROR_V at line %d : Identifier %s can not be used as an array.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 			}
 		}
 	}
@@ -181,32 +195,29 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 		int type = gettype(pt->type);
 
-
 		if(type == integer)
 		{
 			stacknode* temp = curr->child->sibling->sibling->child;
 			while(temp != NULL)
 			{
 				if(strcmp(temp->child->ntortinfo->str, "NUM") != 0)
-					printf("ERROR at line %d : integer case expected.\n", temp->child->tokinfo->linenumber);
+					printf("ERROR_S at line %d : Integer case expected.\n", temp->child->tokinfo->linenumber);
 
 				temp = temp->sibling->sibling;
 			}
 			temp = curr->child->sibling->sibling->sibling;
 			if(temp->child == NULL)
-			{
-				printf("ERROR : expected default case statement for integer type.\n");
-			}
+				printf("ERROR_S at line %d : Expected default case statement for integer type.\n", curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber);
 		}
 		else if(type == real)
 		{
-			printf("ERROR : switch case does not work with real identifiers\n");
+			printf("ERROR_S at line %d : Switch case does not work with real identifiers.\n", curr->child->tokinfo->linenumber);
 		}
 		else if(type == boolean)
 		{
 			stacknode* temp = curr->child->sibling->sibling->sibling; //for <default>
 			if(temp->child != NULL)
-				printf("ERROR : switch case with boolean id should not have default\n");
+				printf("ERROR_S at line %d : Switch case with boolean id should not have default.\n", temp->sibling->tokinfo->linenumber);
 
 			temp = curr->child->sibling->sibling->child;
 			int count = 0;
@@ -218,7 +229,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 
 			if(count != 2)
 			{
-				printf("ERROR : switch case with boolean id cannot have more than two cases\n");
+				printf("ERROR_S at line %d : Switch case with boolean id cannot have more than two cases.\n", curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber);
 				return;
 			}
 
@@ -231,13 +242,13 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 				else if(strcmp(temp->child->ntortinfo->str, "FALSE") == 0)
 					fl++;
 				else
-					printf("ERROR at line %d : switch case with boolean id cannot take NUM case value\n", temp->child->tokinfo->linenumber);
+					printf("ERROR_S at line %d : Switch case with boolean id cannot take NUM case value.\n", temp->child->tokinfo->linenumber);
 				temp = temp->sibling->sibling;
 			}
 
 			if(tr != 1 || fl != 1)
 			{
-				printf("ERROR : switch case with boolean id should have both TRUE and FALSE cases\n");
+				printf("ERROR_S at line %d : Switch case with boolean id should have both TRUE and FALSE cases.\n", curr->child->sibling->sibling->sibling->sibling->tokinfo->linenumber);
 			}
 		}
 	}
@@ -254,7 +265,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 				if(strcmp(temp->ntortinfo->str, "<assignmentStmt>") == 0)
 				{
 					if(strcmp(temp->child->tokinfo->lexeme, tempid) == 0 && strcmp(temp->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
-						printf("ERROR at line %d : cannot redefine.%s\n", temp->child->tokinfo->linenumber, tempid);
+						printf("ERROR_V at line %d : Cannot redefine %s in for loop.\n", temp->child->tokinfo->linenumber, tempid);
 				}
 				temp = temp->sibling;
 			}
