@@ -165,7 +165,55 @@ void codegeniterative(stacknode* temp)
 		printf("\tpush r8\n");
 		printf("\tjmp label_%d\n", startlabel);
 		printf("label_%d: \n", endlabel);
-	}	
+	}
+	return;
+}
+
+void codegenconditional(stacknode* curr)
+{	
+	idsymboltable* idst = curr->child->idst;
+	idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, idst);
+
+	printf("\tmov r8, [%s]\n", pt->idlex);
+	printf("\tpush r8\n");
+
+	if(gettype(pt->type) == integer)
+	{
+		stacknode* temp = curr->child->sibling->sibling; //<caseStmts>
+		stacknode* temp2 = temp->child;
+
+		int currlabel = getlabel();
+		int endlabel = getlabel();
+		while(temp2 != NULL)
+		{
+			int nextlabel = getlabel();
+			printf("label_%d:\n", currlabel);
+			printf("\tpop r8\n");
+			printf("\tpush r8\n");
+			printf("\tmov r9, %s\n", temp2->child->tokinfo->lexeme);
+			printf("\tcmp r8,r9\n");
+			printf("\tjne label_%d\n", nextlabel);
+			stacknode* temp3 = temp2->sibling->child;
+			while(temp3 != NULL)
+			{
+				code_statement(temp3);
+				temp3 = temp3->sibling;
+			}
+			printf("\tjmp label_%d\n", endlabel);
+			currlabel = nextlabel;
+			temp2 = temp2->sibling->sibling;
+		}
+		temp2 = temp->sibling->child->child;
+		printf("label_%d:\n", currlabel);
+		while(temp2 != NULL)
+		{
+			code_statement(temp2);
+			temp2 = temp2->sibling;
+		}
+
+		printf("label_%d:\n", endlabel);
+	}
+	return;
 }
 
 void code_statement(stacknode* temp)
@@ -229,6 +277,11 @@ void code_statement(stacknode* temp)
 	if(strcmp(temp->ntortinfo->str, "<iterativeStmt>") == 0)
 	{
 		codegeniterative(temp);
+	}
+
+	if(strcmp(temp->ntortinfo->str, "<condionalStmt>") == 0)
+	{
+		codegenconditional(temp);
 	}
 	return;
 }

@@ -1,15 +1,26 @@
-** Test case c1.txt: Handles simple expressions**
+** Test case c3.txt: Handles iterative statements**
 
 <<<driver program>>>
 start
-	declare x:integer;
-	declare y:integer;
+	declare x:integer; 
 
-	for(x in  1..15)				    
+	get_value(x);
+	switch(x)
 	start
-		y:= x*2;
-		print(y);
+		case 1: 
+				x:=x+1;
+				print(x);
+				break;
+		case 2: 
+				x:=x+2;
+				print(x);
+				break;
+		case 3:
+				x:=x+3;
+				print(x);
+				break;
+		default:
+				print(x);
+				break;
 	end
-
-	
 end
