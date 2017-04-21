@@ -10,7 +10,7 @@
 #include "typeExtractor.h"
 #include "codegen.h"
 
-void endcode()
+void endcode(FILE* fp)
 {
 	printf("\tmov eax, 1\n");
 	printf("\tmov ebx, 1\n");
@@ -19,7 +19,7 @@ void endcode()
 	return;
 }
 
-void initialize(/*FILE* fp, */mainsymboltable* globalTable)
+void initialize(FILE* fp, mainsymboltable* globalTable)
 {
 	printf("SECTION .bss\n");
 	// fprintf(fp, "")
@@ -52,10 +52,10 @@ void initialize(/*FILE* fp, */mainsymboltable* globalTable)
 	return;
 }
 
-void codegenexp(stacknode* curr)
+void codegenexp(FILE* fp, stacknode* curr)
 {
 	if(strcmp(curr->ntortinfo->str, "<expression>") == 0)
-		codegenexp(curr->child);
+		codegenexp(fp, curr->child);
 
 	if(strcmp(curr->ntortinfo->str, "<var>") == 0)
 	{
@@ -82,7 +82,7 @@ void codegenexp(stacknode* curr)
 	{
 		if(curr->sibling != NULL)
 		{
-			codegenexp(curr->sibling);
+			codegenexp(fp, curr->sibling);
 			printf("\tpop r9\n");
 			printf("\tmov r8, 0\n");
 			printf("\tsub r8, r9\n");
@@ -90,8 +90,8 @@ void codegenexp(stacknode* curr)
 		}
 		else
 		{
-			codegenexp(curr->child);
-			codegenexp(curr->child->sibling);
+			codegenexp(fp, curr->child);
+			codegenexp(fp, curr->child->sibling);
 			printf("\tpop r9\n");
 			printf("\tpop r8\n");
 			printf("\tsub r8,r9\n");
@@ -101,8 +101,8 @@ void codegenexp(stacknode* curr)
 
 	if(strcmp(curr->ntortinfo->str, "PLUS") == 0)
 	{
-		codegenexp(curr->child);
-		codegenexp(curr->child->sibling);
+		codegenexp(fp, curr->child);
+		codegenexp(fp, curr->child->sibling);
 		printf("\tpop r9\n");
 		printf("\tpop r8\n");
 		printf("\tadd r8,r9\n");
@@ -111,8 +111,8 @@ void codegenexp(stacknode* curr)
 
 	if(strcmp(curr->ntortinfo->str, "MUL") == 0)
 	{
-		codegenexp(curr->child);
-		codegenexp(curr->child->sibling);
+		codegenexp(fp, curr->child);
+		codegenexp(fp, curr->child->sibling);
 		printf("\tpop r9\n");
 		printf("\tpop r8\n");
 		printf("\timul r8,r9\n");
@@ -121,8 +121,8 @@ void codegenexp(stacknode* curr)
 
 	if(strcmp(curr->ntortinfo->str, "DIV") == 0)
 	{
-		codegenexp(curr->child);
-		codegenexp(curr->child->sibling);
+		codegenexp(fp, curr->child);
+		codegenexp(fp, curr->child->sibling);
 		printf("\tpop r9\n");
 		printf("\tpop r8\n");
 		printf("\tdiv r8,r9\n");
@@ -131,8 +131,8 @@ void codegenexp(stacknode* curr)
 
 	if((strcmp(curr->ntortinfo->str, "LT") == 0) || (strcmp(curr->ntortinfo->str, "LE") == 0) || (strcmp(curr->ntortinfo->str, "GT") == 0) || (strcmp(curr->ntortinfo->str, "GE") == 0) || (strcmp(curr->ntortinfo->str, "EQ") == 0) || (strcmp(curr->ntortinfo->str, "NE") == 0))
 	{
-		codegenexp(curr->child);
-		codegenexp(curr->child->sibling);
+		codegenexp(fp, curr->child);
+		codegenexp(fp, curr->child->sibling);
 		int truelabel = getlabel();
 		int endlabel = getlabel();
 		printf("\tpop r9\n");
@@ -161,8 +161,8 @@ void codegenexp(stacknode* curr)
 
 	if(strcmp(curr->ntortinfo->str, "AND") == 0)
 	{
-		codegenexp(curr->child);
-		codegenexp(curr->child->sibling);
+		codegenexp(fp, curr->child);
+		codegenexp(fp, curr->child->sibling);
 		printf("\tpop r9\n");
 		printf("\tpop r8\n");
 		int firsttruelabel = getlabel();
@@ -187,8 +187,8 @@ void codegenexp(stacknode* curr)
 
 	if(strcmp(curr->ntortinfo->str, "OR") == 0)
 	{
-		codegenexp(curr->child);
-		codegenexp(curr->child->sibling);
+		codegenexp(fp, curr->child);
+		codegenexp(fp, curr->child->sibling);
 		printf("\tpop r9\n");
 		printf("\tpop r8\n");
 		int firstfalselabel = getlabel();
@@ -219,7 +219,7 @@ int getlabel()
 	return x++;
 }
 
-void codegeniterative(stacknode* temp)
+void codegeniterative(FILE* fp, stacknode* temp)
 {
 	if(strcmp(temp->child->ntortinfo->str, "FOR") == 0)
 	{
@@ -238,7 +238,7 @@ void codegeniterative(stacknode* temp)
 		stacknode* temp2 = temp->child->sibling->sibling->sibling->sibling->child;
 		while(temp2 != NULL)
 		{
-			code_statement(temp2);
+			code_statement(fp, temp2);
 			temp2 = temp2->sibling;
 		}
 
@@ -254,14 +254,14 @@ void codegeniterative(stacknode* temp)
 		int endlabel = getlabel();
 
 		printf("label_%d:\n", startlabel);	
-		codegenexp(temp->child->sibling);
+		codegenexp(fp, temp->child->sibling);
 		printf("\tpop r8\n");
 		printf("\tcmp r8, 0000000000000001h\n");
 		printf("\tjne label_%d\n", endlabel);
 		stacknode* temp2 = temp->child->sibling->sibling->sibling->child;
 		while(temp2 != NULL)
 		{
-			code_statement(temp2);
+			code_statement(fp, temp2);
 			temp2 = temp2->sibling;
 		}
 		printf("\tjmp label_%d\n", startlabel);
@@ -270,7 +270,7 @@ void codegeniterative(stacknode* temp)
 	return;
 }
 
-void codegenconditional(stacknode* curr)
+void codegenconditional(FILE* fp, stacknode* curr)
 {	
 	idsymboltable* idst = curr->child->idst;
 	idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, idst);
@@ -299,7 +299,7 @@ void codegenconditional(stacknode* curr)
 			stacknode* temp3 = temp2->sibling->child;
 			while(temp3 != NULL)
 			{
-				code_statement(temp3);
+				code_statement(fp, temp3);
 				temp3 = temp3->sibling;
 			}
 			printf("\tjmp label_%d\n", endlabel);
@@ -310,7 +310,7 @@ void codegenconditional(stacknode* curr)
 		printf("label_%d:\n", currlabel);
 		while(temp2 != NULL)
 		{
-			code_statement(temp2);
+			code_statement(fp, temp2);
 			temp2 = temp2->sibling;
 		}
 
@@ -342,7 +342,7 @@ void codegenconditional(stacknode* curr)
 			stacknode* temp3 = temp2->sibling->child;
 			while(temp3 != NULL)
 			{
-				code_statement(temp3);
+				code_statement(fp, temp3);
 				temp3 = temp3->sibling;
 			}
 			printf("\tjmp label_%d\n",endlabel);
@@ -355,7 +355,7 @@ void codegenconditional(stacknode* curr)
 	return;
 }
 
-void code_statement(stacknode* temp)
+void code_statement(FILE* fp, stacknode* temp)
 {
 	if(strcmp(temp->ntortinfo->str, "<declareStmt>") == 0)
 		return;
@@ -410,7 +410,7 @@ void code_statement(stacknode* temp)
 	{
 		if(strcmp(temp->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
 		{
-			codegenexp(temp->child->sibling->child);
+			codegenexp(fp, temp->child->sibling->child);
 			printf("\tpop r8\n");
 			idsymboltable* idst = temp->child->idst;
 			idsymboltablenode* pt = getidsymboltablenode(temp->child->tokinfo->lexeme, idst);
@@ -423,17 +423,17 @@ void code_statement(stacknode* temp)
 
 	if(strcmp(temp->ntortinfo->str, "<iterativeStmt>") == 0)
 	{
-		codegeniterative(temp);
+		codegeniterative(fp, temp);
 	}
 
 	if(strcmp(temp->ntortinfo->str, "<condionalStmt>") == 0)
 	{
-		codegenconditional(temp);
+		codegenconditional(fp, temp);
 	}
 	return;
 }
 
-void traverseAST_forCodegen(stacknode* curr)
+void traverseAST_forCodegen(FILE* fp, stacknode* curr)
 {
 	if(curr == NULL)
 		return;
@@ -444,36 +444,15 @@ void traverseAST_forCodegen(stacknode* curr)
 
 	while(temp != NULL)
 	{
-		code_statement(temp);
+		code_statement(fp, temp);
 		temp = temp->sibling;
 	}
-	// traverseAST_forCodegen(curr->child);
-
-	// if(strcmp(curr->ntortinfo->str, "<statements>") == 0)
-	// {
-	// 	stacknode* temp = curr->child;
-	// 	while(temp != NULL)
-	// 	{
-	// 		code_statement(temp);
-	// 		temp = temp->sibling;
-	// 	}
-	// }
-
-	// if(curr->child == NULL)
-	// 	return;
-	
-	// stacknode* temp = curr->child;
-	// while(temp != NULL)
-	// {
-	// 	traverseAST_forCodegen(temp);
-	// 	temp = temp->sibling;
-	// }
 	return;
 }
 
-void generate_code(mainsymboltable* globalTable, stacknode* astroot)
+void generate_code(FILE* fp, mainsymboltable* globalTable, stacknode* astroot)
 {
-	initialize(globalTable);
-	traverseAST_forCodegen(astroot);
-	endcode();
+	initialize(fp, globalTable);
+	traverseAST_forCodegen(fp, astroot);
+	endcode(fp);
 }
