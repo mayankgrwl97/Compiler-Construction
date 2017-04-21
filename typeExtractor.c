@@ -1,3 +1,9 @@
+/*
+BATCH NO. 27
+Mayank Agarwal (2014A7PS111P)
+Karan Deep Batra(2014A7PS160P)
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,7 +35,7 @@ int gettype(stacknode* type)	// expects ID->type
 	else if(strcmp(type->ntortinfo->str, "BOOLEAN") == 0)
 		return boolean;
 	else
-		return gettype(type->child->sibling);		// @@@@ array operations should be checked separately.@@@@
+		return gettype(type->child->sibling);
 }
 
 int typeofexpr(stacknode* curr)
@@ -138,7 +144,9 @@ void traverseAST_fortypechecking(stacknode* curr)
 			if(idType == error || exprType == error)
 				return;
 			if(idType != exprType)
-				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+			{
+				printf("ERROR_T at line %d : Type mismatch value on the left is of type %s and on the right is %s.\n", curr->child->tokinfo->linenumber, findTypeString(idType), findTypeString(exprType));
+			}
 		}
 		else
 		{
@@ -146,7 +154,7 @@ void traverseAST_fortypechecking(stacknode* curr)
 			if(idType == error || exprType == error)
 				return;
 			if(idType != exprType)
-				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+				printf("ERROR_T at line %d : Type mismatch value on the left is of type %s and on the right is %s.\n", curr->child->tokinfo->linenumber, findTypeString(idType), findTypeString(exprType));
 		}
 		return;
 	}
@@ -160,7 +168,7 @@ void traverseAST_fortypechecking(stacknode* curr)
 			if(idType == error || exprType == error)
 				return;
 			if(idType != exprType)
-				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->sibling->tokinfo->linenumber, curr->child->tokinfo->lexeme);
+				printf("ERROR_T at line %d : While should have boolean expression.\n", curr->child->tokinfo->linenumber);
 		}
 		return;
 	}

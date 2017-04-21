@@ -126,7 +126,7 @@ void printParseTable(hashtable* table)
 	return;
 }
 
-int parseGrammar(hashtable* table, tokeninfo* lookahead)
+int parseGrammar(hashtable* table, tokeninfo* lookahead, int toPrint)
 {
 	stack* st = makestack();
 	insertstack(st, getnodehashtable(table, "$"), NULL);// insert $ on stack
@@ -154,8 +154,8 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 					popstack(st);
 					continue;
 				}
-
-				printf("Expected %s at line %d\n", topelem->ntortinfo->str, lookahead->linenumber);
+				if(toPrint)
+					printf("Expected %s at line %d\n", topelem->ntortinfo->str, lookahead->linenumber);
 				lookahead = lookahead->next;
 				return 0;
 			}
@@ -185,7 +185,8 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 				}
 				else
 				{
-					printf("Expected %s at line %d\n", (firstSets[ind])->str, lookahead->linenumber);
+					if(toPrint)
+						printf("Expected %s at line %d\n", (firstSets[ind])->str, lookahead->linenumber);
 					return 0;
 				}
 			}
@@ -201,7 +202,8 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 
 		else if(strcmp(topelem->ntortinfo->str, "$") == 0)//lookahead is something other than $ but top of stack is $
 		{
-			printf("Unexpected symbol %s at line %d\n", lookahead->lexeme, lookahead->linenumber);
+			if(toPrint)
+				printf("Unexpected symbol %s at line %d\n", lookahead->lexeme, lookahead->linenumber);
 			return 0;
 		}
 
@@ -221,7 +223,8 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 			}
 			else
 			{
-				printf("Expected %s at line %d\n", topelem->ntortinfo->str, lookahead->linenumber);
+				if(toPrint)
+					printf("Expected %s at line %d\n", topelem->ntortinfo->str, lookahead->linenumber);
 				return 0;
 			}
 		}
@@ -253,7 +256,8 @@ int parseGrammar(hashtable* table, tokeninfo* lookahead)
 			{
 				// printf("%s\n",topelem->ntortinfo->str);
 				// printf("%s\n", lookahead->tokenname);
-				printf("Expected %s at line %d\n", (firstSets[ind])->str, lookahead->linenumber);
+				if(toPrint)
+					printf("Expected %s at line %d\n", (firstSets[ind])->str, lookahead->linenumber);
 				return 0;
 			}
 		}
