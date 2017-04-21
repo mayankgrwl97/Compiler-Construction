@@ -264,7 +264,7 @@ void codegeniterative(stacknode* temp)
 			code_statement(temp2);
 			temp2 = temp2->sibling;
 		}
-		printf("jmp label_%d\n", startlabel);
+		printf("\tjmp label_%d\n", startlabel);
 		printf("label_%d:\n", endlabel);
 	}
 	return;
@@ -276,10 +276,12 @@ void codegenconditional(stacknode* curr)
 	idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, idst);
 
 	printf("\tmov r8, [%s]\n", pt->idlex);
-	printf("\tpush r8\n");
 
 	if(gettype(pt->type) == integer)
 	{
+		printf("\tand r8, 00000000000000ffh\n");
+		printf("\tpush r8\n");
+
 		stacknode* temp = curr->child->sibling->sibling; //<caseStmts>
 		stacknode* temp2 = temp->child;
 
@@ -312,6 +314,42 @@ void codegenconditional(stacknode* curr)
 			temp2 = temp2->sibling;
 		}
 
+		printf("label_%d:\n", endlabel);
+	}
+	else
+	{
+		printf("\tand r8, 0000000000000001h\n");
+		printf("\tpush r8\n");
+
+		stacknode* temp = curr->child->sibling->sibling;
+		stacknode* temp2 = temp->child;
+
+		int currlabel = getlabel();
+		int endlabel = getlabel();
+		int nextlabel;
+		while(temp2 != NULL)
+		{
+			nextlabel = getlabel();
+			printf("label_%d:\n", currlabel);
+			printf("\tpop r8\n"); //pop id from stack
+			printf("\tpush r8\n"); //push id to stack
+			if(strcmp(temp2->child->tokinfo->lexeme, "true") == 0)
+				printf("\tmov r9, 0000000000000001h\n");
+			else
+				printf("\tmov r9, 0000000000000000h\n");
+			printf("\tcmp r8,r9\n");
+			printf("\tjne label_%d\n", nextlabel);
+			stacknode* temp3 = temp2->sibling->child;
+			while(temp3 != NULL)
+			{
+				code_statement(temp3);
+				temp3 = temp3->sibling;
+			}
+			printf("\tjmp label_%d\n",endlabel);
+			currlabel = nextlabel;
+			temp2 = temp2->sibling->sibling;
+		}
+		printf("label_%d:\n", nextlabel);
 		printf("label_%d:\n", endlabel);
 	}
 	return;
