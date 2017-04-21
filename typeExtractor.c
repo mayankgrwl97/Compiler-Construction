@@ -75,7 +75,7 @@ int typeofexpr(stacknode* curr)
 		{
 			char* type1 = findTypeString(t1);
 			char* type2 = findTypeString(t2);
-			printf("ERROR_T: type mismatch of %s and %s operands with %s operator\n", type1, type2, curr->ntortinfo->str);
+			printf("ERROR_T at line %d : Type mismatch of %s and %s operands with %s operator.\n", curr->tokinfo->linenumber, type1, type2, curr->ntortinfo->str);
 			return error;
 		}
 	}
@@ -92,7 +92,7 @@ int typeofexpr(stacknode* curr)
 		{
 			char* type1 = findTypeString(t1);
 			char* type2 = findTypeString(t2);
-			printf("ERROR_T: type mismatch of %s and %s with %s operator\n", type1, type2, curr->ntortinfo->str);
+			printf("ERROR_T at line %d : Type mismatch of %s and %s with %s operator.\n", curr->tokinfo->linenumber, type1, type2, curr->ntortinfo->str);
 			return error;
 		}
 	}
@@ -107,7 +107,7 @@ int typeofexpr(stacknode* curr)
 		{
 			char* type1 = findTypeString(t1);
 			char* type2 = findTypeString(t2);
-			printf("ERROR_T: type mismatch of %s and %s with logical %s\n", type1, type2, curr->ntortinfo->str);
+			printf("ERROR_T at line %d : Type mismatch of %s and %s with logical %s.\n", curr->tokinfo->linenumber, type1, type2, curr->ntortinfo->str);
 			return error;
 		}
 	}
@@ -133,13 +133,13 @@ void traverseAST_fortypechecking(stacknode* curr)
 		{
 			int exprType = typeofexpr(curr->child->sibling->child);
 			if(idType != exprType)
-				printf("ERROR_T: type mismatch between %s\n", curr->child->tokinfo->lexeme);
+				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		}
 		else
 		{
 			int exprType = typeofexpr(curr->child->sibling);
 			if(idType != exprType)
-				printf("ERROR_T: type mismatch between %s\n", curr->child->tokinfo->lexeme);
+				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		}
 		return;
 	}
@@ -151,7 +151,7 @@ void traverseAST_fortypechecking(stacknode* curr)
 		{
 			int exprType = typeofexpr(curr->child->sibling);
 			if(idType != exprType)
-				printf("ERROR_T: type mismatch between %s\n", curr->child->tokinfo->lexeme);
+				printf("ERROR_T at line %d : Type mismatch between %s.\n", curr->child->sibling->tokinfo->linenumber, curr->child->tokinfo->lexeme);
 		}
 		return;
 	}

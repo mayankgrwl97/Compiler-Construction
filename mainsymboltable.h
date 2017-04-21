@@ -29,7 +29,7 @@ struct mainsymboltable
 
 void traverseAST_fortypechecking(stacknode* curr);
 mainsymboltable* makemainsymboltable();
-void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable);
+void populatemainsymboltable(stacknode* curr, stacknode* parent, mainsymboltable* globaltable, int toPrint);
 mainsymboltablenode* presentmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* insertmainsymboltable(mainsymboltable* table, char* func_name);
 mainsymboltablenode* makemainsymboltablenode(char* func_name);

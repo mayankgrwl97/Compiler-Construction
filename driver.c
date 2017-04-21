@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
 	{
 		mainsymboltable* globaltable = makemainsymboltable();
 		makeAST(root, "ROOT");
-		populatemainsymboltable(root, NULL, globaltable);
+		populatemainsymboltable(root, NULL, globaltable, 0);
 		printmainsymboltable(globaltable);
 	}
 	if(control == 6)
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 		else{
 			mainsymboltable* globaltable = makemainsymboltable();
 			makeAST(root, "ROOT");
-			populatemainsymboltable(root, NULL, globaltable);
+			populatemainsymboltable(root, NULL, globaltable, 1);
 			traverseAST_fortypechecking(root);
 			checkSemantics(root, globaltable);
 		}
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 	{
 		mainsymboltable* globaltable = makemainsymboltable();
 		makeAST(root, "ROOT");
-		populatemainsymboltable(root, NULL, globaltable);
+		populatemainsymboltable(root, NULL, globaltable, 0);
 		generate_code(globaltable, root);
 	}
 	return 0;

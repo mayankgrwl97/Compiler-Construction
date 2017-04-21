@@ -18,15 +18,30 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 
 	if(strcmp(curr->ntortinfo->str, "<var>") == 0)
 	{
-		if(curr->child == NULL || curr->idst == NULL)
+		if(curr->child == NULL || curr->child->idst == NULL)
 			return;
 
 		idsymboltablenode* helper = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
 		if(strcmp(helper->type->ntortinfo->str, "ARRAY") == 0)
 		{
-			if(curr->child->sibling == NULL)
+			if(curr->child->sibling->child == NULL)
 			{
-				printf("ERROR_V: Array should be used by some index\n");
+				printf("ERROR_V: Array should be used by some index. %s at line number %d not indexed properly.\n", curr->child->tokinfo->lexeme, curr->child->tokinfo->linenumber);
+			}
+		}
+	}
+
+	if(strcmp(curr->ntortinfo->str, "<assignmentStmt>") == 0)
+	{
+		if(curr->child == NULL || curr->child->idst == NULL)
+			return;
+
+		idsymboltablenode* helper = getidsymboltablenode(curr->child->tokinfo->lexeme, curr->child->idst);
+		if(strcmp(helper->type->ntortinfo->str, "ARRAY") == 0)
+		{
+			if(strcmp(curr->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
+			{
+				printf("ERROR_V: Array should be used by some index. %s at line number %d not indexed properly.\n", curr->child->tokinfo->lexeme, curr->child->tokinfo->linenumber);
 			}
 		}
 	}
@@ -42,7 +57,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			{
 				idsymboltablenode* helper = getidsymboltablenode(temp->tokinfo->lexeme, temp->idst);
 				if(helper->isAssigned == 0)
-				printf("ERROR_M: The output parameter %s does not get assigned a value\n", temp->tokinfo->lexeme);
+					printf("ERROR_M at line %d : In module %s, the output parameter %s does not get assigned a value.\n", temp->tokinfo->linenumber, temp->idst->func_name, temp->tokinfo->lexeme);
 			}
 			temp = temp->sibling;
 		}
@@ -50,16 +65,16 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 
 	if(strcmp(curr->ntortinfo->str, "<moduleReuseStmt>") == 0)
 	{
-		func_name = curr->child->sibling->tokinfo->lexeme;
+		func_name = curr->child->sibling->tokinfo->lexeme;	// invoked function
 		mainsymboltablenode* pt = presentmainsymboltable(globaltable, func_name);
-		if(pt == NULL){
-			printf("ERROR_M: MODULE %s not known.\n", curr->child->sibling->tokinfo->lexeme);
+		if(pt == NULL || !pt->isdefined){
+			printf("ERROR_M at line %d : Undefined reference to module %s.\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->tokinfo->lexeme);
 			return;
 		}
 
 		if(curr->child->sibling->sibling->child->idst != NULL && strcmp(curr->child->sibling->sibling->child->idst->func_name, func_name) == 0)	
 		{
-			printf("ERROR_M: Recursion not allowed\n");
+			printf("ERROR_M at line %d : In function %s, recursion not allowed.\n", curr->child->sibling->tokinfo->linenumber, curr->child->sibling->sibling->child->idst->func_name);
 			return;
 		}
 
@@ -86,7 +101,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		}
 
 		if(numActualReturn != numOptional)
-			printf("ERROR_M: Output parameters numbers mismatch\n");
+			printf("ERROR_M at line %d : Output parameters numbers mismatch.\n", curr->child->child->tokinfo->linenumber);
 		else
 		{
 			// both return numbers are same check for types
@@ -104,7 +119,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 					int type2 = gettype(temp2->type);
 					if(type1 != type2)
 					{
-						printf("ERROR_M: Output parameters types mismatch\n");
+						printf("ERROR_M at line %d : Output parameters types mismatch.\n", curr->child->child->tokinfo->linenumber);
 						break;
 					}
 					id1 = id1->sibling;
@@ -133,7 +148,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 		}
 
 		if(actualInput != givenInput)
-			printf("ERROR_M: Input parameters numbers mismatch\n");
+			printf("ERROR_M at line %d : Input parameters numbers mismatch.\n", curr->child->sibling->sibling->child->tokinfo->linenumber);
 		else
 		{
 			// check for types
@@ -149,7 +164,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 				int type2 = gettype(temp2->type);
 				if(type1 != type2)
 				{
-					printf("ERROR_M: Input parameters types mismatch\n");
+					printf("ERROR_M at line %d : Input parameters types mismatch.\n", curr->child->sibling->sibling->child->tokinfo->linenumber);
 					break;
 				}
 				id1 = id1->sibling;
@@ -173,14 +188,14 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 			while(temp != NULL)
 			{
 				if(strcmp(temp->child->ntortinfo->str, "NUM") != 0)
-					printf("ERROR at line %d : integer case expected\n", temp->child->tokinfo->linenumber);
+					printf("ERROR at line %d : integer case expected.\n", temp->child->tokinfo->linenumber);
 
 				temp = temp->sibling->sibling;
 			}
 			temp = curr->child->sibling->sibling->sibling;
 			if(temp->child == NULL)
 			{
-				printf("ERROR : expected default case statement for integer type\n");
+				printf("ERROR : expected default case statement for integer type.\n");
 			}
 		}
 		else if(type == real)
@@ -239,7 +254,7 @@ void checkSemantics(stacknode* curr, mainsymboltable* globaltable)
 				if(strcmp(temp->ntortinfo->str, "<assignmentStmt>") == 0)
 				{
 					if(strcmp(temp->child->tokinfo->lexeme, tempid) == 0 && strcmp(temp->child->sibling->ntortinfo->str, "<lvalueIDStmt>") == 0)
-						printf("ERROR at line %d : cannot redefine %s\n", temp->child->tokinfo->linenumber, tempid);
+						printf("ERROR at line %d : cannot redefine.%s\n", temp->child->tokinfo->linenumber, tempid);
 				}
 				temp = temp->sibling;
 			}
