@@ -12,10 +12,10 @@
 
 void endcode()
 {
-	// printf("\tmov eax, 1\n");
-	// printf("\tmov ebx, 1\n");
-	// printf("\tint 80h\n");
-	printf("\tret\n");
+	printf("\tmov eax, 1\n");
+	printf("\tmov ebx, 1\n");
+	printf("\tint 80h\n");
+	// printf("\tret\n");
 	return;
 }
 
@@ -32,7 +32,7 @@ void initialize(/*FILE* fp, */mainsymboltable* globalTable)
 			idsymboltablenode* curr = pt->buckets[i];
 			while(curr != NULL)
 			{
-				printf("\t%s\tresb %d\n", curr->idlex, curr->widthofid);
+				printf("%s\tresb %d\n", curr->idlex, curr->widthofid);
 				curr = curr->next;
 			}
 		}
@@ -43,10 +43,10 @@ void initialize(/*FILE* fp, */mainsymboltable* globalTable)
 	printf("SECTION .data\n");
 	printf("get_val: db \"%%d\", 0\n");
 	printf("print_val: db \"%%d\", 10, 0\n\n");
-	printf("SECTION .text\n");
+	printf("SECTION .text\n\n");
 	printf("extern printf\n");
-	printf("extern scanf\n");
-	printf("\tGLOBAL main\n\n");
+	printf("extern scanf\n\n");
+	printf("GLOBAL main\n\n");
 
 	printf("main:\n");
 	return;
@@ -145,7 +145,7 @@ void codegeniterative(stacknode* temp)
 		printf("\tpush r8\n");
 		int startlabel = getlabel();
 		int endlabel = getlabel();
-		printf("label_%d: ", startlabel);
+		printf("label_%d:\n", startlabel);
 		printf("\tpop r8\n");
 		printf("\tpush r8\n");
 		printf("\tmov [%s], r8w\n", temp->child->sibling->tokinfo->lexeme);
@@ -165,7 +165,55 @@ void codegeniterative(stacknode* temp)
 		printf("\tpush r8\n");
 		printf("\tjmp label_%d\n", startlabel);
 		printf("label_%d: \n", endlabel);
-	}	
+	}
+	return;
+}
+
+void codegenconditional(stacknode* curr)
+{	
+	idsymboltable* idst = curr->child->idst;
+	idsymboltablenode* pt = getidsymboltablenode(curr->child->tokinfo->lexeme, idst);
+
+	printf("\tmov r8, [%s]\n", pt->idlex);
+	printf("\tpush r8\n");
+
+	if(gettype(pt->type) == integer)
+	{
+		stacknode* temp = curr->child->sibling->sibling; //<caseStmts>
+		stacknode* temp2 = temp->child;
+
+		int currlabel = getlabel();
+		int endlabel = getlabel();
+		while(temp2 != NULL)
+		{
+			int nextlabel = getlabel();
+			printf("label_%d:\n", currlabel);
+			printf("\tpop r8\n");
+			printf("\tpush r8\n");
+			printf("\tmov r9, %s\n", temp2->child->tokinfo->lexeme);
+			printf("\tcmp r8,r9\n");
+			printf("\tjne label_%d\n", nextlabel);
+			stacknode* temp3 = temp2->sibling->child;
+			while(temp3 != NULL)
+			{
+				code_statement(temp3);
+				temp3 = temp3->sibling;
+			}
+			printf("\tjmp label_%d\n", endlabel);
+			currlabel = nextlabel;
+			temp2 = temp2->sibling->sibling;
+		}
+		temp2 = temp->sibling->child->child;
+		printf("label_%d:\n", currlabel);
+		while(temp2 != NULL)
+		{
+			code_statement(temp2);
+			temp2 = temp2->sibling;
+		}
+
+		printf("label_%d:\n", endlabel);
+	}
+	return;
 }
 
 void code_statement(stacknode* temp)
@@ -230,6 +278,11 @@ void code_statement(stacknode* temp)
 	{
 		codegeniterative(temp);
 	}
+
+	if(strcmp(temp->ntortinfo->str, "<condionalStmt>") == 0)
+	{
+		codegenconditional(temp);
+	}
 	return;
 }
 
@@ -238,27 +291,36 @@ void traverseAST_forCodegen(stacknode* curr)
 	if(curr == NULL)
 		return;
 
-	traverseAST_forCodegen(curr->child);
+	stacknode* temp = curr->child->sibling->sibling;//<driverModule>
+	temp = temp->child->sibling;//<moduleDef>
+	temp = temp->child->sibling->child;//<statements>->child
 
-	if(strcmp(curr->ntortinfo->str, "<statements>") == 0)
-	{
-		stacknode* temp = curr->child;
-		while(temp != NULL)
-		{
-			code_statement(temp);
-			temp = temp->sibling;
-		}
-	}
-
-	if(curr->child == NULL)
-		return;
-	
-	stacknode* temp = curr->child;
 	while(temp != NULL)
 	{
-		traverseAST_forCodegen(temp);
+		code_statement(temp);
 		temp = temp->sibling;
 	}
+	// traverseAST_forCodegen(curr->child);
+
+	// if(strcmp(curr->ntortinfo->str, "<statements>") == 0)
+	// {
+	// 	stacknode* temp = curr->child;
+	// 	while(temp != NULL)
+	// 	{
+	// 		code_statement(temp);
+	// 		temp = temp->sibling;
+	// 	}
+	// }
+
+	// if(curr->child == NULL)
+	// 	return;
+	
+	// stacknode* temp = curr->child;
+	// while(temp != NULL)
+	// {
+	// 	traverseAST_forCodegen(temp);
+	// 	temp = temp->sibling;
+	// }
 	return;
 }
 
