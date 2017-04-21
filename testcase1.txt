@@ -3,10 +3,12 @@
 <<<driver program>>>
 start
 	declare x:integer;
+	declare y:integer;
 
 	for(x in  1..15)				    
 	start
-		print(x);
+		y:= x*2;
+		print(y);
 	end
 
 	
