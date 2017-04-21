@@ -414,6 +414,7 @@ void code_statement(FILE* fp, stacknode* temp)
 					fprintf(fp, "\tpush r8\n");
 					fprintf(fp, "\tjmp label_%d\n", startlabel);
 					fprintf(fp, "label_%d:\n", endlabel);
+					fprintf(fp, "\tpop r8\n");
 				}
 			}
 			return;
@@ -433,16 +434,54 @@ void code_statement(FILE* fp, stacknode* temp)
 			{
 				idsymboltable* idst = temp2->idst;
 				idsymboltablenode* pt = getidsymboltablenode(temp2->tokinfo->lexeme, idst);
-				fprintf(fp, "\tmov rdi, print_val\n");
-				fprintf(fp, "\tmov rax, [%s]\n", temp2->tokinfo->lexeme);
-				if(pt->widthofid == 2)
-					fprintf(fp, "\tand rax, 00000000000000ffh\n");
-				else if(pt->widthofid == 1)
-					fprintf(fp, "\tand rax, 000000000000000fh\n");
-				fprintf(fp, "\tmov rsi, rax\n");
-				fprintf(fp, "\tmov al, 0\n");
-				fprintf(fp, "\tcall printf\n");
-				fprintf(fp, "\n");
+				if(pt->widthofid == 1 || pt->widthofid == 2)
+				{
+					fprintf(fp, "\tmov rdi, print_val\n");
+					fprintf(fp, "\tmov rax, [%s]\n", temp2->tokinfo->lexeme);
+					if(pt->widthofid == 2)
+						fprintf(fp, "\tand rax, 00000000000000ffh\n");
+					else if(pt->widthofid == 1)
+						fprintf(fp, "\tand rax, 000000000000000fh\n");
+					fprintf(fp, "\tmov rsi, rax\n");
+					fprintf(fp, "\tmov al, 0\n");
+					fprintf(fp, "\tcall printf\n");
+					fprintf(fp, "\n");
+				}
+				else
+				{
+					if(strcmp(pt->type->child->sibling->ntortinfo->str, "INTEGER") == 0)
+					{
+						int startlabel = getlabel();
+						int endlabel = getlabel();
+						fprintf(fp, "\tmov r11, 0\n"); //array curr index 
+						fprintf(fp, "\tmov r8, %s\n", pt->type->child->child->tokinfo->lexeme);
+						fprintf(fp, "\tpush r8\n");
+						fprintf(fp, "label_%d:\n",startlabel);
+						fprintf(fp, "\tpop r8\n");
+						fprintf(fp, "\tpush r8\n");
+						fprintf(fp, "\tmov r9, %s\n", pt->type->child->child->sibling->tokinfo->lexeme);
+						fprintf(fp, "\tcmp r8, r9\n");
+						fprintf(fp, "\tjg label_%d\n",endlabel);
+
+						fprintf(fp, "\tmov rdi, print_val\n");
+						fprintf(fp, "\tmov rax, [%s+r11]\n", pt->idlex);
+						fprintf(fp, "\tand rax, 00000000000000ffh\n");
+						// fprintf(fp, "\tadd rsi, r11\n");
+						fprintf(fp, "\tmov rsi, rax\n");
+						fprintf(fp, "\tmov al,0\n");
+						fprintf(fp, "\tpush r11\n");
+						fprintf(fp, "\tcall printf\n");
+
+						fprintf(fp, "\tpop r11\n");
+						fprintf(fp, "\tadd r11, 4\n");
+						fprintf(fp, "\tpop r8\n");
+						fprintf(fp, "\tinc r8\n");
+						fprintf(fp, "\tpush r8\n");
+						fprintf(fp, "\tjmp label_%d\n", startlabel);
+						fprintf(fp, "label_%d:\n", endlabel);
+						fprintf(fp, "\tpop r8\n");
+					}
+				}
 			}
 		}
 	}
